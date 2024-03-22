@@ -1,7 +1,11 @@
 import React, { FC, useCallback, useState } from "react";
 import {  FlatList,  ListRenderItemInfo,  Modal,  SafeAreaView,  Text,  StyleSheet, TouchableOpacity,} from "react-native";
-import { Device, BleError } from "react-native-ble-plx";
 
+type Device = {
+  id: string;
+  name: string;
+  // Add other necessary properties for the device
+};
 type DeviceModalListItemProps = {
   item: ListRenderItemInfo<Device>;
   connectToPeripheral: (device: Device) => void;
@@ -24,16 +28,11 @@ const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
       await connectToPeripheral(item.item);
       closeModal();
     } catch (error) {
-      const bleError = error as BleError;
-      setError(`Error connecting to ${item.item.name}: ${bleError.message}`);
     }
   }, [closeModal, connectToPeripheral, item]);
 
   return (
-    <TouchableOpacity
-      onPress={connectAndCloseModal}
-      style={modalStyle.ctaButton}
-    >
+    <TouchableOpacity onPress={connectAndCloseModal} style={modalStyle.ctaButton}>
       {error ? (
         <Text style={modalStyle.errorText}>{error}</Text>
       ) : (
@@ -49,11 +48,7 @@ const DeviceModal: FC<DeviceModalProps> = (props) => {
   const renderDeviceModalListItem = useCallback(
     (item: ListRenderItemInfo<Device>) => {
       return (
-        <DeviceModalListItem
-          item={item}
-          connectToPeripheral={connectToPeripheral}
-          closeModal={closeModal}
-        />
+        <DeviceModalListItem item={item} connectToPeripheral={connectToPeripheral} closeModal={closeModal}/>
       );
     },
     [closeModal, connectToPeripheral]

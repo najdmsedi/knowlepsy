@@ -26,7 +26,6 @@ export default function HomeScreen({ navigation }) {
              <Text style={styles.text}>Tap to see details</Text>   
              <StressLevelComponent title="Stress" marginTop={330} />
              <TemperatureComponent title="Temperature" marginTop={330} />
-
              <HeartrateComponent  title="Heart Rate" marginTop={415} />
              <StepsComponent title="Steps" marginTop={500} />
              <LastSleepTrackingComponent title="Last Sleep Tracking" marginTop={600} />

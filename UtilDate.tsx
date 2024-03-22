@@ -1,5 +1,5 @@
 class UtilsDate {
-    static formatDDMMYYYY(date) {
+    static formatDDMMYYYY(date: { getDate: () => any; getMonth: () => number; getFullYear: () => any; }) {
       if (!date) {
         return "";
       }
@@ -9,7 +9,7 @@ class UtilsDate {
       return `${day}/${month}/${year}`;
     }
   
-    static formatHHMMSS(date) {
+    static formatHHMMSS(date: Date) {
       if (!date) {
         return null;
       }
@@ -31,7 +31,7 @@ class UtilsDate {
       return `${hours}:${minutes} ${day}/${month}/${year}`;
     }
   
-    static formatYYYYMMDD(date) {
+    static formatYYYYMMDD(date: Date) {
       if (!date) {
         return null;
       }

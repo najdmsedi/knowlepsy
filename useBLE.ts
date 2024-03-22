@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { BleManager, Device, BleError, Characteristic } from 'react-native-ble-plx';
 import { PermissionsAndroid, Platform } from 'react-native';
 import base64 from 'react-native-base64';
+import * as TextEncoding from 'text-encoding';
+import { Buffer } from 'buffer';
+import iconv from "iconv-lite";
 
 // Import UtilsDate class
 import UtilsDate from './UtilDate';
-const bleManager = new BleManager();
 
 interface BluetoothLowEnergyApi {
   requestPermissions(): Promise<boolean>;
@@ -14,7 +16,6 @@ interface BluetoothLowEnergyApi {
   disconnectFromDevice(): void;
   connectedDevice: Device | null;
   allDevices: Device[];
-  heartRate: number;
 }
 
 // Write service UUIDs
@@ -32,17 +33,19 @@ const notifyService = {
 
 function useBLE(): BluetoothLowEnergyApi {
   console.log("BluetoothLowEnergyApi");
-  const [bleManager] = useState(() => new BleManager());
-  const [allDevices, setAllDevices] = useState<Device[]>([]);
-  const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
-  const [heartRate, setHeartRate] = useState<number>(0);
+  let [bleManager] = useState(() => new BleManager());
+  let [allDevices, setAllDevices] = useState<Device[]>([]);
+  let [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
 
-  const [connected, setConnected] = useState(false);
-  const [services, setServices] = useState(null);
-  const [serviceTx, setServiceTx] = useState(null);
-  const [serviceRx, setServiceRx] = useState(null);
-  const [characteristicTx, setCharacteristicTx] = useState(null);
-  const [characteristicRx, setCharacteristicRx] = useState(null);
+  let [connected, setConnected] = useState(false);
+  let [services, setServices] = useState(null);
+  let [serviceTx, setServiceTx] = useState(null);
+  let [serviceRx, setServiceRx] = useState(null);
+  let [characteristicTx, setCharacteristicTx] = useState(null);
+  let [characteristicRx, setCharacteristicRx] = useState(null);
+  let servicesG
+  let serviceTxG
+  let serviceRxG
 
   //Bluetooth Initialization
   //Permissions Handling
@@ -77,28 +80,50 @@ function useBLE(): BluetoothLowEnergyApi {
     });
   };
 
+  // Connect
+async function connect(device: Device): Promise<void> {
+  try {
+    await device.connect({ timeout: 10000, autoConnect: true });
+    // Update connectedDevice state variable
+    setConnectedDevice(device);
+    connectedDevice = device    
+  } catch (error) {
+    console.error('Exception occurred:', error);
+  }
+} 
 
-//connect
+const disconnectFromDevice = () => {
+  console.log('disconnectFromDevice');
+  if (connectedDevice) {
+    bleManager.cancelDeviceConnection(connectedDevice.id);
+    setConnectedDevice(null);
+  }
+};
+
+  //getCharacteristics of Devices
 
 async function getCharacteristics(device) {
   try {
-    console.log("1 getCharacteristics");
-    
+    console.log("getCharacteristics");
     // Discover services
-    // const services = await device.discoverAllServicesAndCharacteristics();
-    console.log("2 getCharacteristics");
     await device.discoverAllServicesAndCharacteristics();
+    console.log(device.discoverAllServicesAndCharacteristics());
+    
     const services = await device.services();
+    
     if (!services || services.length === 0) {
       console.error("No services found.");
       return;
     }
-    console.log("3 getCharacteristics");
-
     // Find serviceTx and serviceRx
-    const serviceTx = services.find(service => service.uuid === writeService.serviceUuid);
-    const serviceRx = services.find(service => service.uuid === notifyService.serviceUuid);
-    console.log("4 getCharacteristics");
+    const serviceTx = services.find((service: { uuid: string; }) => service.uuid === writeService.serviceUuid);
+    const serviceRx = services.find((service: { uuid: string; }) => service.uuid === notifyService.serviceUuid);
+    console.log("services",services.uuid);
+    console.log("serviceTx",serviceTx.uuid);
+    console.log("serviceRx",serviceRx.uuid);
+    servicesG =services
+    serviceTxG=serviceTx
+    serviceRxG=serviceRx
     // Check if the serviceTx and serviceRx are found
     if (!serviceTx || !serviceRx) {
       console.error("Services not found.");
@@ -106,18 +131,17 @@ async function getCharacteristics(device) {
     }
 
     // Get characteristics for the services
-    const characteristicsTx = await serviceTx.characteristics();
-    const characteristicsRx = await serviceRx.characteristics();
+    let characteristicsTx = await serviceTx.characteristics();
+    let characteristicsRx = await serviceRx.characteristics();
 
     // Find the desired characteristics by UUID
-    const characteristicTx = characteristicsTx.find(characteristic => characteristic.uuid === writeService.characteristicUuid);
-    const characteristicRx = characteristicsRx.find(characteristic => characteristic.uuid === notifyService.characteristicUuid);
+    characteristicTx = characteristicsTx.find((characteristic: { uuid: string; }) => characteristic.uuid === writeService.characteristicUuid);
+    characteristicRx = characteristicsRx.find((characteristic: { uuid: string; }) => characteristic.uuid === notifyService.characteristicUuid);
 
     if (!characteristicTx || !characteristicRx) {
       console.error("Characteristics not found for service.");
       return;
     } 
-    console.log("6 getCharacteristics");
 
     // Set state variables
     setServices(services);
@@ -125,36 +149,42 @@ async function getCharacteristics(device) {
     setServiceRx(serviceRx);
     setCharacteristicTx(characteristicTx);
     setCharacteristicRx(characteristicRx);
-    console.log("7 getCharacteristics");
+    // console.log("Discovered services:", services);
 
     // Do something with the characteristics
     console.log("Characteristic TX:", characteristicTx.uuid);
     console.log("Characteristic RX:", characteristicRx.uuid);
+    
   } catch (error) {
     console.error("Error discovering services and characteristics:", error);
   }
 }
 
-
-
-
-async function writeSyncDate(device) {
+async function writeSyncDate(device, characteristicTx) {
   let status = false;
   try {
-    const syncData = getSyncData();
+    if (!characteristicTx) {
+      console.error("Characteristic for writing data is not found.");
+      return status;
+    }
+
+    const syncData = getSyncData(); // Ensure this function is defined and returns the data string
     for (let i = 0; i < syncData.length; i += 20) {
       const end = (i + 20 < syncData.length) ? i + 20 : syncData.length;
       const chunk = syncData.substring(i, end);
-      await characteristicTx.writeWithoutResponse(chunk, 0);
+      const base64Chunk = Buffer.from(chunk, 'utf-8').toString('base64');
+      await characteristicTx.writeWithoutResponse(base64Chunk);
     }
     status = true;
-    // Exit loop if write is successful
   } catch (error) {
     console.error("An error occurred:", error);
-    await device.cancelConnection();
+    if (device.cancelConnection) {
+      await device.cancelConnection();
+    }
   }
   return status;
 }
+
 
 function getSyncData() {
   const now = new Date();
@@ -166,11 +196,14 @@ function getSyncData() {
 
 async function readIncomingData() {
   try {
-    let responseData = '';
-
+    let responseData = '';    
     await connectedDevice.discoverAllServicesAndCharacteristics();
-    await characteristicRx?.setNotifyValue(true);
+    // console.log("Characteristic properties:", characteristicRx);
+    console.log("isNotifiable:", characteristicRx.isNotifiable);
 
+    await characteristicRx?.setNotifyValue(true);
+    console.log(characteristicRx?.monitor());
+     
     const dataSubscriptionListener = characteristicRx?.monitor((error, value) => {
       if (error) {
         console.error('Error from characteristicRx listener:', error);
@@ -227,103 +260,28 @@ async function addData(data) {
   }
 }
 
-// Connect
-async function connect(device: Device): Promise<void> {
-  try {
-    await device.connect({ timeout: 10000, autoConnect: true });
-    // Update connectedDevice state variable
-    setConnectedDevice(device);
-  } catch (error) {
-    console.error('Exception occurred:', error);
-  }
-}
-
-const disconnectFromDevice = () => {
-  console.log('disconnectFromDevice');
-  if (connectedDevice) {
-    bleManager.cancelDeviceConnection(connectedDevice.id);
-    setConnectedDevice(null);
-    setHeartRate(0);
-  }
-};
-
 async function connectToDevice(device) {
   try {
-    setConnected(false); // Assuming setConnected is a setter function for the connected state variable
-    console.log("connectToDevice 1");
     
+    setConnected(false); // Assuming setConnected is a setter function for the connected state variable
+    console.log("setConnected");    
     await connect(device);
-    console.log("connectToDevice 2");
+    console.log("connect");
 
     await getCharacteristics(device);
-    console.log("connectToDevice 3");
+    console.log("getCharacteristics");
+    bleManager.connectToDevice(device.id)
+    console.log(bleManager.servicesForDevice(device.id))
+    await writeSyncDate(device,characteristicTx); 
+    // console.log("writeSyncDate");
 
-    await writeSyncDate(device);
-    console.log("connectToDevice 4");
-
-    await readIncomingData();
-    console.log("connectToDevice 5");
+    // await readIncomingData();
+    // console.log("readIncomingData");
 
   } catch (error) {
-    console.log(error);
-    console.log("hna");
-    
-    
+    console.log("connectToDevice",error);    
   }
 }
-
-//Data Streaming
-  
-// const onHeartRateUpdate = (error: BleError | null, characteristic: Characteristic | null) => {
-//   if (error) {
-//     console.error(error);
-//     return;
-//   }
-//   if (!characteristic?.value) {
-//     console.log('No Data was received');
-//     return;
-//   }
-
-//   const rawData = base64.decode(characteristic.value);
-//   let innerHeartRate: number = -1;
-
-//   const firstBitValue: number = Number(rawData) & 0x01;
-
-//   if (firstBitValue === 0) {
-//     innerHeartRate = rawData[1].charCodeAt(0);
-//   } else {
-//     innerHeartRate = Number(rawData[1].charCodeAt(0) << 8) + Number(rawData[2].charCodeAt(2));
-//   }
-
-//   setHeartRate(innerHeartRate);
-// };
-
-const startStreamingData = async (device: Device) => {
-  console.log('1 startStreamingData');
-
-  if (device) {
-    console.log('2 startStreamingData');
-    // device.monitorCharacteristicForService(
-    //   notifyService.serviceUuid,
-    //   notifyService.characteristicUuid,
-    // );
-    console.log('3 startStreamingData');
-  } else {
-    console.log('4 startStreamingData');
-    console.log('No Device Connected');
-  }
-};
-
-useEffect(() => {
-  const init = async () => {
-    await requestPermissions();
-    scanForPeripherals();
-  };
-  init();
-  return () => {
-    bleManager.destroy();
-  };
-}, []);
 
 return {
   requestPermissions,
@@ -332,7 +290,6 @@ return {
   disconnectFromDevice,
   connectedDevice,
   allDevices,
-  heartRate,
 };
 }
 

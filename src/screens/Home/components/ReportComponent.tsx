@@ -1,17 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import BluetoothServices from './../../../../BluetoothServices '
 interface RectangleProps {
   title: string;
   color?: string;
   marginTop: number;
   height?: number;
-}
+} 
 
 const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 130 }) => {
+  const { initializeBluetooth, scan,connectToDevice,allDevices } = BluetoothServices();
+
+  
   const handleButtonPress = () => {
-    // Handle button press action here
+    initializeBluetooth();
+    scan()
+    console.log("allDevicesaaa",allDevices);
+    
+
+
     console.log('Button pressed');
   };
 

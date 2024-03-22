@@ -4,64 +4,58 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PulseIndicator } from '../../../PulseIndicator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import DeviceModal from '../../../DeviceConnectionModal';
-import useBLE from '../../../useBLE';
+import BluetoothServices from './../../../BluetoothServices '
 
 export default function ScanScreen({ navigation }) {
   React.useLayoutEffect(() => {
     navigation.setOptions({
         title: '',
     });
+    console.log("connectedDevice??",connectedDevice);
+    
 }, [navigation]);
 
-  const {requestPermissions,scanForPeripherals,allDevices,connectToDevice,connectedDevice,heartRate,disconnectFromDevice,} = useBLE();
-  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
+const { initializeBluetooth, scan,connectToDevice,allDevices ,connectedDevice,disconnectFromDevice} = BluetoothServices();
+const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
 
-  const scanForDevices = async () => {
-    console.log('188');
-    
-    const isPermissionsEnabled = await requestPermissions();
+  const scanForDevices = async () => {    
+    const isPermissionsEnabled = await initializeBluetooth();
     if (isPermissionsEnabled) {
-      console.log('12');
-
-      scanForPeripherals();
+      scan();
     }
   };
 
-  const hideModal = () => {
-    console.log('13');
-
+  const hideModal = () => {    
     setIsModalVisible(false);
   };
 
   const openModal = async () => {
-    console.log('15');
+    console.log("connectedDevice?!!ss!?",connectedDevice);
 
-    scanForDevices();
-    setIsModalVisible(true);
+    const isPermissionsEnabled = await initializeBluetooth();
+    if (isPermissionsEnabled) {
+      await scanForDevices(); // Wait for scanning to finish
+      setIsModalVisible(true);
+      console.log("connectedDevice?!!!?",connectedDevice);
+
+    }
   };
+  
 
     return (
       <SafeAreaView style={styles.container}>
-         <TouchableOpacity
-        onPress={connectedDevice ? disconnectFromDevice : openModal}
-        style={styles.ctaButton}
-      >
-        <Text style={styles.ctaButtonText}>
-          {connectedDevice ? "Disconnect" : "Scan"}
-        </Text>
-      </TouchableOpacity>
-      <DeviceModal
-        closeModal={hideModal}
-        visible={isModalVisible}
-        connectToPeripheral={connectToDevice}
-        devices={allDevices}
-      />
+        <TouchableOpacity onPress={connectedDevice ? disconnectFromDevice : openModal} style={styles.ctaButton} >
+          <Text style={styles.ctaButtonText}>
+            {connectedDevice ? "Disconnect" : "Scan"}
+          </Text>
+        </TouchableOpacity>
+      <DeviceModal closeModal={hideModal} visible={isModalVisible} connectToPeripheral={connectToDevice} devices={allDevices} />
       <View style={styles.heartRateTitleWrapper}>
         {connectedDevice ? (
           <>
             <PulseIndicator />
             <Text style={styles.heartRateTitleText}>Your Heart Rate Is:</Text>
-            <Text style={styles.heartRateText}>{heartRate} bpm</Text>
+            <Text style={styles.heartRateText}> bpm</Text>
           </>
         ) : (
           <Text style={styles.heartRateTitleText}>
