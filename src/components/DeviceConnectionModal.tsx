@@ -1,5 +1,7 @@
 import React, { FC, useCallback, useState } from "react";
 import {  FlatList,  ListRenderItemInfo,  Modal,  SafeAreaView,  Text,  StyleSheet, TouchableOpacity,} from "react-native";
+import BluetoothServices from "../services/BluetoothServices ";
+import { useNavigation } from "@react-navigation/native";
 
 type Device = {
   id: string;
@@ -22,10 +24,13 @@ type DeviceModalProps = {
 const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
   const { item, connectToPeripheral, closeModal } = props;
   const [error, setError] = useState<string | null>(null);
+  const { redirectToAnotherPage,initializeBluetooth, scan,connectToDevice,allDevices ,connectedDevice,disconnectFromDevice} = BluetoothServices();
+  const navigation = useNavigation();
 
   const connectAndCloseModal = useCallback(async () => {
     try {
-      await connectToPeripheral(item.item);
+      await connectToPeripheral(item.item);      
+      redirectToAnotherPage(navigation,"HomeScreen")
       closeModal();
     } catch (error) {
     }
@@ -62,12 +67,15 @@ const DeviceModal: FC<DeviceModalProps> = (props) => {
       visible={visible}
     >
       <SafeAreaView style={modalStyle.modalTitle}>
-        <Text style={modalStyle.modalTitleText}>Scanning</Text>
+        <Text style={modalStyle.modalTitleText}>Scanning..</Text>
         <FlatList
           contentContainerStyle={modalStyle.modalFlatlistContiner}
           data={devices}
           renderItem={renderDeviceModalListItem}
         />
+        <TouchableOpacity onPress={closeModal} style={modalStyle.ctaButton}>
+          <Text style={modalStyle.ctaButtonText}>Close</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </Modal>
   );

@@ -1,70 +1,75 @@
 import * as React from 'react';
-import { View,StyleSheet, Text } from 'react-native';
+import { View,StyleSheet, Text, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PulseIndicator } from '../../../PulseIndicator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import DeviceModal from '../../../DeviceConnectionModal';
-import BluetoothServices from './../../../BluetoothServices '
+import DeviceModal from '../../components/DeviceConnectionModal';
+import BluetoothServices from '../../services/BluetoothServices '
 
 export default function ScanScreen({ navigation }) {
   React.useLayoutEffect(() => {
     navigation.setOptions({
         title: '',
-    });
-    console.log("connectedDevice??",connectedDevice);
-    
+    });    
 }, [navigation]);
 
-const { initializeBluetooth, scan,connectToDevice,allDevices ,connectedDevice,disconnectFromDevice} = BluetoothServices();
-const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
+const { checkState,redirectToAnotherPage,initializeBluetooth, scan,connectToDevice,allDevices ,connectedDevice,disconnectFromDevice} = BluetoothServices();
+const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);  
+const [test, setTest] = React.useState(null);
 
   const scanForDevices = async () => {    
-    const isPermissionsEnabled = await initializeBluetooth();
-    if (isPermissionsEnabled) {
-      scan();
-    }
+      const isPermissionsEnabled = await initializeBluetooth();
+      if (isPermissionsEnabled) {
+        scan();
+      }
   };
 
   const hideModal = () => {    
     setIsModalVisible(false);
   };
 
-  const openModal = async () => {
-    console.log("connectedDevice?!!ss!?",connectedDevice);
+  const disconnect = () => {    
+    disconnectFromDevice();
+    redirectToAnotherPage(navigation,"HomeScreen")
+  };
 
+  const openModal = async () => {
     const isPermissionsEnabled = await initializeBluetooth();
     if (isPermissionsEnabled) {
-      await scanForDevices(); // Wait for scanning to finish
+      await scanForDevices(); 
       setIsModalVisible(true);
-      console.log("connectedDevice?!!!?",connectedDevice);
-
     }
   };
-  
+
+ React.useEffect(() => {
+  checkState().then((ch) => {
+    setTest(ch)
+  });
+}, []); 
 
     return (
       <SafeAreaView style={styles.container}>
-        <TouchableOpacity onPress={connectedDevice ? disconnectFromDevice : openModal} style={styles.ctaButton} >
+        <TouchableOpacity onPress={test ? disconnect : openModal} style={styles.ctaButton}>
           <Text style={styles.ctaButtonText}>
-            {connectedDevice ? "Disconnect" : "Scan"}
+            {test ? "Disconnect" : "Scan"}
           </Text>
         </TouchableOpacity>
       <DeviceModal closeModal={hideModal} visible={isModalVisible} connectToPeripheral={connectToDevice} devices={allDevices} />
       <View style={styles.heartRateTitleWrapper}>
-        {connectedDevice ? (
+        {test ? (
           <>
-            <PulseIndicator />
-            <Text style={styles.heartRateTitleText}>Your Heart Rate Is:</Text>
-            <Text style={styles.heartRateText}> bpm</Text>
+            
+            <Text style={styles.heartRateTitleText}>you are connected to ally!</Text>
           </>
         ) : (
-          <Text style={styles.heartRateTitleText}>
+          <Text style={styles.heartRateTitleText}>Click scan to search for devices 
           </Text>
         )}
       </View>
      
     </SafeAreaView>
     );
+
+    
   }
 
   const styles = StyleSheet.create({

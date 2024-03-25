@@ -7,16 +7,51 @@ import HeartrateComponent from './components/HeartrateComponent';
 import StepsComponent from './components/StepsComponent';
 import LastSleepTrackingComponent from './components/LastSleepTrackingComponent';
 import RiskLevelComponent from './components/RiskLevelComponent';
-import ConstantBar from '../../IsConnectedButton';
 import StressLevelComponent from './components/StressLevelComponent';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useFocusEffect } from '@react-navigation/native';
+import BluetoothServices from '../../services/BluetoothServices ';
 
-export default function HomeScreen({ navigation }) {
-    React.useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => <ConstantBar />,
+export default function HomeScreen({ navigation}) {
+
+    const {checkState} = BluetoothServices();
+    const [rectangleColor, setRectangleColor] = React.useState('#FFCBC9');
+    const [BleColor, setBleColor] = React.useState('#D1837F');
+
+    useFocusEffect(
+        React.useCallback(() => {
+          checkState().then((ch) => {
+            if (ch == true) {
+                setRectangleColor('#71db65');
+                setBleColor('#5c8c57')
+              } else if (ch == false) {
+                setRectangleColor('#FFCBC9');
+                setBleColor('#D1837F')
+              }
+          });
+      
+          navigation.setOptions({
             title: '',
+            headerRight: () =>  <TouchableOpacity onPress={requestPermission}>
+            <View style={[styles.rectangle, { backgroundColor: rectangleColor  }]}>
+              <Ionicons
+                name={'bluetooth'}
+                size={24}
+                color={BleColor}
+                style={styles.icon}
+              />
+              <Text style={styles.textB}>Click to connect</Text>
+            </View>
+          </TouchableOpacity>
         });
-    }, [navigation]);
+        }, [checkState])
+      );
+      
+
+    const requestPermission = () => {
+        navigation.navigate('ScanScreen');
+    };
 
     return (
         <View style={styles.container} >
@@ -46,7 +81,22 @@ const styles = StyleSheet.create({
         right: 10, 
         width: 'auto', 
         height: 210,     
-    }
+    },
+    textB: {
+        fontSize: 13,
+        fontWeight: 'bold',
+        color: '#494646'
+      },
+      rectangle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+        borderRadius: 20,
+        marginRight: 120,
+      },
+      icon: {
+        marginRight: 10,
+      },
   });
 
   

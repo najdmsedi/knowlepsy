@@ -7,7 +7,7 @@ import { Buffer } from 'buffer';
 import iconv from "iconv-lite";
 
 // Import UtilsDate class
-import UtilsDate from './UtilDate';
+import UtilsDate from './src/services/UtilDate';
 
 interface BluetoothLowEnergyApi {
   requestPermissions(): Promise<boolean>;

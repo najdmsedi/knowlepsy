@@ -8,14 +8,10 @@ import SleepTrackScreen from './src/screens/sleepTracking/SleepTrackScreen';
 import DeviceScreen from './src/screens/Device/DeviceScreen';
 import SettingsScreen from './src/screens/settings/SettingsScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useState } from "react";
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import useBLE from "./useBLE";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Screen names
 const homeName = "Home";
 const detailsName = "Details";
 const settingsName = "Settings";
@@ -36,8 +32,8 @@ function TabNavigator(){
               iconName = focused ? 'settings' : 'settings-outline';
             }
             return <Ionicons name={iconName} size={focused ? 35 : 25} color="#8A57ED" />;  }, })}>
-        <Tab.Screen name={homeName}  component={StackNavigator} options={{ headerShown: false, tabBarLabel: '' }} />
-        <Tab.Screen name={sleepTracking} component={SleepTrackScreen} options={{  tabBarLabel: '' }} />
+        <Tab.Screen name={homeName}  component={StackNavigator} options={{ headerShown: false, tabBarLabel: '' }}  />
+        <Tab.Screen name={sleepTracking} component={SleepTrackScreen} options={{  tabBarLabel: '' }}  />
         <Tab.Screen name={detailsName} component={DeviceScreen} options={{  tabBarLabel: '' }} />
         <Tab.Screen name={settingsName} component={SettingsScreen} options={{  tabBarLabel: '' }} />
       </Tab.Navigator>
@@ -46,7 +42,7 @@ function TabNavigator(){
 function StackNavigator(){
   return(
     <Stack.Navigator>
-      <Stack.Screen name='HomeScreen' component={HomeScreen}  />
+      <Stack.Screen name='HomeScreen' component={HomeScreen} />
       <Stack.Screen name='ScanScreen' component={ScanScreen} />
     </Stack.Navigator>
   )
@@ -56,10 +52,6 @@ function StackNavigator(){
 function App() {
   return (
     <NavigationContainer>
-      {/* <View style={{ flex: 1 }}>
-        <ConstantBar />
-        <MainContainer />
-      </View> */}
       <TabNavigator/>
     </NavigationContainer>
   );
