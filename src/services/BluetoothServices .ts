@@ -7,6 +7,9 @@ import { Buffer } from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
+
+// ... rest of your code
+
 type Device = {
   id: string;
   name: string;
@@ -215,99 +218,70 @@ function BluetoothServices():BluetoothServicesType  {
     }
   };
   
+  const { BleManagerModule } = NativeModules;
+  const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+  
   const readIncomingData = async (device, serviceRx) => {
-    let responseData = '';
-  
-    try {
-      await BleManager.start({ showAlert: false });
-  
-      // Retrieve services and characteristics for the connected device
-      const services = await BleManager.retrieveServices(device.id);
-      console.log("services", services);
-      console.log("notifyCharacteristicUuid", notifyService.characteristicUuid);
-
-      // Enable notifications for the characteristicRx
-      await BleManager.startNotification(device.id, serviceRx.service, notifyService.characteristicUuid);
-      
-      console.log("Notification started for characteristic:", notifyService.characteristicUuid);
-  
-      // Read the value of the notify characteristic to trigger the notification
-      let readData = await BleManager.read(device.id, serviceRx.service, notifyService.characteristicUuid);
-      console.log("Initial data read:", readData);
-  
-      // Set up a timer to periodically check for characteristic value changes
-      const intervalId = setInterval(async () => {
-        // try {
-        //   let updatedData = await BleManager.read(device.id, serviceRx.service, notifyCharacteristicUuid);
-        //   if (updatedData !== readData) {
-        //     readData = updatedData;
-        //     // Handle updated data here
-        //     const decoded = Buffer.from(updatedData, 'base64').toString('utf-8');
-        //     if (decoded.includes("--start--")) {
-        //       responseData = decoded;
-        //     } else {
-        //       responseData += decoded;
-        //     }
-  
-        //     if (responseData.includes("--end--")) {
-        //       const parsedData = extractData(responseData);
-        //       if (parsedData && parsedData.data) {
-        //         addData(parsedData.data);
-        //       }
-        //     }
-        //   }
-        // } catch (error) {
-        //   console.error("Error reading characteristic:", error);
-        // }
-      }, 1000); // Adjust the interval as needed
-  
-      // Clear the interval when done
-      // clearInterval(intervalId);
-  
-    } catch (error) {
-      console.error("Error in reading incoming data:", error);
-    }
-  }
-  
-  
-  
-// const readIncomingData = async (characteristicRx) => {
-//   let responseData = '';
-//   try {
-//     await BleManager.startNotification(
-//       characteristicRx.deviceId,
-//       characteristicRx.service,
-//       characteristicRx.characteristic
-//     );
-//     console.log("aaaaaaaaaaaaaaaaaaaa");
+    console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
     
-//     console.log(characteristicRx);
+ 
+      let responseData = "";
+  
+      // Assuming 'peripheralId' and 'characteristicUUID' are known
+      const peripheralId = device.id;
+      const characteristicUUID = notifyService.characteristicUuid;
+  console.log("init");
+  
+      const startNotifications = async () => {
+        // Discover services and characteristics
+        await BleManager.retrieveServices(peripheralId).then((services) => {
+          console.log("services",services);
+          
+        })
+  
+        // Start notification on the specified characteristic
+        await BleManager.startNotification(peripheralId, serviceRx.service, characteristicUUID).then((notification) => {
+          console.log("notification",notification);
+          
+        })
+        console.log("init deee");
 
-//     const bleManagerEmitter = new NativeEventEmitter(NativeModules.BleManager);
-//     const dataSubscriptionListener = bleManagerEmitter.addListener(
-//       'BleManagerDidUpdateValueForCharacteristic',
-//       ({ value, peripheral, characteristic, service }) => {
-//         const decoded = Buffer.from(value).toString('utf8');
-//         if (decoded.includes('--start--')) {
-//           responseData = decoded;
-//         } else {
-//           responseData += decoded;
-//         }
-//         if (responseData.includes('--end--')) {
-//           const data = extractData(responseData);
-//           if (data && data['data']) {
-//             addData(data['data']);
-//           }
-//         }
-//       }
-//     );
+        // Handle incoming data
+        bleManagerEmitter.addListener(
+          'BleManagerDidUpdateValueForCharacteristic',
+          ({ value, peripheral, characteristic, service }) => {
+            console.log("value");
+            console.log(value);
 
-//     // Remember to remove the listener when you are done
-//     return () => dataSubscriptionListener.remove();
-//   } catch (ex) {
-//     console.log('error from scanresults listener', ex);
-//   }
-// };
+            // Decode the base64 value
+            const decoded = Buffer.from(value, 'base64').toString('utf-8');
+            console.log("decoded",decoded);
+            
+            if (decoded.includes("--start--")) {
+              responseData = decoded;
+            } else {
+              responseData += decoded;
+            }
+  
+            if (decoded.includes("--end--")) {
+              const data = extractData(responseData);
+              if (data && data['data']) {
+                addData(data['data']);
+              }
+            }
+          }
+        );
+      };
+  
+      startNotifications();
+  
+      return () => {
+        // Clean up: remove listener
+        bleManagerEmitter.removeAllListeners('BleManagerDidUpdateValueForCharacteristic');
+      };
+ 
+  };
+
 
 const extractData = (data) => {
   try {
@@ -347,7 +321,7 @@ const addData = async (data) => {
      // Retrieve characteristics and perform sync data write
       await getCharacteristics(device, async (serviceTx,serviceRx) => {
         await writeSyncData(device, serviceTx); 
-        console.log(serviceTx);
+        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         readIncomingData(device,serviceRx)
         // await readIncomingData(serviceTx)
         
