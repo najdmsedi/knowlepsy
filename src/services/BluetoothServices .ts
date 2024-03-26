@@ -6,9 +6,7 @@ import UtilsDate from './UtilDate';
 import { Buffer } from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-
-
-// ... rest of your code
+import Realm from 'realm';
 
 type Device = {
   id: string;
@@ -48,6 +46,47 @@ function BluetoothServices():BluetoothServicesType  {
   const [dataSubscriptionListener, setDataSubscriptionListener] = useState(null);
   const [connectedDevice, setConnectedDevice] = useState();
 
+  async function onInit() {
+    try {
+      // Initialize the Realm app
+      const appId = 'devicesync-ckoxl'; // Set the Realm app ID here
+      const appConfig = {
+        id: appId,
+        timeout: 10000,
+        app: {
+          name: 'default',
+          version: '0',
+        },
+      };
+      const app = new Realm.App(appConfig);
+  
+      // Log in to the Realm app
+      const credentials = Realm.Credentials.anonymous(); // Replace with appropriate credentials if needed
+      await app.logIn(credentials);
+  
+      // Open the Realm
+      const config = {
+        schema: [], // Add your schema definitions here
+        sync: {
+          user: app.currentUser,
+          partitionValue: 'data', // Set the partition key to match your MongoDB collection
+        },
+      };
+  
+      const realm = await Realm.open(config);
+      console.log('MongoDB connection successful');
+  
+      // Perform operations
+      const data = realm.objects('data'); // Replace 'data' with your collection name if different
+      console.log(data);
+  
+      // Remember to close the Realm when done
+      realm.close();
+    } catch (e) {
+      console.error('MongoDB connection failed', e);
+    }
+  }
+  
   const redirectToAnotherPage = async (navigation, pageName) => {
     if (navigation && pageName) {
       navigation.navigate(pageName);
@@ -250,12 +289,12 @@ function BluetoothServices():BluetoothServicesType  {
         bleManagerEmitter.addListener(
           'BleManagerDidUpdateValueForCharacteristic',
           ({ value, peripheral, characteristic, service }) => {
-            console.log("value");
-            console.log(value);
+            // console.log("value");
+            // console.log(value);
 
             // Decode the base64 value
             const decoded = Buffer.from(value, 'base64').toString('utf-8');
-            console.log("decoded",decoded);
+            // console.log("decoded",decoded);
             
             if (decoded.includes("--start--")) {
               responseData = decoded;
@@ -297,7 +336,8 @@ const addData = async (data) => {
     // Replace 'your_connection_string' with your actual MongoDB connection string
     const uri = 'your_connection_string';
     // const client = new MongoClient(uri);
-
+    console.log("data final",data);
+    
     // await client.connect();
     // const database = client.db('data');
     // const usersCollection = database.collection('data');
@@ -315,6 +355,7 @@ const addData = async (data) => {
 
   async function connectToDevice(device) {
     try {
+      await onInit()
       await connect(device);
 
       // Retrieve characteristics and perform sync data write
