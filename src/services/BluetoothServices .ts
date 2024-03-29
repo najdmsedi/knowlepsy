@@ -6,7 +6,7 @@ import UtilsDate from './UtilDate';
 import { Buffer } from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import Realm from 'realm';
+// import Realm from 'realm';
 
 type Device = {
   id: string;
@@ -50,38 +50,38 @@ function BluetoothServices():BluetoothServicesType  {
     try {
       // Initialize the Realm app
       const appId = 'devicesync-ckoxl'; // Set the Realm app ID here
-      const appConfig = {
-        id: appId,
-        timeout: 10000,
-        app: {
-          name: 'default',
-          version: '0',
-        },
-      };
-      const app = new Realm.App(appConfig);
+      // const appConfig = {
+      //   id: appId,
+      //   timeout: 10000,
+      //   app: {
+      //     name: 'default',
+      //     version: '0',
+      //   },
+      // };
+      // const app = new Realm.App(appConfig);
   
       // Log in to the Realm app
-      const credentials = Realm.Credentials.anonymous(); // Replace with appropriate credentials if needed
-      await app.logIn(credentials);
+      // const credentials = Realm.Credentials.anonymous(); // Replace with appropriate credentials if needed
+      // await app.logIn(credentials);
   
       // Open the Realm
-      const config = {
-        schema: [], // Add your schema definitions here
-        sync: {
-          user: app.currentUser,
-          partitionValue: 'data', // Set the partition key to match your MongoDB collection
-        },
-      };
+      // const config = {
+      //   schema: [], // Add your schema definitions here
+      //   sync: {
+      //     user: app.currentUser,
+      //     partitionValue: 'data', // Set the partition key to match your MongoDB collection
+      //   },
+      // };
   
-      const realm = await Realm.open(config);
-      console.log('MongoDB connection successful');
+      // const realm = await Realm.open(config);
+      // console.log('MongoDB connection successful');
   
       // Perform operations
-      const data = realm.objects('data'); // Replace 'data' with your collection name if different
-      console.log(data);
+      // const data = realm.objects('data'); // Replace 'data' with your collection name if different
+      // console.log(data);
   
       // Remember to close the Realm when done
-      realm.close();
+      // realm.close();
     } catch (e) {
       console.error('MongoDB connection failed', e);
     }
