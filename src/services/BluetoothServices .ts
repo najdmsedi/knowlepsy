@@ -5,8 +5,6 @@ import BleManager from 'react-native-ble-manager';
 import UtilsDate from './UtilDate';
 import { Buffer } from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-// import Realm from 'realm';
 
 type Device = {
   id: string;
@@ -26,16 +24,6 @@ interface BluetoothServicesType {
 }
 
 function BluetoothServices():BluetoothServicesType  {
-  const writeService = {
-    serviceUuid: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
-    characteristicUuid: "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
-  };
-  
-  const notifyService = {
-    serviceUuid: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
-    characteristicUuid: "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
-  };
-
   const [allDevices, setAllDevices] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [services, setServices] = useState([]);
@@ -45,48 +33,18 @@ function BluetoothServices():BluetoothServicesType  {
   const [characteristicRx, setCharacteristicRx] = useState(null);
   const [dataSubscriptionListener, setDataSubscriptionListener] = useState(null);
   const [connectedDevice, setConnectedDevice] = useState();
+  const { BleManagerModule } = NativeModules;
+  const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+  
+  const writeService = {
+    serviceUuid: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
+    characteristicUuid: "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+  };
+  const notifyService = {
+    serviceUuid: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
+    characteristicUuid: "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+  };
 
-  async function onInit() {
-    try {
-      // Initialize the Realm app
-      const appId = 'devicesync-ckoxl'; // Set the Realm app ID here
-      // const appConfig = {
-      //   id: appId,
-      //   timeout: 10000,
-      //   app: {
-      //     name: 'default',
-      //     version: '0',
-      //   },
-      // };
-      // const app = new Realm.App(appConfig);
-  
-      // Log in to the Realm app
-      // const credentials = Realm.Credentials.anonymous(); // Replace with appropriate credentials if needed
-      // await app.logIn(credentials);
-  
-      // Open the Realm
-      // const config = {
-      //   schema: [], // Add your schema definitions here
-      //   sync: {
-      //     user: app.currentUser,
-      //     partitionValue: 'data', // Set the partition key to match your MongoDB collection
-      //   },
-      // };
-  
-      // const realm = await Realm.open(config);
-      // console.log('MongoDB connection successful');
-  
-      // Perform operations
-      // const data = realm.objects('data'); // Replace 'data' with your collection name if different
-      // console.log(data);
-  
-      // Remember to close the Realm when done
-      // realm.close();
-    } catch (e) {
-      console.error('MongoDB connection failed', e);
-    }
-  }
-  
   const redirectToAnotherPage = async (navigation, pageName) => {
     if (navigation && pageName) {
       navigation.navigate(pageName);
@@ -157,11 +115,8 @@ function BluetoothServices():BluetoothServicesType  {
         });        
       }
     };
-    // Instantiate the NativeEventEmitter
     const bleEmitter = new NativeEventEmitter();
-    // Add event listener for discovered devices
     bleEmitter.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
-    // Stop the scan after a timeout (5 seconds in this case)
     setTimeout(() => {
       BleManager.stopScan().then(() => {
         bleEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
@@ -242,7 +197,6 @@ function BluetoothServices():BluetoothServicesType  {
         const chunk = syncData.substring(i, end);
         const list = Buffer.from(chunk, "utf-8").toJSON().data;
         console.log("device",device.id,"serviceRx",serviceTx.service,"characteristicUuid",serviceTx.characteristic);
-
         await BleManager.write(
           device.id,
           serviceTx.service,
@@ -253,130 +207,79 @@ function BluetoothServices():BluetoothServicesType  {
       }
     } catch (ex) {
       console.log("An error occurred during sync data write:", ex);
-      throw ex; // re-throw the error for higher-level handling
+      throw ex;
     }
   };
   
-  const { BleManagerModule } = NativeModules;
-  const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
-  
-  const readIncomingData = async (device, serviceRx) => {
-    console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-    
- 
+  const readIncomingData = async (device, serviceRx) => { 
       let responseData = "";
-  
-      // Assuming 'peripheralId' and 'characteristicUUID' are known
       const peripheralId = device.id;
       const characteristicUUID = notifyService.characteristicUuid;
-  console.log("init");
   
-      const startNotifications = async () => {
-        // Discover services and characteristics
         await BleManager.retrieveServices(peripheralId).then((services) => {
           console.log("services",services);
-          
         })
   
-        // Start notification on the specified characteristic
-        await BleManager.startNotification(peripheralId, serviceRx.service, characteristicUUID).then((notification) => {
-          console.log("notification",notification);
+        await BleManager.startNotification(peripheralId, serviceRx.service, characteristicUUID);
           
-        })
-        console.log("init deee");
-
-        // Handle incoming data
-        bleManagerEmitter.addListener(
-          'BleManagerDidUpdateValueForCharacteristic',
-          ({ value, peripheral, characteristic, service }) => {
-            // console.log("value");
-            // console.log(value);
-
-            // Decode the base64 value
-            const decoded = Buffer.from(value, 'base64').toString('utf-8');
-            // console.log("decoded",decoded);
-            
+        bleManagerEmitter.addListener('BleManagerDidUpdateValueForCharacteristic',
+        ({ value, peripheral, characteristic, service }) => {       
+            const decoded = Buffer.from(value, 'base64').toString('utf-8'); 
             if (decoded.includes("--start--")) {
               responseData = decoded;
             } else {
               responseData += decoded;
             }
-  
-            if (decoded.includes("--end--")) {
+            if (decoded.includes("--end--") || decoded.includes("end--")) {
               const data = extractData(responseData);
               if (data && data['data']) {
                 addData(data['data']);
               }
+              responseData = "";
             }
           }
         );
-      };
-  
-      startNotifications();
-  
-      return () => {
-        // Clean up: remove listener
-        bleManagerEmitter.removeAllListeners('BleManagerDidUpdateValueForCharacteristic');
-      };
- 
   };
 
-
-const extractData = (data) => {
-  try {
-    const jsonString = data.replaceAll('--start--', '').replaceAll('--end--', '');
-    return JSON.parse(jsonString);
-  } catch (error) {
-    return null;
-  }
-};
-  
-const addData = async (data) => {
-  try {
-    // Replace 'your_connection_string' with your actual MongoDB connection string
-    const uri = 'your_connection_string';
-    // const client = new MongoClient(uri);
-    console.log("data final",data);
+  const extractData = (data) => {
+    try {
+      const jsonString = data.replaceAll('--start--', '').replaceAll('--end--', '');
+      return JSON.parse(jsonString);
+    } catch (error) {
+      return null;
+    }
+  };
     
-    // await client.connect();
-    // const database = client.db('data');
-    // const usersCollection = database.collection('data');
-
-    // await usersCollection.insertMany([data]);
-    console.log('data added successfully!');
-    console.log(`Data added at ${new Date().toLocaleTimeString()}`);
-
-    // await client.close();
-  } catch (e) {
-    console.log('Error adding data:', e);
-    // Handle reconnection logic or other error handling here
-  }
-};
+  const addData = async (data) => {
+    try {        
+      const response = await fetch('http://172.187.93.156:3000/addData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add data');
+      }
+    } catch (e) {
+      console.log('Error adding data:', e);
+    }
+  };
 
   async function connectToDevice(device) {
     try {
-      await onInit()
       await connect(device);
-
-      // Retrieve characteristics and perform sync data write
-     // Retrieve characteristics and perform sync data write
       await getCharacteristics(device, async (serviceTx,serviceRx) => {
         await writeSyncData(device, serviceTx); 
-        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        readIncomingData(device,serviceRx)
-        // await readIncomingData(serviceTx)
-        
+        readIncomingData(device,serviceRx)        
       });
-
-      console.log("alo");
       
       checkState()
     } catch (error) {
       console.log("connectToDevice", error);
     }
   }
-
-
 
   useEffect(() => {
     console.log("BluetoothServices => useEffect");
