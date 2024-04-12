@@ -28,7 +28,7 @@ function TabNavigator() {
           if (route.name === homeName) {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === sleepTracking) {
-            iconName = focused ? 'bed' : 'bed-outline';
+            iconName = focused ? 'moon' : 'moon-outline';
           } else if (route.name === detailsName) {
             iconName = focused ? 'watch' : 'watch-outline';
           } else if (route.name === settingsName) {
@@ -66,6 +66,7 @@ function App() {
         result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] !==
         PermissionsAndroid.RESULTS.GRANTED
       ) {
+        // Nearby device permission denied, guide user to enable it manually
         console.log('Nearby device permission denied. Please enable it manually in app settings.');
       }
       console.log('Permissions granted successfully.');
@@ -74,8 +75,11 @@ function App() {
     }
   }
   
+  
   BleManager.enableBluetooth()
+  // Call the function to request permissions
   requestPermissions();
+
   return (
     <NavigationContainer>
       <TabNavigator />

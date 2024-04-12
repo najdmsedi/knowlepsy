@@ -16,17 +16,21 @@ export default function SleepTrackScreen({ navigation }:SleepScreenProps) {
     const requestPermission = () => {
         navigation.navigate('ScanScreen');
     };
+    const [text, setText] = React.useState('Click to connect');
+
     useFocusEffect(
         React.useCallback(() => {
-            checkState().then((ch) => {
-                if (ch == true) {
-                    setRectangleColor('#71db65');
-                    setBleColor('#5c8c57')
-                  } else if (ch == false) {
-                    setRectangleColor('#FFCBC9');
-                    setBleColor('#D1837F')
-                  }
-            });
+          checkState().then((ch) => {
+            if (ch == true) {
+                setRectangleColor('#71db65');
+                setBleColor('#5c8c57');
+                setText('    Connected     ')
+              } else if (ch == false) {
+                setRectangleColor('#FFCBC9');
+                setBleColor('#D1837F');
+                setText('Click to connect')
+              }
+          });
             navigation.setOptions({
                 title: '',
                 headerRight: () => <TouchableOpacity onPress={requestPermission}>
@@ -37,7 +41,7 @@ export default function SleepTrackScreen({ navigation }:SleepScreenProps) {
                             color={BleColor}
                             style={styles.icon}
                         />
-                        <Text style={styles.textB}>Click to connect</Text>
+                        <Text style={styles.textB}>{text}</Text>
                     </View>
                 </TouchableOpacity>
             });
@@ -49,7 +53,7 @@ export default function SleepTrackScreen({ navigation }:SleepScreenProps) {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <Text
                 onPress={() => navigation.navigate('sleep')}
-                style={{ fontSize: 26, fontWeight: 'bold' }}>Sleep Screen</Text>
+                style={{ fontSize: 26, fontWeight: 'bold',color:'black' }}>Sleep Screen</Text>
         </View>
     );
 }

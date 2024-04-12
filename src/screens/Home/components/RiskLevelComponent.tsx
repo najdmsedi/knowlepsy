@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     top: 10,
+    color:'black'
   },
 });
 

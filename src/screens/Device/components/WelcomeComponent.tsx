@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     top: 10,
   },
   welcome: {
-    fontSize: 17,
+    fontSize: 13,
     fontWeight: 'bold',
     marginBottom: 1,
     marginTop: 15,
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
 
   },
   name: {
-    fontSize: 23,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 5,

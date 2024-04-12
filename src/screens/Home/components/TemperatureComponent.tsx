@@ -6,14 +6,14 @@ interface RectangleProps {
   color?: string;
   marginTop: number;
   height?: number;
-  BPM? : number;
+  wrist? : number| undefined | null;
 }
 
-const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD' ,marginTop,height=80,BPM='--'}) => {
+const TemperatureComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD' ,marginTop,height=80,wrist='--'}) => {
   return (
     <View style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height }]}>
     <Text style={styles.title}>{title}</Text>
-    <Text style={styles.BPM}>{BPM} <Text style={styles.BPMText}>C°</Text></Text>
+    <Text style={styles.wrist}>{wrist} <Text style={styles.wristText}>C°</Text></Text>
   </View>
   );
 };
@@ -35,17 +35,17 @@ const styles = StyleSheet.create({
     marginBottom: -2,
     color: 'black'
   },
-  BPM :{
+  wrist :{
     fontSize: 23,
     fontWeight: 'bold',
     marginBottom:10,
     color:'#C45549'
   },
-  BPMText: {
+  wristText: {
     fontSize: 19,
 
     color: 'black',
   },
 });
 
-export default HeartrateComponent;
+export default TemperatureComponent;

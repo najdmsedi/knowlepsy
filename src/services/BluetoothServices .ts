@@ -139,7 +139,10 @@ function BluetoothServices():BluetoothServicesType  {
   };
 
   const disconnectFromDevice = async () => {
-    setIsConnected(false)
+    setIsConnected(false),
+    (global as any).wrist='--',
+    (global as any).HR='--',
+    (global as any).steps='0'
     //FIX_ME
     const connectedPeripherals = await BleManager.getConnectedPeripherals([]);
     if (connectedPeripherals.length > 0) {
@@ -235,8 +238,7 @@ function BluetoothServices():BluetoothServicesType  {
             if (decoded.includes("--end--") || decoded.includes("end--")) {
               const data = extractData(responseData);
               if (data && data['data']) {
-                addData(data['data']);
-
+                addData(data['data']);                
 
                 console.log("data[data] ",data['data']);
                 console.log("data spec ",data['data']['PPG']!= undefined);
@@ -245,8 +247,9 @@ function BluetoothServices():BluetoothServicesType  {
                 }
                 if (data['data']['Motion']!= undefined){
                   (global as any).steps = data['data']['Motion']['steps']; 
-                  console.log((global as any).steps);
-                           
+                }
+                if (data['data']['TEMP']!= undefined){
+                  (global as any).wrist = data['data']['TEMP']['wrist']; 
                 }
               }
               responseData = "";

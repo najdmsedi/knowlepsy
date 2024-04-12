@@ -30,10 +30,14 @@ const [test, setTest] = React.useState<any | null>(null);
   const hideModal = () => {    
     setIsModalVisible(false);
   };
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
   const disconnect = () => {    
     disconnectFromDevice();
-    redirectToAnotherPage(navigation,"HomeScreen")
+    redirectToAnotherPage(navigation, "HomeScreen").then(() => {
+      // Navigate back to the HomeScreen
+      redirectToAnotherPage(navigation, "HomeScreen");
+  });
   };
 
   const openModal = async () => {
