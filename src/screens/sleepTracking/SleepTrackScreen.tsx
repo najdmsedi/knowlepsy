@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import BluetoothServices from '../../services/BluetoothServices ';
+import TopComponent from './components/TopComponent';
 
 type SleepScreenProps = {
     navigation: any;
@@ -51,9 +52,7 @@ export default function SleepTrackScreen({ navigation }:SleepScreenProps) {
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text
-                onPress={() => navigation.navigate('sleep')}
-                style={{ fontSize: 26, fontWeight: 'bold',color:'black' }}>Sleep Screen</Text>
+           <TopComponent color='#F5F3FF' Time='04:00 pm' info='tracker ends 2h ago' marginTop={20}></TopComponent>
         </View>
     );
 }
