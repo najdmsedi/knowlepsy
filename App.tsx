@@ -8,8 +8,16 @@ import SleepTrackScreen from './src/screens/sleepTracking/SleepTrackScreen';
 import DeviceScreen from './src/screens/Device/DeviceScreen';
 import SettingsScreen from './src/screens/settings/SettingsScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { Image, PermissionsAndroid, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BleManager from 'react-native-ble-manager';
+import { Button, Input } from 'react-native-elements';
+import { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { color } from 'react-native-elements/dist/helpers';
+import LoginScreen from './src/screens/Auth/Login/LoginScreen';
+import RegisterScreen from './src/screens/Auth/Register/Register';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SplashScreen from 'react-native-splash-screen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -44,17 +52,17 @@ function TabNavigator() {
     </Tab.Navigator>
   )
 }
+
 function StackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name='HomeScreen' component={HomeScreen} />
-      <Stack.Screen name='ScanScreen' component={ScanScreen} />
     </Stack.Navigator>
   )
 }
 
-
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   async function requestPermissions() {
     try {
       const result = await PermissionsAndroid.requestMultiple([
@@ -66,7 +74,6 @@ function App() {
         result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] !==
         PermissionsAndroid.RESULTS.GRANTED
       ) {
-        // Nearby device permission denied, guide user to enable it manually
         console.log('Nearby device permission denied. Please enable it manually in app settings.');
       }
       console.log('Permissions granted successfully.');
@@ -74,15 +81,47 @@ function App() {
       console.error('Error requesting permissions:', error);
     }
   }
-  
-  
-  BleManager.enableBluetooth()
-  // Call the function to request permissions
-  requestPermissions();
+  useEffect(() => {
+    BleManager.enableBluetooth()
+    requestPermissions();
+  }, []);
 
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
+  const handleLogOut = () => {
+    setIsLoggedIn(false);
+  };
+
+  async function getData() {
+    const data = await AsyncStorage.getItem('isLoggedIn') as unknown as boolean;
+    console.log(data, 'at app.jsx');
+    setIsLoggedIn(data);
+  }
+
+  useEffect(() => {
+    getData();
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 1900);
+  }, [isLoggedIn]);
   return (
     <NavigationContainer>
-      <TabNavigator />
+      <Stack.Navigator>
+        {isLoggedIn ? (
+          
+          <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }}/>
+
+        ) : (
+          <Stack.Screen name="LoginScreen" options={{ headerShown: false }}>
+            {(props) => <LoginScreen {...props} onLogin={handleLogin} />}
+          </Stack.Screen>
+        )}
+        <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }}/>
+      
+        <Stack.Screen name='ScanScreen' component={ScanScreen} />
+
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
