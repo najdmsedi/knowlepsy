@@ -59,7 +59,6 @@ export default function HomeScreen({ navigation}: HomeScreenProps) {
         }, [checkState])
       );
       
-
     const requestPermission = () => {
         navigation.navigate('ScanScreen');
     };

@@ -1,17 +1,17 @@
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { Input } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../../../context/AuthContext';
 
-interface LoginProps {
-  onLogin: () => void;
-  navigation: any;
-}
 
-export default function LoginScreen({ onLogin, navigation }: LoginProps) {
+
+export default function LoginScreen() {
+  const {login} = useContext(AuthContext)
 
   const [email, setEmail] = useState('');
   const [emailVerify, setEmailVerify] = useState(false);
@@ -40,6 +40,7 @@ export default function LoginScreen({ onLogin, navigation }: LoginProps) {
       setPasswordVerify(true);
     }
   }
+  const navigation = useNavigation();
 
   const handleLogin = async () => {
     try {
@@ -50,7 +51,6 @@ export default function LoginScreen({ onLogin, navigation }: LoginProps) {
         },
         body: JSON.stringify({ email, password }),
       }).then(async response=>{
-        
         if (!response.ok) {
           throw new Error('Failed to login');
         }
@@ -61,10 +61,9 @@ export default function LoginScreen({ onLogin, navigation }: LoginProps) {
 
         AsyncStorage.setItem('token', token);
         AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
-        navigation.navigate('HomeScreen');
+        navigation.navigate('TabNavigator');
 
       });
-      // navigation.navigate(userType === 'admin' ? 'AdminDashboard' : 'UserDashboard');
     } catch (error) {
       console.error('Error logging in:', error);
       Alert.alert('Error', 'Failed to login. Please try again later.');
@@ -72,12 +71,11 @@ export default function LoginScreen({ onLogin, navigation }: LoginProps) {
     
   };
   async function getData() {
-    const data = await AsyncStorage.getItem('isLoggedIn');
-    
-    if(data==="true"){
-      console.log("aaaa");
-      onLogin()
+    const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+    const token = await AsyncStorage.getItem('token');
 
+    if(isLoggedIn==="true" && token!=null){
+      console.log("here is your token");
     }
   }
   useEffect(()=>{
@@ -161,11 +159,11 @@ export default function LoginScreen({ onLogin, navigation }: LoginProps) {
         )}
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={styles.button} onPress={login}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <View style={styles.registerContainer}>
-        <Text style={styles.registerText}>Not a member? </Text>
+        <Text style={styles.registerText}>Not a member?  </Text>
         <TouchableOpacity onPress={handleRegister}>
           <Text style={styles.registerLink}>Register </Text>
         </TouchableOpacity>
@@ -173,7 +171,6 @@ export default function LoginScreen({ onLogin, navigation }: LoginProps) {
     </View>
   );
 };
-
 
 
 const styles = StyleSheet.create({

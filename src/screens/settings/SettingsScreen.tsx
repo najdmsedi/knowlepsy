@@ -1,4 +1,4 @@
-import * as React from 'react';
+import  React, { useContext }from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothServices from '../../services/BluetoothServices ';
 import { useFocusEffect } from '@react-navigation/native';
@@ -6,12 +6,16 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ButtonSettings from './components/ButtonSettings';
 import LoginScreen from '../Auth/Login/LoginScreen';
 import RegisterScreen from './../../../src/screens/Auth/Register/Register';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 
 type SettingsScreenProps = {
   navigation: any;
 };
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
+  const {logout} = useContext(AuthContext)
 
   const { checkState } = BluetoothServices();
   const [rectangleColor, setRectangleColor] = React.useState('#FFCBC9');
@@ -54,9 +58,26 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   );
   const handleButtonPress = () => { }
   const handleButtonPresss = () => { }
-  const handleLogout = () => {
-  };
 
+  const handleLogout = async () => {  
+    try {
+      // Update the isLoggedIn state to false
+      await AsyncStorage.setItem('isLoggedIn', 'false');
+      await AsyncStorage.removeItem('token');
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      const token = await AsyncStorage.getItem('token');
+      console.log("isLoggedIn",isLoggedIn);
+      console.log("token",token);
+
+      if(isLoggedIn==="false" && token==null){
+        console.log("aaaa");
+        console.log("ani hna ani hnaaa");
+        navigation.navigate('LoginScreen');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
   return (
     <View style={styles.container}>
       <View style={styles.profileCircle}>
@@ -80,7 +101,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <TouchableOpacity onPress={handleButtonPress} style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 20 }}>
         <Text style={{ ...styles.EditbuttonText, fontSize: 14 }}>Emergency Call</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleLogout} style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 20, backgroundColor: '#e8bc56' }}>
+      <TouchableOpacity onPress={logout} style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 20, backgroundColor: '#e8bc56' }}>
         <Ionicons name="log-out-outline" size={20} style={{ marginLeft: 30 }} color="#7a0909" />
         <Text style={{ ...styles.EditbuttonText, fontSize: 14 }}> Logout </Text>
       </TouchableOpacity>
