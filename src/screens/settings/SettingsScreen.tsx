@@ -1,15 +1,17 @@
-import * as React from 'react';
+import  React, { useContext }from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothServices from '../../services/BluetoothServices ';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ButtonSettings from './components/ButtonSettings';
+import { AuthContext } from '../../context/AuthContext';
 
 type SettingsScreenProps = {
     navigation: any;
   };
   
 export default function SettingsScreen({ navigation }:SettingsScreenProps) {
+  const {logout} = useContext(AuthContext)
 
   const { checkState } = BluetoothServices();
   const [rectangleColor, setRectangleColor] = React.useState('#FFCBC9');
@@ -77,7 +79,7 @@ export default function SettingsScreen({ navigation }:SettingsScreenProps) {
       <TouchableOpacity onPress={handleButtonPress} style={{...styles.Editbutton,marginTop: 5,paddingHorizontal: 20}}>
         <Text style={{...styles.EditbuttonText,fontSize: 14}}>Emergency Call</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleButtonPress} style={{...styles.Editbutton,marginTop: 5,paddingHorizontal: 20 ,backgroundColor: '#e8bc56'}}>
+      <TouchableOpacity onPress={logout} style={{...styles.Editbutton,marginTop: 5,paddingHorizontal: 20 ,backgroundColor: '#e8bc56'}}>
         <Ionicons name="log-out-outline" size={20} style={{marginLeft:10}} color="#7a0909" />
         <Text style={{...styles.EditbuttonText,fontSize: 14}}>  Logout       </Text>
       </TouchableOpacity>
