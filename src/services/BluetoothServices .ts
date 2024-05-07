@@ -103,17 +103,29 @@ function BluetoothServices():BluetoothServicesType  {
       console.log('No permissions to scan for Bluetooth devices.');
       return;
     }
+    console.log("start scan");
+    
     BleManager.scan([], 5, true).then(() => {
     }).catch(error => {
       console.error("Error starting scan:", error);
     });
+    console.log("aa");
+    
     const handleDiscoverPeripheral = (peripheral:any) => {
+      console.log("aa",peripheral);
+
       if (peripheral && (peripheral.name?.startsWith("Ally") || peripheral.name?.startsWith("Knowlepsy"))) {
         setAllDevices(prevDevices => {
           if (!prevDevices.find(prevDevice => prevDevice.id === peripheral?.id)) {
+            console.log("prevDevices",prevDevices);
+
             return [...prevDevices, peripheral];
+
           }
+          console.log("prevDevices",prevDevices);
+
           return prevDevices;
+
         });        
       }
     };
@@ -131,7 +143,11 @@ function BluetoothServices():BluetoothServicesType  {
   const connect = async (device:Device) => {
     try {
       await BleManager.connect(device.id);
+      console.log('device.id',device.id);
+      
       setConnectedDevice(device.id);
+      console.log('setConnectedDevice');
+
       setIsConnected(true)
     } catch (error) {
       console.error('Connection error', error);
@@ -154,6 +170,10 @@ function BluetoothServices():BluetoothServicesType  {
 
   const getCharacteristics = async (device:Device, onCharacteristicsRetrieved:any) => {
     try {
+      console.log("getCharacteristics");
+      console.log("device",device);
+      console.log("onCharacteristicsRetrieved",onCharacteristicsRetrieved);
+
       const services = await BleManager.retrieveServices(device.id);
       const serviceTx = services?.characteristics?.find(
         (c) => c.service === writeService.serviceUuid && c.characteristic === writeService.characteristicUuid,
@@ -176,8 +196,8 @@ function BluetoothServices():BluetoothServicesType  {
       setServiceTx(serviceTx);
       setServiceRx(serviceRx);
       if (serviceTx && serviceRx) {
-        // console.log('Write Characteristic:', serviceTx.descriptors[0].uuid);
-        // console.log('Notify Characteristic:', serviceRx.descriptors[0].uuid);
+        console.log('Write Characteristic:', serviceTx);
+        console.log('Notify Characteristic:', serviceRx);
       } else {
         console.log('Required services not found.');
       }
@@ -322,7 +342,4 @@ const addData = async (data: any) => {
   
 };
 export default BluetoothServices;
-function NULL(prevState: undefined): undefined {
-  throw new Error('Function not implemented.');
-}
 
