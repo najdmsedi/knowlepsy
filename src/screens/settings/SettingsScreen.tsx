@@ -3,11 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothServices from '../../services/BluetoothServices ';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ButtonSettings from './components/ButtonSettings';
-import LoginScreen from '../Auth/Login/LoginScreen';
-import RegisterScreen from './../../../src/screens/Auth/Register/Register';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 
 type SettingsScreenProps = {
@@ -19,7 +14,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const { checkState } = BluetoothServices();
   const [rectangleColor, setRectangleColor] = React.useState('#FFCBC9');
-  const [BleColor, setBleColor] = React.useState('#D1837F');
+  const [BleColor, setBleColor] = React.useState('#D1837F');  
   const requestPermission = () => {
     navigation.navigate('ScanScreen');
   };
@@ -41,43 +36,22 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
       navigation.setOptions({
         title: '',
-        headerRight: () => <TouchableOpacity onPress={requestPermission}>
-          <View style={[styles.rectangle, { backgroundColor: rectangleColor }]}>
-            <Ionicons
-              name={'bluetooth'}
-              size={24}
-              color={BleColor}
-              style={styles.icon}
-            />
-            <Text style={styles.textB}>{text}</Text>
-          </View>
-        </TouchableOpacity>
+        headerRight: () => 
+          <TouchableOpacity onPress={requestPermission}>
+            <View style={[styles.rectangle, { backgroundColor: rectangleColor }]}>
+              <Ionicons
+                name={'bluetooth'}
+                size={24}
+                color={BleColor}
+                style={styles.icon}
+              />
+              <Text style={styles.textB}>{text}</Text>
+            </View>
+          </TouchableOpacity>
       });
-
     }, [checkState])
   );
-  const handleButtonPress = () => { }
-  const handleButtonPresss = () => { }
 
-  const handleLogout = async () => {  
-    try {
-      // Update the isLoggedIn state to false
-      await AsyncStorage.setItem('isLoggedIn', 'false');
-      await AsyncStorage.removeItem('token');
-      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
-      const token = await AsyncStorage.getItem('token');
-      console.log("isLoggedIn",isLoggedIn);
-      console.log("token",token);
-
-      if(isLoggedIn==="false" && token==null){
-        console.log("aaaa");
-        console.log("ani hna ani hnaaa");
-        navigation.navigate('LoginScreen');
-      }
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
   return (
     <View style={styles.container}>
       <View style={styles.profileCircle}>
@@ -88,17 +62,17 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       </View>
       <Text style={styles.userName}>Najd Mseddi</Text>
       <Text style={styles.UseraccountbuttonText}>User account </Text>
-      <TouchableOpacity onPress={handleButtonPress} style={{ ...styles.Editbutton, marginTop: 0, paddingHorizontal: 34 }}>
+      <TouchableOpacity style={{ ...styles.Editbutton, marginTop: 0, paddingHorizontal: 34 }}>
         <Text style={styles.EditbuttonText}>Edit Profile </Text>
       </TouchableOpacity>
       <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
-      <TouchableOpacity onPress={handleButtonPress} style={{ ...styles.Editbutton, marginTop: -370, paddingHorizontal: 20 }}>
+      <TouchableOpacity style={{ ...styles.Editbutton, marginTop: -370, paddingHorizontal: 20 }}>
         <Text style={{ ...styles.EditbuttonText, fontSize: 14 }}>   Information   </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleButtonPress} style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 6 }}>
+      <TouchableOpacity style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 6 }}>
         <Text style={{ ...styles.EditbuttonText, fontSize: 14 }}>    Change Password</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleButtonPress} style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 20 }}>
+      <TouchableOpacity style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 20 }}>
         <Text style={{ ...styles.EditbuttonText, fontSize: 14 }}>Emergency Call</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={logout} style={{ ...styles.Editbutton, marginTop: 5, paddingHorizontal: 20, backgroundColor: '#e8bc56' }}>

@@ -1,7 +1,4 @@
-
-
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import ScanScreen from '../screens/Device/ScanScreen';
 import RegisterScreen from '../screens/Auth/Register/Register';
 import LoginScreen from '../screens/Auth/Login/LoginScreen';
 

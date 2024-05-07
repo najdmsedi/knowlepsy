@@ -126,6 +126,28 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 function App(){
+  async function requestPermissions() {
+        try {
+          const result = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+            PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+          ]);
+          if (
+            result[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] !==
+            PermissionsAndroid.RESULTS.GRANTED
+          ) {
+            console.log('Nearby device permission denied. Please enable it manually in app settings.');
+          }
+          console.log('Permissions granted successfully.');
+        } catch (error) {
+          console.error('Error requesting permissions:', error);
+        }
+      }
+      useEffect(() => {
+        BleManager.enableBluetooth()
+        requestPermissions();
+      }, []);
   return (
     <GestureHandlerRootView>
       <AuthProvider>

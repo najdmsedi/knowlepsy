@@ -4,6 +4,8 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
+import { BASE_URL } from '../../../config';
 
 type SettingsScreenProps = {
   navigation: any;
@@ -78,27 +80,18 @@ function RegisterScreen({navigation }: SettingsScreenProps) {
     };
     console.log("userData",userData);
     try {
-    const response = await fetch('http://192.168.1.14:3000/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-      
-    });
-   
-    if (!response.ok) {
-      throw new Error('Failed to add data');
-      
+      const response = await axios.post(`${BASE_URL}/register`, userData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      console.log("Response:", response.data);
+      navigation.navigate('LoginScreen');
+    } catch (error) {
+      console.log('Error adding data:', error);
+      Alert.alert('Error', 'Failed to add data. Please try again later.');
     }
-    const responseData = await response.json();
-    console.log("Response:", responseData);
-    navigation.navigate('LoginScreen');
-  } catch (error) {
-    console.log('Error adding data:', error);
-    // Show alert with error message
-    Alert.alert('Error', 'Failed to add data. Please try again later.');
-  } 
   };
 
   const handleLogin = () => {

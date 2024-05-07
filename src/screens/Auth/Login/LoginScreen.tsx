@@ -42,52 +42,10 @@ export default function LoginScreen() {
   }
   const navigation = useNavigation();
 
-  const handleLogin = async () => {
-    try {
-      await fetch('http://192.168.1.14:3000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      }).then(async response=>{
-        if (!response.ok) {
-          throw new Error('Failed to login');
-        }
-
-        const responseData = await response.json();
-        const { data: token } = responseData;
-        console.log("Token:", token);
-
-        AsyncStorage.setItem('token', token);
-        AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
-        navigation.navigate('TabNavigator');
-
-      });
-    } catch (error) {
-      console.error('Error logging in:', error);
-      Alert.alert('Error', 'Failed to login. Please try again later.');
-    }
-    
-  };
-  async function getData() {
-    const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
-    const token = await AsyncStorage.getItem('token');
-
-    if(isLoggedIn==="true" && token!=null){
-      console.log("here is your token");
-    }
-  }
-  useEffect(()=>{
-    getData();
-    console.log("Hii");
-  },[])
   const handleRegister = async () => {
-    console.log(await AsyncStorage.getItem('isLoggedIn'));
-    console.log(await AsyncStorage.getItem('token'));
-
     navigation.navigate('RegisterScreen');
   };
+
   return (
     <View style={styles.container}>
       <Image source={require("../../../../assets/knowlepsy_logo.png")} style={styles.logo}></Image>
@@ -159,7 +117,7 @@ export default function LoginScreen() {
         )}
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={login}>
+      <TouchableOpacity style={styles.button} onPress={() => login(email,password)}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <View style={styles.registerContainer}>

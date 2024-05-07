@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import WelcomeComponent from './components/WelcomeComponent';
 import ReportComponent from './components/ReportComponent';
@@ -12,16 +11,15 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import BluetoothServices from '../../services/BluetoothServices ';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Assuming you've chosen an icon from Font Awesome
-
-
+import React, { useContext } from 'react'
+import { AuthContext } from '../../context/AuthContext';
 
 type HomeScreenProps = {
   navigation: any;
 };
 
-
 export default function HomeScreen({ navigation}: HomeScreenProps) {
+    const { isLoading, userToken, userInfo } = useContext(AuthContext);
 
     const {checkState} = BluetoothServices();
     const [rectangleColor, setRectangleColor] = React.useState('#FFCBC9');
@@ -85,7 +83,7 @@ export default function HomeScreen({ navigation}: HomeScreenProps) {
     }, []);
     return (
         <View style={styles.container} >
-             <WelcomeComponent welcome='good morning'  name='Najd' color="#F5F3FF" marginTop={20}/>
+             <WelcomeComponent welcome='good morning'  name={userInfo?.firstName} color="#F5F3FF" marginTop={20}/>
              <RiskLevelComponent  title='Risk Level' color="#FAF9FE" marginTop={25}/>
              <ReportComponent title="Tap this button if you had a seizure" color="#FCF2F5" marginTop={160} height={120}/>
              <Text style={styles.text}>Tap to see details</Text>   
