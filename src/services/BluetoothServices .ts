@@ -1,14 +1,18 @@
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { PermissionsAndroid, Platform,NativeEventEmitter, NativeModules, Alert } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import UtilsDate from './UtilDate';
 import { Buffer } from 'buffer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../context/AuthContext';
+import { useSetRecoilState } from 'recoil';
+import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom } from './../atoms'
+import { useNavigation } from '@react-navigation/native';
 
 type Device = {
   id: string;
   name: string;
+  advertising: any;
 };
 
 interface BluetoothServicesType {
@@ -20,10 +24,18 @@ interface BluetoothServicesType {
   disconnectFromDevice(): void;
   isConnected: Boolean | null;
   redirectToAnotherPage(navigation: any, pageName: string): Promise<void>;
-  checkState():Promise<Boolean>;
 }
 
 function BluetoothServices():BluetoothServicesType  {
+  const setConnected = useSetRecoilState(ConnectedAtom);
+  const setDevice = useSetRecoilState(DeviceNameAtom);
+
+  const setBPM = useSetRecoilState(BPMAtom);
+  const setTemp = useSetRecoilState(TempAtom);
+  const setSteps = useSetRecoilState(StepsAtom);
+
+  const {userInfo} = useContext(AuthContext)
+
   const [allDevices, setAllDevices] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [services, setServices] = useState([]);
@@ -33,6 +45,7 @@ function BluetoothServices():BluetoothServicesType  {
   const [characteristicRx, setCharacteristicRx] = useState<any | null>(null);
   const [dataSubscriptionListener, setDataSubscriptionListener] = useState(null);
   const [connectedDevice, setConnectedDevice] = useState<any | null>(null);
+  const navigation = useNavigation();
 
   const { BleManagerModule } = NativeModules;
   const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -51,25 +64,6 @@ function BluetoothServices():BluetoothServicesType  {
       navigation.navigate(pageName);
     }
   };
-
-  const checkState = async (): Promise<Boolean> => {
-    try {
-      const connectedPeripherals = await BleManager.getConnectedPeripherals([]);
-      if (connectedPeripherals.length > 0) {
-        console.log('Phone is connected to at least one device.');
-        console.log('Connected devices:', connectedPeripherals);
-        await AsyncStorage.setItem('checkState',connectedPeripherals[0].id );
-        return true
-      } else {
-        console.log('Phone is not connected to any device.');
-        await AsyncStorage.removeItem('checkState');
-        return false
-      } 
-    } catch (error) {
-      console.error('Error checking connection status:', error);
-      return false
-    }
-  }
 
   const initializeBluetooth = async (): Promise<boolean> => {
     if (Platform.OS === 'android') {  
@@ -109,20 +103,20 @@ function BluetoothServices():BluetoothServicesType  {
     }).catch(error => {
       console.error("Error starting scan:", error);
     });
-    console.log("aa");
+    // console.log("aa");
     
     const handleDiscoverPeripheral = (peripheral:any) => {
-      console.log("aa",peripheral);
+      // console.log("aa",peripheral);
 
       if (peripheral && (peripheral.name?.startsWith("Ally") || peripheral.name?.startsWith("Knowlepsy"))) {
         setAllDevices(prevDevices => {
           if (!prevDevices.find(prevDevice => prevDevice.id === peripheral?.id)) {
-            console.log("prevDevices",prevDevices);
+            // console.log("prevDevices",prevDevices);
 
             return [...prevDevices, peripheral];
 
           }
-          console.log("prevDevices",prevDevices);
+          // console.log("prevDevices",prevDevices);
 
           return prevDevices;
 
@@ -143,12 +137,11 @@ function BluetoothServices():BluetoothServicesType  {
   const connect = async (device:Device) => {
     try {
       await BleManager.connect(device.id);
-      console.log('device.id',device.id);
-      
       setConnectedDevice(device.id);
-      console.log('setConnectedDevice');
-
       setIsConnected(true)
+      //recoil
+      setConnected(true)
+      setDevice((prevBPM) => device.advertising.localName || prevBPM);
     } catch (error) {
       console.error('Connection error', error);
     }
@@ -156,23 +149,24 @@ function BluetoothServices():BluetoothServicesType  {
 
   const disconnectFromDevice = async () => {
     setIsConnected(false),
-    (global as any).wrist='--',
-    (global as any).HR='--',
-    (global as any).steps='0'
+    setBPM('--');
+    setSteps('--');
+    setTemp('--');
+    setConnected(false)
     //FIX_ME
     const connectedPeripherals = await BleManager.getConnectedPeripherals([]);
     if (connectedPeripherals.length > 0) {
-      console.log('Phone is connected to at least one device.');
-      console.log('Connected devices:', connectedPeripherals);
+      // console.log('Phone is connected to at least one device.');
+      // console.log('Connected devices:', connectedPeripherals);
       BleManager.disconnect(connectedPeripherals[0].id);
     }  
   };
 
   const getCharacteristics = async (device:Device, onCharacteristicsRetrieved:any) => {
     try {
-      console.log("getCharacteristics");
-      console.log("device",device);
-      console.log("onCharacteristicsRetrieved",onCharacteristicsRetrieved);
+      // console.log("getCharacteristics");
+      // console.log("device",device);
+      // console.log("onCharacteristicsRetrieved",onCharacteristicsRetrieved);
 
       const services = await BleManager.retrieveServices(device.id);
       const serviceTx = services?.characteristics?.find(
@@ -196,8 +190,8 @@ function BluetoothServices():BluetoothServicesType  {
       setServiceTx(serviceTx);
       setServiceRx(serviceRx);
       if (serviceTx && serviceRx) {
-        console.log('Write Characteristic:', serviceTx);
-        console.log('Notify Characteristic:', serviceRx);
+        // console.log('Write Characteristic:', serviceTx);
+        // console.log('Notify Characteristic:', serviceRx);
       } else {
         console.log('Required services not found.');
       }
@@ -221,7 +215,7 @@ function BluetoothServices():BluetoothServicesType  {
         const end = i + 20 < syncData.length ? i + 20 : syncData.length;
         const chunk = syncData.substring(i, end);
         const list = Buffer.from(chunk, "utf-8").toJSON().data;
-        console.log("device",device.id,"serviceRx",serviceTx.service,"characteristicUuid",serviceTx.characteristic);
+        // console.log("device",device.id,"serviceRx",serviceTx.service,"characteristicUuid",serviceTx.characteristic);
         await BleManager.write(
           device.id,
           serviceTx.service,
@@ -242,7 +236,7 @@ function BluetoothServices():BluetoothServicesType  {
       const characteristicUUID = notifyService.characteristicUuid;
   
         await BleManager.retrieveServices(peripheralId).then((services) => {
-          console.log("services",services);
+          // console.log("services",services);
         })
   
         await BleManager.startNotification(peripheralId, serviceRx.service, characteristicUUID);
@@ -260,16 +254,14 @@ function BluetoothServices():BluetoothServicesType  {
               if (data && data['data']) {
                 addData(data['data']);                
 
-                console.log("data[data] ",data['data']);
-                console.log("data spec ",data['data']['PPG']!= undefined);
                 if (data['data']['PPG']!= undefined){
-                  (global as any).HR = data['data']['PPG']['heart_rate'];                  
+                  setBPM((prevBPM) => data['data']['PPG']['heart_rate'] || prevBPM);
                 }
                 if (data['data']['Motion']!= undefined){
-                  (global as any).steps = data['data']['Motion']['steps']; 
+                  setSteps((prevSteps) => data['data']['Motion']['steps'] || prevSteps);
                 }
                 if (data['data']['TEMP']!= undefined){
-                  (global as any).wrist = data['data']['TEMP']['wrist']; 
+                  setTemp((prevTemp) => data['data']['TEMP']['wrist'] || prevTemp);
                 }
               }
               responseData = "";
@@ -289,22 +281,66 @@ function BluetoothServices():BluetoothServicesType  {
     
 const addData = async (data: any) => {
   try {
-    const response = await fetch('http://172.187.93.156:3000/addData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-      
-    });
+    let extraData = {}
+    if(data['PPG']!= undefined){      
+      extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
+      console.log("extraData PPG",extraData);
 
-    if (!response.ok) {
-      throw new Error('Failed to add data');
-      
+      const response = await fetch('http://172.187.93.156:3000/addPPGData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(extraData),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add PPG data');
+      }
+    }
+
+    if (data['Motion']!= undefined){
+      extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
+      const response = await fetch('http://172.187.93.156:3000/addMotionData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(extraData),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add Motion data');
+      }
+    }
+
+    if (data['TEMP']!= undefined){
+      extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
+      const response = await fetch('http://172.187.93.156:3000/addTempData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(extraData),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add TEMP data');
+      }
+    }
+
+    if (data['EDA']!= undefined){
+      extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
+      const response = await fetch('http://172.187.93.156:3000/addEdaData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(extraData),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add EDA data');
+      }
     }
   } catch (error) {
     console.log('Error adding data:', error);
-    // Show alert with error message
     Alert.alert('Error', 'Failed to add data. Please try again later.');
   }
 };
@@ -317,7 +353,6 @@ const addData = async (data: any) => {
         readIncomingData(device,serviceRx)        
       });
       
-      checkState()
     } catch (error) {
       console.log("connectToDevice", error);
     }
@@ -325,7 +360,6 @@ const addData = async (data: any) => {
 
   useEffect(() => {
     console.log("BluetoothServices => useEffect");
-    checkState()
   }, []); 
   
   return {
@@ -337,7 +371,6 @@ const addData = async (data: any) => {
     isConnected,
     disconnectFromDevice,
     redirectToAnotherPage,
-    checkState
   };
   
 };

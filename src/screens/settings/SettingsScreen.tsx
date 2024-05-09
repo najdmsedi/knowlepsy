@@ -1,10 +1,9 @@
-import  React, { useContext }from 'react';
+import  React, { useContext, useEffect }from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import BluetoothServices from '../../services/BluetoothServices ';
-import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ButtonSettings from './components/ButtonSettings';
 import { AuthContext } from '../../context/AuthContext';
+import ConstantBar from '../../components/BleutoothButton';
+import BluetoothServices from '../../services/BluetoothServices '
 
 type SettingsScreenProps = {
     navigation: any;
@@ -12,64 +11,36 @@ type SettingsScreenProps = {
   
 export default function SettingsScreen({ navigation }:SettingsScreenProps) {
   const {logout} = useContext(AuthContext)
+  const { userInfo } = useContext(AuthContext)
 
-  const { checkState } = BluetoothServices();
-  const [rectangleColor, setRectangleColor] = React.useState('#FFCBC9');
-  const [BleColor, setBleColor] = React.useState('#D1837F');
-  const requestPermission = () => {
-      navigation.navigate('ScanScreen');
-  };
-  const [text, setText] = React.useState('Click to connect');
+  const { disconnectFromDevice } = BluetoothServices();
 
-    useFocusEffect(
-        React.useCallback(() => {
-          checkState().then((ch) => {
-            if (ch == true) {
-                setRectangleColor('#71db65');
-                setBleColor('#5c8c57');
-                setText('    Connected     ')
-              } else if (ch == false) {
-                setRectangleColor('#FFCBC9');
-                setBleColor('#D1837F');
-                setText('Click to connect')
-              }
-          });
-
-          navigation.setOptions({
-              title: '',
-              headerRight: () => <TouchableOpacity onPress={requestPermission}>
-                  <View style={[styles.rectangle, { backgroundColor: rectangleColor }]}>
-                      <Ionicons
-                          name={'bluetooth'}
-                          size={24}
-                          color={BleColor}
-                          style={styles.icon}
-                      />
-                      <Text style={styles.textB}>{text}</Text>
-                  </View>
-              </TouchableOpacity>
-          });
-
-      }, [checkState]) 
-  );
+  const log= () => {
+    disconnectFromDevice()
+    logout()
+  }
+  useEffect(() => {
+    navigation.setOptions({
+      title: '',
+      headerRight: () => <ConstantBar />,
+    });
+  }, []);
   const handleButtonPress = () => {}
-  const handleButtonPresss = () => {}
 
     return (
       <View style={styles.container}>
       <View style={styles.profileCircle}>
-        <Text style={styles.initials}>NM</Text>
+        <Text style={styles.initials}>{userInfo.firstName.charAt(0)}{userInfo.lastName.charAt(0)}</Text>
         <TouchableOpacity>
         <Ionicons style={styles.editIcon} name="pencil" size={30} color="white"  />
         </TouchableOpacity>
       </View>
-      <Text style={styles.userName}>Najd Mseddi</Text>
+      <Text style={styles.userName}>{userInfo.firstName +" "+userInfo.lastName}</Text>
       <Text style={styles.UseraccountbuttonText}>User account </Text>
       <TouchableOpacity onPress={handleButtonPress} style={{...styles.Editbutton,marginTop: 0,paddingHorizontal: 34}}>
         <Text style={styles.EditbuttonText}>Edit Profile </Text>
       </TouchableOpacity> 
       <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
-    
       <TouchableOpacity onPress={handleButtonPress} style={{...styles.Editbutton,marginTop: -370,paddingHorizontal: 20}}>
         <Text style={{...styles.EditbuttonText,fontSize: 14}}>   Information   </Text>
       </TouchableOpacity>
@@ -79,7 +50,7 @@ export default function SettingsScreen({ navigation }:SettingsScreenProps) {
       <TouchableOpacity onPress={handleButtonPress} style={{...styles.Editbutton,marginTop: 5,paddingHorizontal: 20}}>
         <Text style={{...styles.EditbuttonText,fontSize: 14}}>Emergency Call</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={logout} style={{...styles.Editbutton,marginTop: 5,paddingHorizontal: 20 ,backgroundColor: '#e8bc56'}}>
+      <TouchableOpacity onPress={log} style={{...styles.Editbutton,marginTop: 5,paddingHorizontal: 20 ,backgroundColor: '#e8bc56'}}>
         <Ionicons name="log-out-outline" size={20} style={{marginLeft:10}} color="#7a0909" />
         <Text style={{...styles.EditbuttonText,fontSize: 14}}>  Logout       </Text>
       </TouchableOpacity>

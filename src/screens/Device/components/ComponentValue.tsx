@@ -2,19 +2,22 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 interface RectangleProps {
-  title: string;
+  title?: string;
   color?: string;
-  marginTop: number;
+  marginTop?: number;
   height?: number;
-  BPM? : any;
+  value?: any;
+  width?:number;
+  left?:number;
+  children?: React.ReactNode; 
 }
 
-const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD' ,marginTop,height=80,BPM='--'}) => {
+
+const ComponentValue: React.FC<RectangleProps> = ({ title, color = '#F5F3FD' ,marginTop,height=80,value='--',width,left}) => {
   return (
-    <View style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height }]}>
+    <View style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height } , { width: width }, { left: left }]}>
     <Text style={styles.title}>{title}</Text>
-    <Text style={styles.BPM}>{BPM} <Text style={styles.BPMText}>BPM</Text></Text>
-    
+    <Text style={styles.value}>{value} <Text style={styles.valueText}>C°</Text></Text>
   </View>
   );
 };
@@ -22,9 +25,7 @@ const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD'
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 200, 
     right: 10, 
-    width: 'auto', 
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -35,19 +36,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: -2,
     color: 'black'
-
   },
-  BPM :{
+  value :{
     fontSize: 23,
     fontWeight: 'bold',
     marginBottom:10,
     color:'#C45549'
   },
-  BPMText: {
-    fontSize: 15,
-
+  valueText: {
+    fontSize: 19,
     color: 'black',
   },
 });
 
-export default HeartrateComponent;
+export default ComponentValue;

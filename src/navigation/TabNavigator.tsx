@@ -7,7 +7,6 @@ import DeviceScreen from '../screens/Device/DeviceScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ScanScreen from '../screens/Device/ScanScreen';
 
-
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -19,15 +18,12 @@ const sleepTracking = "SleepTrackScreen";
 const HomeStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-      />
+      <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="ScanScreen" component={ScanScreen} />
-
     </Stack.Navigator>
   );
 };
+
 function TabNavigator() {
   return (
     <Tab.Navigator initialRouteName={"TabNavigator"}

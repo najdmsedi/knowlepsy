@@ -1,58 +1,23 @@
-import * as React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useFocusEffect } from '@react-navigation/native';
-import BluetoothServices from '../../services/BluetoothServices ';
+import React, { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import TopComponent from './components/TopComponent';
+import ConstantBar from '../../components/BleutoothButton';
 
 type SleepScreenProps = {
     navigation: any;
-  };
-  
-export default function SleepTrackScreen({ navigation }:SleepScreenProps) {
+};
 
-    const { checkState } = BluetoothServices();
-    const [rectangleColor, setRectangleColor] = React.useState('#FFCBC9');
-    const [BleColor, setBleColor] = React.useState('#D1837F');
-    const requestPermission = () => {
-        navigation.navigate('ScanScreen');
-    };
-    const [text, setText] = React.useState('Click to connect');
-
-    useFocusEffect(
-        React.useCallback(() => {
-          checkState().then((ch) => {
-            if (ch == true) {
-                setRectangleColor('#71db65');
-                setBleColor('#5c8c57');
-                setText('    Connected     ')
-              } else if (ch == false) {
-                setRectangleColor('#FFCBC9');
-                setBleColor('#D1837F');
-                setText('Click to connect')
-              }
-          });
-            navigation.setOptions({
-                title: '',
-                headerRight: () => <TouchableOpacity onPress={requestPermission}>
-                    <View style={[styles.rectangle, { backgroundColor: rectangleColor }]}>
-                        <Ionicons
-                            name={'bluetooth'}
-                            size={24}
-                            color={BleColor}
-                            style={styles.icon}
-                        />
-                        <Text style={styles.textB}>{text}</Text>
-                    </View>
-                </TouchableOpacity>
-            });
-
-        }, [checkState]) 
-    );
+export default function SleepTrackScreen({ navigation }: SleepScreenProps) {
+    useEffect(() => {
+        navigation.setOptions({
+            title: '',
+            headerRight: () => <ConstantBar />,
+        });
+    }, []);
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-           <TopComponent color='#F5F3FF' Time='04:00 pm' info='tracker ends 2h ago' marginTop={20}></TopComponent>
+            <TopComponent color='#F5F3FF' Time='04:00 pm' info='tracker ends 2h ago' marginTop={20}></TopComponent>
         </View>
     );
 }

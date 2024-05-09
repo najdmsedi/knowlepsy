@@ -6,7 +6,7 @@ interface RectangleProps {
   color?: string;
   marginTop: number;
   height?: number;
-  wrist? : number| undefined | null;
+  wrist? : any;
 }
 
 const TemperatureComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD' ,marginTop,height=80,wrist='--'}) => {

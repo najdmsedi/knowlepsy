@@ -6,7 +6,7 @@ interface RectangleProps {
   color?: string;
   marginTop: number;
   height?: number;
-  Steps?: number| undefined | null;
+  Steps?: any; 
 }
 
 const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80 ,Steps=0}) => {

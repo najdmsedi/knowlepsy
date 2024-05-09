@@ -6,8 +6,9 @@ import { useNavigation } from "@react-navigation/native";
 type Device = {
   id: string;
   name: string;
-  // Add other necessary properties for the device
+  advertising: any;
 };
+
 type DeviceModalListItemProps = {
   item: ListRenderItemInfo<Device>;
   connectToPeripheral: (device: Device) => void;
@@ -24,13 +25,13 @@ type DeviceModalProps = {
 const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
   const { item, connectToPeripheral, closeModal } = props;
   const [error, setError] = useState<string | null>(null);
-  const { redirectToAnotherPage,initializeBluetooth, scan,connectToDevice,allDevices ,connectedDevice,disconnectFromDevice} = BluetoothServices();
+  const { redirectToAnotherPage } = BluetoothServices();
   const navigation = useNavigation();
 
   const connectAndCloseModal = useCallback(async () => {
     try {
-      await connectToPeripheral(item.item);      
-      redirectToAnotherPage(navigation,"HomeScreen")
+      connectToPeripheral(item.item);      
+      redirectToAnotherPage(navigation,"Home")
       closeModal();
     } catch (error) {
     }
@@ -100,6 +101,7 @@ const modalStyle = StyleSheet.create({
     fontWeight: "bold",
     marginHorizontal: 20,
     textAlign: "center",
+    color:'black'
   },
   ctaButton: {
     backgroundColor: "#5916C9",

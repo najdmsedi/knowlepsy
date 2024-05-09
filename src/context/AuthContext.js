@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }) => {
             }
         setIsLoading(false)
     }
-
     const logout = () => {
         setIsLoading(true)
         setUserToken(null)
