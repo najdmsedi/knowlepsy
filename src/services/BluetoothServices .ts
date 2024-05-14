@@ -98,26 +98,17 @@ function BluetoothServices():BluetoothServicesType  {
       return;
     }
     console.log("start scan");
-    
     BleManager.scan([], 5, true).then(() => {
     }).catch(error => {
       console.error("Error starting scan:", error);
-    });
-    // console.log("aa");
-    
+    });    
     const handleDiscoverPeripheral = (peripheral:any) => {
-      // console.log("aa",peripheral);
-
       if (peripheral && (peripheral.name?.startsWith("Ally") || peripheral.name?.startsWith("Knowlepsy"))) {
         setAllDevices(prevDevices => {
           if (!prevDevices.find(prevDevice => prevDevice.id === peripheral?.id)) {
-            // console.log("prevDevices",prevDevices);
-
             return [...prevDevices, peripheral];
 
           }
-          // console.log("prevDevices",prevDevices);
-
           return prevDevices;
 
         });        

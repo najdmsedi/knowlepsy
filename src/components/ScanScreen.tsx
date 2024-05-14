@@ -2,10 +2,10 @@ import * as React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import DeviceModal from '../../components/DeviceConnectionModal';
-import BluetoothServices from '../../services/BluetoothServices '
+import DeviceModal from './DeviceConnectionModal';
+import BluetoothServices from '../services/BluetoothServices '
 import { useRecoilValue } from 'recoil';
-import { ConnectedAtom } from '../../atoms';
+import { ConnectedAtom } from '../atoms';
 
 type ScanScreenProps = {
   navigation: any;
@@ -19,8 +19,10 @@ export default function ScanScreen({ navigation }: ScanScreenProps) {
   }, [navigation]);
 
   const { initializeBluetooth, scan, connectToDevice, allDevices, disconnectFromDevice } = BluetoothServices();
-  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
   const connected = useRecoilValue(ConnectedAtom);
+
+
+  const [isModalVisible, setIsModalVisible] = React.useState<boolean>(false);
 
   const scanForDevices = async () => {
     const isPermissionsEnabled = await initializeBluetooth();
@@ -29,9 +31,7 @@ export default function ScanScreen({ navigation }: ScanScreenProps) {
     }
   };
 
-  const hideModal = () => {
-    setIsModalVisible(false);
-  };
+ 
 
   const disconnect = () => {
     disconnectFromDevice();
@@ -45,7 +45,10 @@ export default function ScanScreen({ navigation }: ScanScreenProps) {
       setIsModalVisible(true);
     }
   };
-
+  
+  const hideModal = () => {
+    setIsModalVisible(false);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={connected ? disconnect : openModal} style={styles.ctaButton}>
@@ -55,14 +58,14 @@ export default function ScanScreen({ navigation }: ScanScreenProps) {
       </TouchableOpacity>
       <DeviceModal closeModal={hideModal} visible={isModalVisible} connectToPeripheral={connectToDevice} devices={allDevices} />
       <View style={styles.heartRateTitleWrapper}>
-        {connected ? (
+        {/* {connected ? (
           <>
             <Text style={styles.heartRateTitleText}>you are connected to ally!</Text>
           </>
         ) : (
           <Text style={styles.heartRateTitleText}>Click scan to search for devices
           </Text>
-        )}
+        )} */}
       </View>
 
     </SafeAreaView>
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 50,
     marginHorizontal: 20,
-    marginBottom: 5,
+    marginTop: 320,
     borderRadius: 8,
   },
   ctaButtonText: {

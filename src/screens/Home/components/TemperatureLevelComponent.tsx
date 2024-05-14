@@ -1,31 +1,46 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
+import LinearGradient from 'react-native-linear-gradient';
+import { useRecoilValue } from 'recoil';
+import { ConnectedAtom } from '../../../atoms';
 
 interface RectangleProps {
   title: string;
   color?: string;
   marginTop: number;
   height?: number;
+  wirst?: number;
 }
 
-const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 250 }) => {
+const TemperatureLevelComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 250, wirst }) => {
+  const connected = useRecoilValue(ConnectedAtom);
+
   return (
-    <View style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
+    <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
       <View style={styles.innerContainer}>
         <Text style={styles.title}>{title}</Text>
         <CircularProgress
-          value={20}
-          valueSuffix={'%'}
+          value={wirst ? wirst : 0}
+          duration={500}
+          radius={60}
+          valueSuffix={'°C'}
           inActiveStrokeOpacity={0.2}
-          maxValue={100}
+          maxValue={60}
           inActiveStrokeColor={'#5916C9'}
           activeStrokeColor='#5916C9'
           progressValueColor='#7B53F1'
-          progressValueFontSize={25}
+          progressValueFontSize={22}
+          progressFormatter={(value: any) => {
+            'worklet';
+            return value.toFixed(2);
+          }}
         />
+        {!connected &&
+          <Text style={{ color: '#E84A46', marginTop: 30 }}>offline </Text>
+        }
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -60,4 +75,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StressLevelComponent;
+export default TemperatureLevelComponent;

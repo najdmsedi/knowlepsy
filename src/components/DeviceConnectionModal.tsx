@@ -22,7 +22,7 @@ type DeviceModalProps = {
   closeModal: () => void;
 };
 
-const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
+export const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
   const { item, connectToPeripheral, closeModal } = props;
   const [error, setError] = useState<string | null>(null);
   const { redirectToAnotherPage } = BluetoothServices();

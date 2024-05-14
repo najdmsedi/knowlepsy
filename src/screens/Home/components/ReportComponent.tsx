@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import LinearGradient from 'react-native-linear-gradient';
 
 interface RectangleProps {
   title: string;
@@ -20,21 +21,22 @@ const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue',
         'Content-Type': 'application/json',
       },
     })
-    .then(response => response.json()) // Convert the response to JSON
+    .then(response => response.json())
     .then(data => {
-      console.log(data, "zzz"); // Log the data
+      console.log(data, "zzz");
       console.log(data[1]['event']);
       test=data[1]['event']
       Alert.alert(data[5][`gyro`]);
     })
     .catch(error => {
-      console.error('Error:', error); // Log any errors
+      console.error('Error:', error);
     });
     
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height }]}>
+    <LinearGradient colors={['#FCF2F5', '#EDEBF7']} style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height }]}>
+
       <View style={styles.row}>
         <Ionicons name="information-circle-outline" size={25} color="#998F92" style={styles.icon} />
         <Text style={styles.title}>{title}</Text>
@@ -43,7 +45,7 @@ const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue',
         <Text style={styles.buttonText}>Report a seizure</Text>
         <Ionicons name="alert-outline" size={20} color="white" style={styles.buttonIcon} />
       </TouchableOpacity>
-    </View>
+      </LinearGradient>
   );
 };
 

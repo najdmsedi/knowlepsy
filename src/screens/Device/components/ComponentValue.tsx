@@ -30,6 +30,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20, 
+    elevation: 3,
+
   },
   title: {
     fontSize: 16,
@@ -38,7 +40,7 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   value :{
-    fontSize: 23,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom:10,
     color:'#C45549'

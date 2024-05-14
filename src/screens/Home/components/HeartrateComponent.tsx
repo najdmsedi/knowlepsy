@@ -1,5 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import { useRecoilValue } from 'recoil';
+import { ConnectedAtom } from '../../../atoms';
 
 interface RectangleProps {
   title: string;
@@ -10,13 +13,22 @@ interface RectangleProps {
 }
 
 const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, BPM = '--' }) => {
+  const connected = useRecoilValue(ConnectedAtom);
+
   return (
-    <View style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height }]}>
-
+    <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.BPM}>{BPM} <Text style={styles.BPMText}>BPM</Text></Text>
-    </View>   
+      {connected &&
+        <Text style={styles.BPM}>{BPM} <Text style={styles.BPMText}>BPM</Text></Text>
+      }
 
+      {!connected &&
+        <>
+          <Text style={styles.BPM}>-- <Text style={styles.BPMText}>BPM</Text></Text>
+          <Text style={{ color: '#E84A46' }}>offline </Text>
+        </>
+      }
+    </LinearGradient>
   );
 };
 

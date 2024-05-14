@@ -5,7 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import SleepTrackScreen from '../screens/sleepTracking/SleepTrackScreen';
 import DeviceScreen from '../screens/Device/DeviceScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
-import ScanScreen from '../screens/Device/ScanScreen';
+import ScanScreen from '../components/ScanScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -43,7 +43,8 @@ function TabNavigator() {
         },
       })}
     >
-      <Tab.Screen name={homeName} component={HomeStack} options={{ headerShown: false, tabBarLabel: '' }} />
+      {/* options={{ headerShown: false}} */}
+      <Tab.Screen name={homeName} component={HomeStack} options={{  headerShown: false,tabBarLabel: '' }} />
       <Tab.Screen name={sleepTracking} component={SleepTrackScreen} options={{ tabBarLabel: '' }} />
       <Tab.Screen name={deviceName} component={DeviceScreen} options={{ tabBarLabel: '' }} />
       <Tab.Screen name={settingsName} component={SettingsScreen} options={{ tabBarLabel: '' }} />

@@ -40,12 +40,12 @@ export default function DeviceScreen({ navigation }: DeviceScreenProps) {
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       {connected ? (
         <>
-          <WelcomeComponent welcome='Connected' name='You are connected to ally' color="#F5F3FF" marginTop={20} />
+          <WelcomeComponent welcome='Connected' name='You are connected to ally' color="#CCBEFE" marginTop={20} />
           
           <Text style={styles.text}>Device Settings</Text>
-          <ComponentValue marginTop={160} title='Steps' color='#F5F3FF' width={120} left={275} value={Steps}> </ComponentValue>
-          <ComponentValue marginTop={160} title='Heart rate' color='#F5F3FF' width={120} left={145} value={BPM}> </ComponentValue>
-          <ComponentValue marginTop={160} title='Temperature' color='#F5F3FF' width={120} left={15} value={Temp}> </ComponentValue>
+          <ComponentValue marginTop={160} title='Steps' color='#C7F9CF' width={120} left={275} value={Steps}> </ComponentValue>
+          <ComponentValue marginTop={160} title='Heart rate' color='#D7D2F9' width={120} left={145} value={BPM}> </ComponentValue>
+          <ComponentValue marginTop={160} title='Temperature' color='#F7DBDA' width={120} left={15} value={Temp}> </ComponentValue>
           <TouchableOpacity onPress={disconnect} style={styles.custombutton}>
             <Ionicons name="remove-circle-outline" size={20} color="white" style={styles.buttonIcon} />
             <Text style={styles.buttonText}>  Remove Device</Text>
