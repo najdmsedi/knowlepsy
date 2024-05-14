@@ -57,6 +57,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
+    elevation: 2,
+
   },
   title: {
     fontSize: 14,
@@ -71,6 +73,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     flexDirection: 'row',
     alignItems: 'center',
+    elevation: 5,
+
   },
   buttonText: {
     color: 'white',

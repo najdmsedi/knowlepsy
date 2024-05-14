@@ -1,4 +1,4 @@
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState, useContext } from 'react'
 import { Input } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -7,11 +7,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../../context/AuthContext';
+import Toast from 'react-native-toast-message';
 
 
 
 export default function LoginScreen() {
-  const {login} = useContext(AuthContext)
+  const { login } = useContext(AuthContext)
 
   const [email, setEmail] = useState('');
   const [emailVerify, setEmailVerify] = useState(false);
@@ -19,7 +20,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [passwordVerify, setPasswordVerify] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
-  
+
   function onvalidateEmail(e: any) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     const text = e.nativeEvent.text;
@@ -46,87 +47,108 @@ export default function LoginScreen() {
     navigation.navigate('RegisterScreen');
   };
 
-  return (
-    <View style={styles.container}>
-      <Image source={require("../../../../assets/knowlepsy_logo.png")} style={styles.logo}></Image>
+  const handleLogin = async () => {
+    console.log("email",email);
+    console.log("password",password);
 
-      <View style={styles.inputContainer}>
-        <View style={styles.action}>
-          <FontAwesome
-            name="user-o"
-            color="#420475"
-            style={styles.smallIcon}
-          />
-          <TextInput
-            placeholder="First Name"
-            placeholderTextColor="gray"
-            style={styles.textInput}
-            onChange={e => onvalidateEmail(e)}
-          />
-          {email.length < 1 ? null : emailVerify ? (
-            <Feather name="check-circle" color="green" size={20} />
-          ) : (
-            <Ionicons name="alert-circle" color="red" size={20} />
+    if (email.length === 0 || password.length === 0) {
+      Toast.show({
+        type: 'customErrorToast',
+        text1: 'please fill the fields!'
+      });
+    } else {
+      Toast.show({
+        type: 'customSuccessToast',
+        text1: 'Login Success'
+      });
+
+      login(email, password)
+    }
+  };
+
+  return (
+    <ImageBackground source={require("../../../../assets/HeroImageOne.png")} style={[styles.backgroundImage, { opacity: 0.8 }]}>
+      <View style={styles.container}>
+        <Image source={require("../../../../assets/logo.png")} style={[styles.logo, { width: 300, height: 300 }]} resizeMode="contain" />
+
+        <View style={styles.inputContainer}>
+          <View style={styles.action}>
+            <FontAwesome
+              name="user-o"
+              color="#5e2a89"
+              style={styles.smallIcon}
+            />
+            <TextInput
+              placeholder="First Name"
+              placeholderTextColor="#e0e0e0"
+              style={styles.textInput}
+              onChange={e => onvalidateEmail(e)}
+            />
+            {email.length < 1 ? null : emailVerify ? (
+              <Feather name="check-circle" color="green" size={20} />
+            ) : (
+              <Ionicons name="alert-circle" color="red" size={20} />
+            )}
+          </View>
+          {email.length < 1 ? null : emailVerify ? null : (
+            <Text
+              style={{
+                marginLeft: 20,
+                color: 'red',
+              }}>
+              Name should be more than 1 character.
+            </Text>
+          )}
+
+          <View style={styles.action}>
+            <FontAwesome name="lock" color="#5e2a89" style={styles.smallIcon} />
+            <TextInput
+              placeholder="Password"
+              placeholderTextColor="#e0e0e0"
+              style={styles.textInput}
+              onChange={e => onvalidatePassword(e)}
+              secureTextEntry={showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length < 1 ? null : showPassword ? (
+                <Feather
+                  name="eye-off"
+                  style={{ marginRight: -10 }}
+                  color={passwordVerify ? 'green' : 'red'}
+                  size={23}
+                />
+              ) : (
+                <Feather
+                  name="eye"
+                  style={{ marginRight: -10 }}
+                  color={passwordVerify ? 'green' : 'red'}
+                  size={23}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {password.length < 1 ? null : passwordVerify ? null : (
+            <Text
+              style={{
+                marginLeft: 20,
+                color: 'red',
+              }}>
+              Uppercase, Lowercase, Number and 6 or more characters.
+            </Text>
           )}
         </View>
-        {email.length < 1 ? null : emailVerify ? null : (
-          <Text
-            style={{
-              marginLeft: 20,
-              color: 'red',
-            }}>
-            Name sholud be more then 1 characters.
-          </Text>
-        )}
 
-        <View style={styles.action}>
-          <FontAwesome name="lock" color="#420475" style={styles.smallIcon} />
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="gray"
-            style={styles.textInput}
-            onChange={e => onvalidatePassword(e)}
-            secureTextEntry={showPassword}
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            {password.length < 1 ? null : showPassword ? (
-              <Feather
-                name="eye-off"
-                style={{ marginRight: -10 }}
-                color={passwordVerify ? 'green' : 'red'}
-                size={23}
-              />
-            ) : (
-              <Feather
-                name="eye"
-                style={{ marginRight: -10 }}
-                color={passwordVerify ? 'green' : 'red'}
-                size={23}
-              />
-            )}
+        <TouchableOpacity style={styles.button} onPress={() => { handleLogin() }}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <View style={styles.registerContainer}>
+          <Text style={styles.registerText}>Not a member?  </Text>
+          <TouchableOpacity onPress={handleRegister}>
+            <Text style={styles.registerLink}>Register </Text>
           </TouchableOpacity>
         </View>
-        {password.length < 1 ? null : passwordVerify ? null : (
-          <Text
-            style={{
-              marginLeft: 20,
-              color: 'red',
-            }}>
-            Uppercase, Lowercase, Number and 6 or more characters.
-          </Text>
-        )}
       </View>
-
-      <TouchableOpacity style={styles.button} onPress={() => login(email,password)}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <View style={styles.registerContainer}>
-        <Text style={styles.registerText}>Not a member?  </Text>
-        <TouchableOpacity onPress={handleRegister}>
-          <Text style={styles.registerLink}>Register </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -136,7 +158,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: -12,
 
-    color: '#05375a',
+    color: 'white',
   },
   smallIcon: {
     marginRight: 10,
@@ -151,21 +173,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
 
     borderWidth: 1,
-    borderColor: '#420475',
+    borderColor: '#ece1f2',
     borderRadius: 50,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
   },
   inputContainer: {
+    marginTop: 250,
+
     marginVertical: 10,
     width: '80%',
   },
   logo: {
-    marginBottom: 150
+    marginTop: -100,
   },
   button: {
     backgroundColor: '#4A189B',
@@ -188,11 +211,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   registerText: {
-    color: '#000',
+    color: 'white',
     fontSize: 16,
   },
   registerLink: {
     color: '#4A189B',
     fontSize: 16,
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
   },
 });

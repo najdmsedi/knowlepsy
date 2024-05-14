@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import BluetoothServices from '../services/BluetoothServices ';
+import { useNavigation } from '@react-navigation/native';
 import { useRecoilValue } from 'recoil';
 import { ConnectedAtom } from '../atoms';
 

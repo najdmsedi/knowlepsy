@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FCFBFF'
+    
   },
   text: {
     fontSize: 16,
