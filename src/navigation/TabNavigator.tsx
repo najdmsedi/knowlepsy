@@ -6,6 +6,7 @@ import SleepTrackScreen from '../screens/sleepTracking/SleepTrackScreen';
 import DeviceScreen from '../screens/Device/DeviceScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ScanScreen from '../components/ScanScreen';
+import { useEffect } from 'react';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
