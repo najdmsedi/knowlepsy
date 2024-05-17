@@ -10,13 +10,20 @@ import BluetoothModal from './src/components/firstLoad/BluetoothModal';
 import { toastConfig } from './src/toast';
 import BluetoothDisableModal from './src/components/firstLoad/BluetoothDisableModal';
 import PushNotification from 'react-native-push-notification';
+import SplashScreen from 'react-native-splash-screen'; // Import SplashScreen library
 
 function App() {
   const [showModal, setShowModal] = useState(false);
   const [showBluetoothDisableModal, setShowBluetoothDisableModal] = useState(false);
   const [bluetoothEnabled, setBluetoothEnabled] = useState(false);
   const [isBluetoothCheckComplete, setIsBluetoothCheckComplete] = useState(false);
+  useEffect(() => {
+    const splashTimeout = setTimeout(() => {
+      SplashScreen.hide();
+    }, 2500);
 
+    return () => clearTimeout(splashTimeout);
+  }, []);
   async function requestPermissions() {
     let isBluetoothEnabled = false;
     try {

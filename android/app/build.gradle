@@ -121,6 +121,7 @@ dependencies {
     implementation project(':react-native-vector-icons')
     implementation ('com.google.firebase:firebase-analytics')
     implementation project(':react-native-push-notification')
+    implementation project(':react-native-splash-screen')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
