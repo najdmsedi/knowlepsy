@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRecoilValue } from 'recoil';
 import { ConnectedAtom } from '../../../atoms';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../navigation/TabNavigator';
+import { useNavigation } from '@react-navigation/native';
 
 interface RectangleProps {
   title: string;
@@ -11,22 +14,27 @@ interface RectangleProps {
   height?: number;
   Steps?: any;
 }
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, Steps = 0 }) => {
   const connected = useRecoilValue(ConnectedAtom);
-
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const onPress = () => {navigation.navigate('Steps')}
+  
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
-      <Text style={styles.title}>{title}</Text>
-      {connected &&
-        <Text style={styles.Steps}>{Steps} <Text style={styles.StepsText}>Steps</Text></Text>
-      }
-      {!connected &&
-        <>
-          <Text style={styles.Steps}>-- <Text style={styles.StepsText}>Steps</Text></Text>
-          <Text style={{ color: '#E84A46' }}>offline </Text>
-        </>
-      }
+      <TouchableOpacity onPress={onPress}>
+        <Text style={styles.title}>{title}</Text>
+        {connected &&
+          <Text style={styles.Steps}>{Steps} <Text style={styles.StepsText}>Steps</Text></Text>
+        }
+        {!connected &&
+          <>
+            <Text style={styles.Steps}>-- <Text style={styles.StepsText}>Steps</Text></Text>
+            <Text style={{ color: '#E84A46',left: 13 }}>offline </Text>
+          </>
+        }
+      </TouchableOpacity>
     </LinearGradient>
   );
 };
@@ -48,7 +56,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: -2,
-    color: 'black'
+    color: 'black',
+    left: 10
 
   },
   Steps: {

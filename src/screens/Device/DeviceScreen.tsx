@@ -8,6 +8,7 @@ import { useRecoilValue } from 'recoil';
 import { BPMAtom, ConnectedAtom, DeviceNameAtom, StepsAtom, TempAtom } from '../../atoms';
 import ComponentValue from './components/ComponentValue';
 import BluetoothServices from '../../services/BluetoothServices ';
+import LinearGradient from 'react-native-linear-gradient';
 
 type DeviceScreenProps = {
   navigation: any;
@@ -37,7 +38,7 @@ export default function DeviceScreen({ navigation }: DeviceScreenProps) {
   const handleButtonPresss = () => {
   }
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       {connected ? (
         <>
           <WelcomeComponent welcome='Connected' name='You are connected to ally' color="#CCBEFE" marginTop={20} />
@@ -67,7 +68,7 @@ export default function DeviceScreen({ navigation }: DeviceScreenProps) {
       )}
 
 
-    </View>
+    </LinearGradient>
   );
 }
 

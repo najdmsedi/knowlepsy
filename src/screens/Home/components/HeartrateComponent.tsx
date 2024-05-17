@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRecoilValue } from 'recoil';
 import { ConnectedAtom } from '../../../atoms';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../navigation/TabNavigator';
+import { useNavigation } from '@react-navigation/native';
 
 interface RectangleProps {
   title: string;
@@ -11,24 +14,30 @@ interface RectangleProps {
   height?: number;
   BPM?: any;
 }
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, BPM = '--' }) => {
   const connected = useRecoilValue(ConnectedAtom);
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const onPress = () => {navigation.navigate('HeartRate')}
 
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
-      <Text style={styles.title}>{title}</Text>
-      {connected &&
-        <Text style={styles.BPM}>{BPM} <Text style={styles.BPMText}>BPM</Text></Text>
-      }
+      <TouchableOpacity onPress={onPress}>
+        <Text style={styles.title}>{title}</Text>
+        {connected &&
+          <Text style={styles.BPM}>{BPM} <Text style={styles.BPMText}>BPM</Text></Text>
+        }
 
-      {!connected &&
-        <>
-          <Text style={styles.BPM}>-- <Text style={styles.BPMText}>BPM</Text></Text>
-          <Text style={{ color: '#E84A46' }}>offline </Text>
-        </>
-      }
+        {!connected &&
+          <>
+            <Text style={styles.BPM}>-- <Text style={styles.BPMText}>BPM</Text></Text>
+            <Text style={{ color: '#E84A46',left: 20 }}>offline </Text>
+          </>
+        }
+      </TouchableOpacity>
     </LinearGradient>
+    
   );
 };
 

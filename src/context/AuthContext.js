@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
                 setUserInfo(userDataResponse.data.data);
                 AsyncStorage.setItem('userToken', loginResponse.data.data);
                 AsyncStorage.setItem('userInfo', JSON.stringify(userDataResponse.data.data));
-                console.log("userInfo",userInfo);
+                console.log("userInfo",userInfo); 
             } catch (error) {
                 console.log(`Login error ${error}`);
             }

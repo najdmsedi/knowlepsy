@@ -8,31 +8,32 @@ interface RectangleProps {
   color?: string;
   marginTop: number;
   height?: number;
+  handleButtonPress():void;
 } 
 
-const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 130 }) => {
+const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 130,handleButtonPress }) => {
 
-  let test
-  const handleButtonPress = () => {
-    console.log('Button pressed');
-    fetch('http://172.187.93.156:3000/Motion', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data, "zzz");
-      console.log(data[1]['event']);
-      test=data[1]['event']
-      Alert.alert(data[5][`gyro`]);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
+  // let test
+  // const handleButtonPress = () => {
+  //   console.log('Button pressed');
+  //   fetch('http://172.187.93.156:3000/Motion', {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //   })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     console.log(data, "zzz");
+  //     console.log(data[1]['event']);
+  //     test=data[1]['event']
+  //     Alert.alert(data[5][`gyro`]);
+  //   })
+  //   .catch(error => {
+  //     console.error('Error:', error);
+  //   });
     
-  };
+  // };
 
   return (
     <LinearGradient colors={['#FCF2F5', '#EDEBF7']} style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height }]}>

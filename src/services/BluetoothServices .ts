@@ -8,6 +8,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useSetRecoilState } from 'recoil';
 import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom } from './../atoms'
 import { useNavigation } from '@react-navigation/native';
+import PushNotification from 'react-native-push-notification';
 
 type Device = {
   id: string;
@@ -133,6 +134,11 @@ function BluetoothServices():BluetoothServicesType  {
       //recoil
       setConnected(true)
       setDevice((prevBPM) => device.advertising.localName || prevBPM);
+      PushNotification.localNotification({
+        channelId: "channel-id",
+        title: "Device connected",
+        message: "Device is connected",
+    });
     } catch (error) {
       console.error('Connection error', error);
     }
@@ -151,6 +157,11 @@ function BluetoothServices():BluetoothServicesType  {
       // console.log('Connected devices:', connectedPeripherals);
       BleManager.disconnect(connectedPeripherals[0].id);
     }  
+    PushNotification.localNotification({
+      channelId: "channel-id",
+      title: "Device disconnected",
+      message: "Open the app and pair device",
+  });
   };
 
   const getCharacteristics = async (device:Device, onCharacteristicsRetrieved:any) => {

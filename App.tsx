@@ -9,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import BluetoothModal from './src/components/firstLoad/BluetoothModal';
 import { toastConfig } from './src/toast';
 import BluetoothDisableModal from './src/components/firstLoad/BluetoothDisableModal';
+import PushNotification from 'react-native-push-notification';
 
 function App() {
   const [showModal, setShowModal] = useState(false);
@@ -39,8 +40,24 @@ function App() {
             <BluetoothModal showModal={showModal} setShowModal={setShowModal} />
           )
         }
-
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          {
+            title: 'Notification Permission',
+            message:
+              'This app needs permission to show notifications.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Notification permission granted');
+        } else {
+          console.log('Notification permission denied');
+        }
       }
+     
     } catch (error) {
       console.error('Error requesting permissions:', error);
     } finally {
@@ -49,9 +66,37 @@ function App() {
   }
 
   useEffect(() => {
+    PushNotification.requestPermissions();
     requestPermissions();
   }, []);
 
+  // const checkConnectedDevice = async () => {
+  //   if(isBluetoothCheckComplete)
+  //    {return await BleManager.getConnectedPeripherals()}
+  // }
+
+
+  // useEffect(() => {
+  //   if(isBluetoothCheckComplete)
+  //   {BleManager.getConnectedPeripherals().then(res => {
+  //     console.log("checkstate",res);
+  //     if (res.length == 0){
+  //       PushNotification.localNotification({
+  //         channelId: "channel-id",
+  //         title: "Device disconnected",
+  //         message: "Open the app and pair device",
+  //     });
+  //     }else{
+  //       PushNotification.localNotification({
+  //         channelId: "channel-id",
+  //         title: "Device connected",
+  //         message: "Device is connected",
+  //     });
+  //     }
+      
+  //   }) }
+  // }, [checkConnectedDevice]);
+  
   // if (!isBluetoothCheckComplete) {
   //   return <View><Text>Checking Bluetooth status...</Text></View>;
   // }
@@ -59,6 +104,10 @@ function App() {
   if (!bluetoothEnabled) {
     return <BluetoothDisableModal showModal={showBluetoothDisableModal} setShowBluetoothDisableModal={setShowBluetoothDisableModal} />;
   }
+
+
+
+
 
   return (
     <GestureHandlerRootView>

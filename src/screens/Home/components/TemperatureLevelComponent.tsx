@@ -4,6 +4,10 @@ import CircularProgress from 'react-native-circular-progress-indicator';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRecoilValue } from 'recoil';
 import { ConnectedAtom } from '../../../atoms';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../navigation/TabNavigator';
 
 interface RectangleProps {
   title: string;
@@ -12,12 +16,16 @@ interface RectangleProps {
   height?: number;
   wirst?: number;
 }
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const TemperatureLevelComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 250, wirst }) => {
   const connected = useRecoilValue(ConnectedAtom);
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const onPress = () => {navigation.navigate('Temperature')}
 
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
+      <TouchableOpacity onPress={onPress}>
       <View style={styles.innerContainer}>
         <Text style={styles.title}>{title}</Text>
         <CircularProgress
@@ -40,6 +48,7 @@ const TemperatureLevelComponent: React.FC<RectangleProps> = ({ title, color = '#
           <Text style={{ color: '#E84A46', marginTop: 30 }}>offline </Text>
         }
       </View>
+      </TouchableOpacity>
     </LinearGradient>
   );
 };
