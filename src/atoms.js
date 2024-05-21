@@ -2,17 +2,17 @@ import { atom } from "recoil"
 
 export const BPMAtom = atom({
     key: 'BPM',
-    default: "---",
+    default: "--",
 });
 
 export const TempAtom = atom({
     key: 'Temp',
-    default: "---",
+    default: "--",
 });
 
 export const StepsAtom = atom({
     key: 'Steps',
-    default: "---",
+    default: "--",
 });
 
 export const ConnectedAtom = atom({
@@ -22,6 +22,11 @@ export const ConnectedAtom = atom({
 
 export const DeviceNameAtom = atom({
     key: 'DeviceName',
+    default: null,
+});
+
+export const DeviceCharacteristiqueAtom = atom({
+    key: 'DeviceCharacteristique',
     default: null,
 });
 

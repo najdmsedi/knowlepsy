@@ -110,6 +110,13 @@ function BluetoothServices():BluetoothServicesType  {
             return [...prevDevices, peripheral];
 
           }
+          console.log("prevDevices[0].advertising",prevDevices[0].advertising);
+          console.log("prevDevices[0].advertising.manufacturerData",prevDevices[0].advertising.manufacturerData);
+          console.log("prevDevices[0].advertising.manufacturerRawData",prevDevices[0].advertising.manufacturerRawData);
+          console.log("prevDevices[0].advertising.rawData",prevDevices[0].advertising.rawData);
+          console.log("prevDevices[0].advertising.serviceData",prevDevices[0].advertising.serviceData);
+          console.log("prevDevices[0].advertising.serviceUUIDs",prevDevices[0].advertising.serviceUUIDs);
+
           return prevDevices;
 
         });        

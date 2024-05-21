@@ -10,18 +10,19 @@ interface RectangleProps {
   title: string;
   color?: string;
   marginTop: number;
+  marginRight?: number;
   height?: number;
   status: string;
   statusColor: string;
 }
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 120, status, statusColor }) => {
+const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 120, status, statusColor,marginRight }) => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const onPress = () => {navigation.navigate('Stress')}
   
   return (
-    <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
+    <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height, }]}>
       <TouchableOpacity onPress={onPress}>
           <Text style={styles.title}>{title}</Text>
 

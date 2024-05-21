@@ -25,7 +25,11 @@ const ConstantBar: React.FC<ConstantBarProps> = ({ color, marginRight = 120 }) =
     const [iconName, setIconName] = React.useState('bluetooth-off');
 
     const requestPermission = () => {
-        navigation.navigate('ScanScreen');
+        if (text === "Click to connect") {
+            navigation.navigate('ScanScreen');
+        } else {
+            navigation.navigate('DeviceScreen');
+        }
     };
 
     useEffect(() => {

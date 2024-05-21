@@ -6,14 +6,16 @@ import ConstantBar from '../../components/BleutoothButton';
 import { useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
 import { BPMAtom, ConnectedAtom, DeviceNameAtom, StepsAtom, TempAtom } from '../../atoms';
-import ComponentValue from './components/ComponentValue';
 import BluetoothServices from '../../services/BluetoothServices ';
 import LinearGradient from 'react-native-linear-gradient';
+import ComponentHR from './components/ComponentHR';
+import ComponentSteps from './components/ComponentSteps';
+import ComponentTemperature from './components/ComponentTemperature';
 
 type DeviceScreenProps = {
   navigation: any;
 };
-
+ 
 export default function DeviceScreen({ navigation }: DeviceScreenProps) {
   const connected = useRecoilValue(ConnectedAtom);
   const DeviceName = useRecoilValue(DeviceNameAtom);
@@ -41,12 +43,14 @@ export default function DeviceScreen({ navigation }: DeviceScreenProps) {
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       {connected ? (
         <>
-          <WelcomeComponent welcome='Connected' name='You are connected to ally' color="#CCBEFE" marginTop={20} />
+          <WelcomeComponent color="#CCBEFE" marginTop={20} />
           
           <Text style={styles.text}>Device Settings</Text>
-          <ComponentValue marginTop={160} title='Steps' color='#C7F9CF' width={120} left={275} value={Steps}> </ComponentValue>
-          <ComponentValue marginTop={160} title='Heart rate' color='#D7D2F9' width={120} left={145} value={BPM}> </ComponentValue>
-          <ComponentValue marginTop={160} title='Temperature' color='#F7DBDA' width={120} left={15} value={Temp}> </ComponentValue>
+          <ComponentSteps marginTop={160} title='Steps' color='#DCFFE3' width={120} left={275} value={Steps}> </ComponentSteps>
+          <ComponentTemperature marginTop={160} title='Temperature' color='#D7D2F9' width={120} left={145} value={Temp}> </ComponentTemperature>
+          <ComponentHR marginTop={160} title='Heart rate' color='#FDE9E7' width={120} left={15} value={BPM}> </ComponentHR>
+
+          
           <TouchableOpacity onPress={disconnect} style={styles.custombutton}>
             <Ionicons name="remove-circle-outline" size={20} color="white" style={styles.buttonIcon} />
             <Text style={styles.buttonText}>  Remove Device</Text>
@@ -59,7 +63,7 @@ export default function DeviceScreen({ navigation }: DeviceScreenProps) {
         </>
       ) : (
         <>
-          <WelcomeComponent welcome='Disconnected' name='Scan Device to Connect' color="#F5F3FF" marginTop={20} />
+          <WelcomeComponent  color="#F5F3FF" marginTop={20} />
           <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
             <Ionicons name="watch-outline" size={20} color="white" style={styles.buttonIcon} />
             <Text style={styles.buttonText}>  Scan Device</Text>
