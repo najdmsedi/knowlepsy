@@ -24,7 +24,7 @@ const chartConfig = {
 const Steps = () => {
   return (
     <LinearGradient colors={['#FEFEFE', '#A992FC']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ color: '#402477', bottom: 120, fontSize: 23 }}>Heart Rate </Text>
+      <Text style={{ color: '#402477', bottom: 120, fontSize: 23 }}>Steps </Text>
       <BarChart
       yAxisSuffix=''
         data={data}
@@ -34,6 +34,7 @@ const Steps = () => {
         chartConfig={chartConfig}
         verticalLabelRotation={30}
       />
+      
     </LinearGradient>
   )
 }

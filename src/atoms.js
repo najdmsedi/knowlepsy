@@ -30,4 +30,31 @@ export const DeviceCharacteristiqueAtom = atom({
     default: null,
 });
 
+export const PPGListAtom = atom({
+    key: 'PPGList',
+    default: [0,0,0,0,0,0,0,0,0,0,0],
+});
+export const PPGListTimeAtom = atom({
+    key: 'PPGListTime',
+    default: ["0","0","0","0","0","0","0","0","0","0","0"],
+});
+export const PPGValueAtom = atom({
+    key: 'PPGValue',
+    default: {},
+});
 
+
+
+
+export const TempListAtom = atom({
+    key: 'TempList',
+    default: [0,0,0,0,0,0,0,0,0,0,0],
+});
+export const TempListTimeAtom = atom({
+    key: 'TempListTime',
+    default: ["0","0","0","0","0","0","0","0","0","0","0"],
+});
+export const TempValueAtom = atom({
+    key: 'TempValue',
+    default: {},
+});

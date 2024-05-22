@@ -5,8 +5,8 @@ import BleManager from 'react-native-ble-manager';
 import UtilsDate from './UtilDate';
 import { Buffer } from 'buffer';
 import { AuthContext } from '../context/AuthContext';
-import { useSetRecoilState } from 'recoil';
-import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom } from './../atoms'
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom, TempValueAtom, PPGValueAtom } from '../atoms'
 import { useNavigation } from '@react-navigation/native';
 import PushNotification from 'react-native-push-notification';
 
@@ -34,6 +34,9 @@ function BluetoothServices():BluetoothServicesType  {
   const setBPM = useSetRecoilState(BPMAtom);
   const setTemp = useSetRecoilState(TempAtom);
   const setSteps = useSetRecoilState(StepsAtom);
+
+  const setPPGValue = useSetRecoilState(PPGValueAtom);
+  const setTempValue = useSetRecoilState(TempValueAtom);
 
   const {userInfo} = useContext(AuthContext)
 
@@ -110,12 +113,12 @@ function BluetoothServices():BluetoothServicesType  {
             return [...prevDevices, peripheral];
 
           }
-          console.log("prevDevices[0].advertising",prevDevices[0].advertising);
-          console.log("prevDevices[0].advertising.manufacturerData",prevDevices[0].advertising.manufacturerData);
-          console.log("prevDevices[0].advertising.manufacturerRawData",prevDevices[0].advertising.manufacturerRawData);
-          console.log("prevDevices[0].advertising.rawData",prevDevices[0].advertising.rawData);
-          console.log("prevDevices[0].advertising.serviceData",prevDevices[0].advertising.serviceData);
-          console.log("prevDevices[0].advertising.serviceUUIDs",prevDevices[0].advertising.serviceUUIDs);
+          // console.log("prevDevices[0].advertising",prevDevices[0].advertising);
+          // console.log("prevDevices[0].advertising.manufacturerData",prevDevices[0].advertising.manufacturerData);
+          // console.log("prevDevices[0].advertising.manufacturerRawData",prevDevices[0].advertising.manufacturerRawData);
+          // console.log("prevDevices[0].advertising.rawData",prevDevices[0].advertising.rawData);
+          // console.log("prevDevices[0].advertising.serviceData",prevDevices[0].advertising.serviceData);
+          // console.log("prevDevices[0].advertising.serviceUUIDs",prevDevices[0].advertising.serviceUUIDs);
 
           return prevDevices;
 
@@ -287,13 +290,24 @@ function BluetoothServices():BluetoothServicesType  {
       return null;
     }
   };
-    
-const addData = async (data: any) => {
+
+  const addData = async (data: any) => {
   try {
-    let extraData = {}
+    let extraData = {} as any
+   
+    try {
+      if(data['PPG']!= undefined){   
+        console.log("data.PPG",data.PPG);
+        
+        setPPGValue(data.PPG);
+      }
+    } catch (error) {
+      console.log(error,"error from HR");
+      
+    }
+
     if(data['PPG']!= undefined){      
       extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
-      console.log("extraData PPG",extraData);
 
       const response = await fetch('http://172.187.93.156:3000/addPPGData', {
         method: 'POST',
@@ -319,6 +333,17 @@ const addData = async (data: any) => {
       if (!response.ok) {
         throw new Error('Failed to add Motion data');
       }
+    }
+
+    try {
+      if(data['TEMP']!= undefined){   
+        console.log("data.TEMP",data.TEMP);
+
+        setTempValue(data.TEMP);        
+      }
+    } catch (error) {
+      console.log(error,"error from HR");
+      
     }
 
     if (data['TEMP']!= undefined){

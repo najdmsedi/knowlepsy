@@ -1,4 +1,4 @@
-import { Alert, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native'
 import React, { useEffect, useState, useContext } from 'react'
 import { Input } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -8,8 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../../context/AuthContext';
 import Toast from 'react-native-toast-message';
-
-
 
 export default function LoginScreen() {
   const { login } = useContext(AuthContext)
@@ -68,92 +66,96 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground source={require("../../../../assets/HeroImageOne.png")} style={[styles.backgroundImage, { opacity: 0.8 }]}>
-      <View style={styles.container}>
-        <Image source={require("../../../../assets/logo.png")} style={[styles.logo, { width: 300, height: 300 }]} resizeMode="contain" />
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.container}>
+          <Image source={require("../../../../assets/logo.png")} style={[styles.logo, { width: 300, height: 300 }]} resizeMode="contain" />
 
-        <View style={styles.inputContainer}>
-          <View style={styles.action}>
-            <FontAwesome
-              name="user-o"
-              color="#5e2a89"
-              style={styles.smallIcon}
-            />
-            <TextInput
-              placeholder="First Name"
-              placeholderTextColor="#e0e0e0"
-              style={styles.textInput}
-              onChange={e => onvalidateEmail(e)}
-            />
-            {email.length < 1 ? null : emailVerify ? (
-              <Feather name="check-circle" color="green" size={20} />
-            ) : (
-              <Ionicons name="alert-circle" color="red" size={20} />
+          <View style={styles.inputContainer}>
+            <View style={styles.action}>
+              <FontAwesome
+                name="user-o"
+                color="#5e2a89"
+                style={styles.smallIcon}
+              />
+              <TextInput
+                placeholder="First Name"
+                placeholderTextColor="#e0e0e0"
+                style={styles.textInput}
+                onChange={e => onvalidateEmail(e)}
+              />
+              {email.length < 1 ? null : emailVerify ? (
+                <Feather name="check-circle" color="green" size={20} />
+              ) : (
+                <Ionicons name="alert-circle" color="red" size={20} />
+              )}
+            </View>
+            {email.length < 1 ? null : emailVerify ? null : (
+              <Text
+                style={{
+                  marginLeft: 20,
+                  color: 'red',
+                }}>
+                Name should be more than 1 character.
+              </Text>
+            )}
+
+            <View style={styles.action}>
+              <FontAwesome name="lock" color="#5e2a89" style={styles.smallIcon} />
+              <TextInput
+                placeholder="Password"
+                placeholderTextColor="#e0e0e0"
+                style={styles.textInput}
+                onChange={e => onvalidatePassword(e)}
+                secureTextEntry={showPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                {password.length < 1 ? null : showPassword ? (
+                  <Feather
+                    name="eye-off"
+                    style={{ marginRight: -10 }}
+                    color={passwordVerify ? 'green' : 'red'}
+                    size={23}
+                  />
+                ) : (
+                  <Feather
+                    name="eye"
+                    style={{ marginRight: -10 }}
+                    color={passwordVerify ? 'green' : 'red'}
+                    size={23}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+            {password.length < 1 ? null : passwordVerify ? null : (
+              <Text
+                style={{
+                  marginLeft: 20,
+                  color: 'red',
+                }}>
+                Uppercase, Lowercase, Number and 6 or more characters.
+              </Text>
             )}
           </View>
-          {email.length < 1 ? null : emailVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
-              Name should be more than 1 character.
-            </Text>
-          )}
 
-          <View style={styles.action}>
-            <FontAwesome name="lock" color="#5e2a89" style={styles.smallIcon} />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor="#e0e0e0"
-              style={styles.textInput}
-              onChange={e => onvalidatePassword(e)}
-              secureTextEntry={showPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              {password.length < 1 ? null : showPassword ? (
-                <Feather
-                  name="eye-off"
-                  style={{ marginRight: -10 }}
-                  color={passwordVerify ? 'green' : 'red'}
-                  size={23}
-                />
-              ) : (
-                <Feather
-                  name="eye"
-                  style={{ marginRight: -10 }}
-                  color={passwordVerify ? 'green' : 'red'}
-                  size={23}
-                />
-              )}
+          <TouchableOpacity style={styles.button} onPress={() => { handleLogin() }}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>Not a member?  </Text>
+            <TouchableOpacity onPress={handleRegister}>
+              <Text style={styles.registerLink}>Register </Text>
             </TouchableOpacity>
           </View>
-          {password.length < 1 ? null : passwordVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
-              Uppercase, Lowercase, Number and 6 or more characters.
-            </Text>
-          )}
         </View>
-
-        <TouchableOpacity style={styles.button} onPress={() => { handleLogin() }}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-        <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Not a member?  </Text>
-          <TouchableOpacity onPress={handleRegister}>
-            <Text style={styles.registerLink}>Register </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
     </ImageBackground>
   );
 };
 
-
 const styles = StyleSheet.create({
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   textInput: {
     flex: 1,
     marginTop: -12,

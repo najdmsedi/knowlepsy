@@ -1,4 +1,4 @@
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -117,6 +117,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
   }
   return (
     <ImageBackground source={require("../../../../assets/HeroImageOne.png")} style={[styles.backgroundImage, { opacity: 0.8 }]}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
 
       <View style={styles.container}>
         <Image source={require("../../../../assets/logo.png")} style={[styles.logo, { width: 300, height: 300 }]} resizeMode="contain" />
@@ -287,6 +288,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
           </View>
         </View>
       </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -295,6 +297,9 @@ export default RegisterScreen;
 
 
 const styles = StyleSheet.create({
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
