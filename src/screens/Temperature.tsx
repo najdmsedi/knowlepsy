@@ -48,7 +48,9 @@ const Temperature = () => {
       <LineChart
         data={{
           labels: TempListTime,
-          datasets: [{ data: TEMPList }]
+          datasets: [{ data: TEMPList }],
+          // legend: ["Temp"] // optional
+
         }}
         width={Dimensions.get('window').width - 32}
         height={350}

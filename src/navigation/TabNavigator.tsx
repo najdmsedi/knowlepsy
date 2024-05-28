@@ -6,7 +6,7 @@ import SleepTrackScreen from '../screens/sleepTracking/SleepTrackScreen';
 import DeviceScreen from '../screens/Device/DeviceScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ScanScreen from '../components/ScanScreen';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import BleManager from 'react-native-ble-manager';
 import PushNotification from 'react-native-push-notification';
 import { useSetRecoilState } from 'recoil';
@@ -19,6 +19,7 @@ import CustomBackButton from '../components/button/CustomBackButton';
 import EditProfile from '../screens/EditProfile';
 import ChangePassword from '../screens/ChangePassword';
 import Stress from '../screens/Stress';
+import { AuthContext } from '../context/AuthContext';
 
 const Tab = createBottomTabNavigator();
 // const Stack = createNativeStackNavigator();
@@ -76,36 +77,46 @@ const HomeStack = ({ navigation }:any) => {
 };
 
 function TabNavigator() {
+  const { userInfo } = useContext(AuthContext);
+console.log("useuse",userInfo);
+
   return (
     <Tab.Navigator
-      initialRouteName={homeName}
+      initialRouteName="HomeScreen"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => {
           let iconName;
-          if (route.name === homeName) {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === sleepTracking) {
-            iconName = focused ? 'moon' : 'moon-outline';
-          } else if (route.name === deviceName) {
-            iconName = focused ? 'watch' : 'watch-outline';
-          } else if (route.name === settingsName) {
-            iconName = focused ? 'settings' : 'settings-outline';
+          switch (route.name) {
+            case "HomeScreen":
+              iconName = focused ? 'home' : 'home-outline';
+              break;
+            case "DeviceScreen":
+              iconName = focused ? 'watch' : 'watch-outline';
+              break;
+            case "Settings":
+              iconName = focused ? 'settings' : 'settings-outline';
+              break;
+            default:
+              iconName = 'circle'; // Default icon
+              break;
           }
-          return <Ionicons name={iconName!} size={focused ? 35 : 25} color="#8A57ED" />;
+          return <Ionicons name={iconName} size={focused ? 35 : 25} color="#8A57ED" />;
         },
-        tabBarStyle: ((route) => {
-          const routeName = getFocusedRouteNameFromRoute(route) ?? "";
-          if (routeName === 'ScanScreen' || routeName === 'Temperature'|| routeName === 'HeartRate'|| routeName === 'Steps' || routeName === 'EditProfile'|| routeName === 'Stress') {
-            return { display: 'none' };
-          }
-          return {};
-        })(route),
       })}
     >
-      <Tab.Screen name={homeName} component={HomeStack} options={{ headerShown: false, tabBarLabel: '' }} />
-      {/* <Tab.Screen name={sleepTracking} component={SleepTrackScreen} options={{ tabBarLabel: '' }} /> */}
-      <Tab.Screen name={deviceName} component={DeviceScreen} options={{ tabBarLabel: '' }} />
-      <Tab.Screen name={settingsName} component={SettingsScreen} options={{ tabBarLabel: '' }} />
+      { userInfo.role === 'doctor' && (
+        <>
+          <Tab.Screen name="HomeScreen" component={HomeStack} options={{ headerShown: false, tabBarLabel: '' }} />
+          <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: '' }} />
+        </>
+      )}
+      { userInfo.role === 'patient' && (
+        <>
+          <Tab.Screen name="HomeScreen" component={HomeStack} options={{ headerShown: false, tabBarLabel: '' }} />
+          <Tab.Screen name="DeviceScreen" component={DeviceScreen} options={{ tabBarLabel: '' }} />
+          <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: '' }} />
+        </>
+      )}
     </Tab.Navigator>
   );
 }

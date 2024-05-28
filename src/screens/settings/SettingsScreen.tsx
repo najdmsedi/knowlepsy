@@ -27,11 +27,17 @@ export default function SettingsScreen() {
     logout()
   }
   useEffect(() => {
-    navigation.setOptions({
-      title: '',
-      headerRight: () => <ConstantBar />,
-    });
-  }, []);
+    if (userInfo.role === 'patient') {
+      navigation.setOptions({
+        title: '',
+        headerRight: () => <ConstantBar marginRight={104} />,
+      });
+    } else if (userInfo.role === 'doctor') {
+      navigation.setOptions({
+        headerShown: false, // This will completely remove the header
+      });
+    }
+  }, [userInfo.role, navigation]);
   const handleButtonPress = () => { }
   const handleEditProfile = () => { navigation.navigate('EditProfile') }
   const handleChangePassword = () => { navigation.navigate('ChangePassword') }

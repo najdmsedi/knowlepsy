@@ -4,7 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 
 interface RectangleProps {
-  title: string;
+  title?: string;
   color?: string;
   marginTop: number;
   height?: number;
@@ -39,12 +39,11 @@ const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue',
     <LinearGradient colors={['#FCF2F5', '#EDEBF7']} style={[styles.container, { backgroundColor: color }, { top: marginTop }, { height: height }]}>
 
       <View style={styles.row}>
-        <Ionicons name="information-circle-outline" size={25} color="#998F92" style={styles.icon} />
         <Text style={styles.title}>{title}</Text>
       </View>
       <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
-        <Text style={styles.buttonText}>Report a seizure</Text>
-        <Ionicons name="alert-outline" size={20} color="white" style={styles.buttonIcon} />
+        <Text style={styles.buttonText}>Messaging Doctor</Text>
+        <Ionicons name="chatbox-ellipses-outline" size={20} color="white" style={styles.buttonIcon} />
       </TouchableOpacity>
       </LinearGradient>
   );
@@ -73,7 +72,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 100,
     borderRadius: 50,
-    marginTop: 10,
+    marginTop: -25,
     flexDirection: 'row',
     alignItems: 'center',
     elevation: 5,
