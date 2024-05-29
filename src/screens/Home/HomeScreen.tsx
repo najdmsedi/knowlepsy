@@ -37,12 +37,21 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, [userInfo.role, navigation]);
 
-  const sendNotification = () => {
-    PushNotification.localNotification({
-      channelId: "channel-id",
-      title: "test",
-      message: "knowlepsy",
-    });
+  const chat = () => {
+      console.log(userInfo);
+      
+      if(userInfo.doctorId == null){
+        navigation.navigate('Patient_Doctor');
+      }
+      else{
+        navigation.navigate('ChatScreen')
+      }
+   
+    // PushNotification.localNotification({
+    //   channelId: "channel-id",
+    //   title: "test",
+    //   message: "knowlepsy",
+    // });
   };
 
   return (
@@ -50,7 +59,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <WelcomeComponent welcome='good morning' name={userInfo.firstName} color="#F5F3FF" marginTop={20} />
         <StressLevelComponent title='Stress Level' color="#FAF9FE" marginTop={25} status='happy' statusColor='#3AA50E' />
-        <ReportComponent handleButtonPress={sendNotification} color="#FCF2F5" marginTop={160} height={120} />
+        <ReportComponent handleButtonPress={chat} color="#FCF2F5" marginTop={160} height={120} />
         <Text style={styles.text}>Tap to see details </Text>
         <TemperatureLevelComponent wirst={parseFloat(Temp)} title="Temperature" marginTop={330} />
         {/* <TemperatureComponent wrist={Temp} title="Temperature" marginTop={330} /> */}

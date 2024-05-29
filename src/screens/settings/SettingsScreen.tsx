@@ -41,6 +41,7 @@ export default function SettingsScreen() {
   const handleButtonPress = () => { }
   const handleEditProfile = () => { navigation.navigate('EditProfile') }
   const handleChangePassword = () => { navigation.navigate('ChangePassword') }
+  const handlePatient_DoctorPassword = () => { navigation.navigate('Patient_Doctor') }
 
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
@@ -59,6 +60,7 @@ export default function SettingsScreen() {
 
       <Text style={styles.UseraccountbuttonText}>User account </Text>
       <GenericButton buttonText='Edit Profile' onPress={handleEditProfile} icon='caret-forward-outline' top={-10} />
+      <GenericButton buttonText='Invite Doctor' onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} />
 
       <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
       <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={-370} />
@@ -66,7 +68,7 @@ export default function SettingsScreen() {
       <GenericButton buttonText='Emergency Call' onPress={handleButtonPress} icon='caret-forward-outline' top={-340} />
 
       <LargeButton buttonText='Logout' onPress={log} icon='log-out-outline' top={-325} />
-      <Image source={require("../../../assets/logo...png")} style={[{ width: 300, height: 300, bottom: 350 }]} resizeMode="contain" />
+      <Image source={require("../../../assets/logo...png")} style={[{ width: 300, height: 300, bottom: 380 }]} resizeMode="contain" />
 
 
     </LinearGradient>
@@ -124,7 +126,8 @@ const styles = StyleSheet.create({
     color: '#7944cf',
     fontSize: 23,
     marginRight: 150,
-    marginBottom: 390,
+    marginBottom: 400,
+    top:10
   },
   Editbutton: {
     backgroundColor: '#d4ceeb',

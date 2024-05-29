@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
+import { AuthContext } from '../../../context/AuthContext';
 
 interface RectangleProps {
   title?: string;
   color?: string;
   marginTop: number;
   height?: number;
-  handleButtonPress():void;
-} 
+  handleButtonPress(): void;
+}
 
-const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 130,handleButtonPress }) => {
+const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 130, handleButtonPress }) => {
+  const { userInfo } = useContext(AuthContext);
 
   // let test
   // const handleButtonPress = () => {
@@ -32,7 +34,7 @@ const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue',
   //   .catch(error => {
   //     console.error('Error:', error);
   //   });
-    
+
   // };
 
   return (
@@ -42,10 +44,15 @@ const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue',
         <Text style={styles.title}>{title}</Text>
       </View>
       <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
-        <Text style={styles.buttonText}>Messaging Doctor</Text>
+        {userInfo.role === "patient" &&
+          <Text style={styles.buttonText}>Messaging Doctor</Text>
+        }
+        {userInfo.role === "doctor" &&
+          <Text style={styles.buttonText}>Messaging Patient</Text>
+        }
         <Ionicons name="chatbox-ellipses-outline" size={20} color="white" style={styles.buttonIcon} />
       </TouchableOpacity>
-      </LinearGradient>
+    </LinearGradient>
   );
 };
 

@@ -20,6 +20,8 @@ import EditProfile from '../screens/EditProfile';
 import ChangePassword from '../screens/ChangePassword';
 import Stress from '../screens/Stress';
 import { AuthContext } from '../context/AuthContext';
+import ChatScreen from '../components/messenger/ChatScreen';
+import Patient_Doctor from '../screens/Patient_Doctor';
 
 const Tab = createBottomTabNavigator();
 // const Stack = createNativeStackNavigator();
@@ -40,6 +42,8 @@ export type RootStackParamList = {
   ChangePassword: undefined;
   Stress: undefined;
   TabNavigator: NavigatorScreenParams<RootTabParamList>;
+  ChatScreen: undefined;
+  Patient_Doctor: undefined;
 };
 
 type RootTabParamList = {
@@ -72,6 +76,8 @@ const HomeStack = ({ navigation }:any) => {
       <Stack.Screen name="Stress" component={Stress} options={{ headerLeft: () => <CustomBackButton />,title: ''}}/>
       <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: ''}}/>
       <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: ''}}/>
+      <Stack.Screen name="Patient_Doctor" component={Patient_Doctor} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: ''}}/>
+      <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerLeft: () => <CustomBackButton />,title: ''}}/>
     </Stack.Navigator>
   );
 };
@@ -102,6 +108,13 @@ console.log("useuse",userInfo);
           }
           return <Ionicons name={iconName} size={focused ? 35 : 25} color="#8A57ED" />;
         },
+        tabBarStyle: ((route) => {
+          const routeName = getFocusedRouteNameFromRoute(route) ?? "";
+          if (routeName === 'ScanScreen' || routeName === 'Temperature'|| routeName === 'HeartRate'|| routeName === 'Steps' || routeName === 'EditProfile'|| routeName === 'Stress'|| routeName === 'ChatScreen'|| routeName === 'Patient_Doctor') {
+            return { display: 'none' };
+          }
+          return {};
+        })(route),
       })}
     >
       { userInfo.role === 'doctor' && (
