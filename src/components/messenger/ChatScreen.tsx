@@ -1,6 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ListRenderItem } from 'react-native';
 import { Avatar } from 'react-native-paper';
+import { useIsFocused } from '@react-navigation/native';
+import { BASE_URL } from '../../config';
+import { AuthContext } from '../../context/AuthContext';
 
 type Message = {
   id: string;
@@ -9,133 +12,106 @@ type Message = {
   avatar: string;
 };
 
-const sampleMessages: Message[] = [
-  {
-    id: '1',
-    text: 'Hello there!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '2',
-    text: 'Hi! How are you?',
-    isUser: true,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '3',
-    text: 'I am good, thank you!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '4',
-    text: 'Hello there!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '5',
-    text: 'Hi! How are you?',
-    isUser: true,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '6',
-    text: 'I am good, thank you!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '7',
-    text: 'Hello there!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '8',
-    text: 'Hi! How are you?',
-    isUser: true,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '9',
-    text: 'I am good, thank you!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '10',
-    text: 'Hello there!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '11',
-    text: 'Hi! How are you?',
-    isUser: true,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '12',
-    text: 'I am good, thank you!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '13',
-    text: 'Hello there!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '14',
-    text: 'Hi! How are you?',
-    isUser: true,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '15',
-    text: 'I am good, thank you!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '16',
-    text: 'Hello there!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '17',
-    text: 'Hi! How are you?',
-    isUser: true,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-  {
-    id: '18',
-    text: 'I am good, thank you!',
-    isUser: false,
-    avatar: 'https://placeimg.com/140/140/any',
-  },
-];
+type ChatScreenProps = {
+  userId: string;
+  otherUserId: string;
+  userAvatar: string;
+  otherUserAvatar: string;
+};
 
-const ChatScreen = () => {
+const ChatScreen: React.FC<ChatScreenProps> = ({ userId, otherUserId, userAvatar, otherUserAvatar }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [text, setText] = useState('');
   const flatListRef = useRef<FlatList<Message>>(null);
+  const isFocused = useIsFocused();
+  const { userInfo } = useContext(AuthContext);
+  const { userGuestInfo } = useContext(AuthContext);
+  const defaultAvatar = 'https://placeimg.com/140/140/any';
+  let userGuestInfoID = "";
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/messages/${userInfo._id}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch messages: ${response.statusText}`);
+      }
+      const data = await response.json();
+      const formattedMessages = data.map((msg: any) => ({
+        id: msg._id,
+        text: msg.text,
+        isUser: msg.senderId === userInfo._id,
+        avatar: msg.senderId === userInfo._id ? userAvatar : otherUserAvatar,
+      }));
+      setMessages(formattedMessages);
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    }
+  }, [userInfo._id, userAvatar, otherUserAvatar]);
+
+  useEffect(() => {
+    if (isFocused) {
+      fetchMessages();
+    }
+  }, [isFocused, fetchMessages]);
 
   useEffect(() => {
     if (flatListRef.current) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
-  }, []);
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!text.trim()) {
+      return;
+    }
+    if (userInfo.role === "patient") {
+      userGuestInfoID = userGuestInfo.user._id
+    }
+    else if (userInfo.role === "doctor") {
+      userGuestInfoID = userGuestInfo._id
+    }
+
+    const newMessage = {
+      senderId: userInfo._id,
+      receiverId: userGuestInfoID,
+      text: text,
+    };
+
+    try {
+      const response = await fetch(`${BASE_URL}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newMessage),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`Failed to send message: ${response.status} ${response.statusText} - ${errorMessage}`);
+      }
+
+      const savedMessage = await response.json();
+      setMessages([...messages, {
+        id: savedMessage._id,
+        text: savedMessage.text,
+        isUser: true,
+        avatar: userAvatar,
+      }]);
+      setText('');
+      fetchMessages(); // Refetch messages after sending a new one
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+  };
 
   const renderItem: ListRenderItem<Message> = ({ item }) => (
     <View style={[styles.messageContainer, item.isUser ? styles.messageRight : styles.messageLeft]}>
-      {!item.isUser && <Avatar.Image size={36} source={{ uri: item.avatar }} />}
+      {!item.isUser && <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />}
       <View style={[styles.messageBubble, item.isUser ? styles.bubbleRight : styles.bubbleLeft]}>
-        <Text style={item.isUser ? styles.textRight : styles.textLeft}>{item.text}</Text>
+        <Text style={item.isUser ? styles.textRight : styles.textLeft}>{item.text} </Text>
       </View>
-      {item.isUser && <Avatar.Image size={36} source={{ uri: item.avatar }} />}
+      {item.isUser && <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />}
     </View>
   );
 
@@ -143,21 +119,23 @@ const ChatScreen = () => {
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
-        data={sampleMessages}
+        data={messages}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         style={styles.messagesList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
-      
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Type a message"
           placeholderTextColor="black"
+          value={text}
+          onChangeText={setText}
         />
-        <TouchableOpacity style={styles.sendButton}>
+        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>

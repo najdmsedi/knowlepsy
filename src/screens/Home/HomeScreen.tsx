@@ -13,6 +13,8 @@ import { BPMAtom, StepsAtom, TempAtom } from './../../atoms';
 import ConstantBar from '../../components/BleutoothButton';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from "react-native-push-notification";
+import axios from 'axios';
+import { BASE_URL } from '../../config';
 
 type HomeScreenProps = {
   navigation: any;
@@ -37,16 +39,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, [userInfo.role, navigation]);
 
-  const chat = () => {
-      console.log(userInfo);
-      
-      if(userInfo.doctorId == null){
+  const chat = async () => {
+    console.log(userInfo);
+    if (userInfo.role === "patient") {
+      if (userInfo.doctorId == null) {
         navigation.navigate('Patient_Doctor');
       }
-      else{
+      else {
         navigation.navigate('ChatScreen')
       }
-   
+    }
+    else if (userInfo.role === "doctor") {
+      const patient = await axios.get(`${BASE_URL}/patients/${userInfo._id}`);
+      if (patient == null) {
+        navigation.navigate('Patient_Doctor');
+      }
+      else {
+        navigation.navigate('ChatScreen')
+      }
+    }
     // PushNotification.localNotification({
     //   channelId: "channel-id",
     //   title: "test",
@@ -87,16 +98,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',  // Ensure text is centered
     color: 'black',
     // marginVertical: 100,
-    bottom:-270,
-    right:120
+    bottom: -270,
+    right: 120
   },
   text1: {
     fontSize: 16,
     textAlign: 'center',  // Ensure text is centered
     color: 'black',
     // marginVertical: 100,
-    bottom:-550,
-    right:135
+    bottom: -550,
+    right: 135
   },
   textB: {
     fontSize: 13,
