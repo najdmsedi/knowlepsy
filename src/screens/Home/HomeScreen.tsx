@@ -13,7 +13,7 @@ import { BPMAtom, StepsAtom, TempAtom } from './../../atoms';
 import ConstantBar from '../../components/BleutoothButton';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from "react-native-push-notification";
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { BASE_URL } from '../../config';
 
 type HomeScreenProps = {
@@ -49,14 +49,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         navigation.navigate('ChatScreen')
       }
     }
-    else if (userInfo.role === "doctor") {
-      const patient = await axios.get(`${BASE_URL}/patients/${userInfo._id}`);
-      if (patient == null) {
-        navigation.navigate('Patient_Doctor');
-      }
-      else {
+    else {
+      console.log("userInfo._id", userInfo._id);
+
+      try {
+        const res = await axios.get(`${BASE_URL}/patients/${userInfo._id}`);
+        console.log(res);
         navigation.navigate('ChatScreen')
+        console.log("nhebech");
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response) {
+          console.log('Error data:', axiosError.response.data);
+          console.log('Error status:', axiosError.response.status);
+          console.log('Error headers:', axiosError.response.headers);
+          navigation.navigate('Patient_Doctor');
+          console.log("nheb");
+        } else if (axiosError.request) {
+          console.log('Error request:', axiosError.request);
+        } else {
+          console.log('Error message:', axiosError.message);
+        }
+        console.log('Error config:', axiosError.config);
       }
+
     }
     // PushNotification.localNotification({
     //   channelId: "channel-id",
@@ -77,7 +93,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         <HeartrateComponent BPM={BPM} title="Heart Rate" marginTop={330} height={118} />
         <StepsComponent Steps={Steps} title="Steps" marginTop={462} height={118} />
         <Text style={styles.text1}>Sleep details </Text>
-
         <LastSleepTrackingComponent title="Last Sleep Tracking" marginTop={600} />
       </ScrollView>
     </LinearGradient>

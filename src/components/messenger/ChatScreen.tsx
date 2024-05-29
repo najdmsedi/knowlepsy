@@ -4,6 +4,7 @@ import { Avatar } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { BASE_URL } from '../../config';
 import { AuthContext } from '../../context/AuthContext';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type Message = {
   id: string;
@@ -55,6 +56,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ userId, otherUserId, userAvatar
   }, [isFocused, fetchMessages]);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [fetchMessages]);
+
+  useEffect(() => {
     if (flatListRef.current) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
@@ -65,10 +74,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ userId, otherUserId, userAvatar
       return;
     }
     if (userInfo.role === "patient") {
-      userGuestInfoID = userGuestInfo.user._id
-    }
-    else if (userInfo.role === "doctor") {
-      userGuestInfoID = userGuestInfo._id
+      userGuestInfoID = userGuestInfo.user._id;
+    } else if (userInfo.role === "doctor") {
+      userGuestInfoID = userGuestInfo._id;
     }
 
     const newMessage = {
@@ -99,7 +107,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ userId, otherUserId, userAvatar
         avatar: userAvatar,
       }]);
       setText('');
-      fetchMessages(); // Refetch messages after sending a new one
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -107,11 +114,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ userId, otherUserId, userAvatar
 
   const renderItem: ListRenderItem<Message> = ({ item }) => (
     <View style={[styles.messageContainer, item.isUser ? styles.messageRight : styles.messageLeft]}>
-      {!item.isUser && <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />}
+      {!item.isUser && 
+      // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
+              <Ionicons name="person-circle" size={20} color="black" />
+
+      }
       <View style={[styles.messageBubble, item.isUser ? styles.bubbleRight : styles.bubbleLeft]}>
         <Text style={item.isUser ? styles.textRight : styles.textLeft}>{item.text} </Text>
       </View>
-      {item.isUser && <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />}
+      {item.isUser && 
+      // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
+      <Ionicons name="person-circle-outline" size={20} color="black" />
+
+      }
     </View>
   );
 

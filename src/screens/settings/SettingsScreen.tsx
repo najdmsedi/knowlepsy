@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AuthContext } from '../../context/AuthContext';
 import ConstantBar from '../../components/BleutoothButton';
@@ -34,7 +34,7 @@ export default function SettingsScreen() {
       });
     } else if (userInfo.role === 'doctor') {
       navigation.setOptions({
-        headerShown: false, // This will completely remove the header
+        headerShown: false,
       });
     }
   }, [userInfo.role, navigation]);
@@ -45,37 +45,43 @@ export default function SettingsScreen() {
 
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
-      <View style={styles.profileCircle}>
-        <Text style={styles.initials}>{userInfo.firstName.charAt(0)}{userInfo.lastName.charAt(0)} </Text>
-        <TouchableOpacity>
-          <View style={[styles.cercleIcon, { borderRadius: 25 }]}>
-            <Ionicons style={styles.editIcon} name="pencil" size={20} color="white" />
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={{ left: 30 }}>
-        <Text style={styles.userName}>{userInfo.firstName + " " + userInfo.lastName}</Text>
-        <Text style={styles.userEmail}>{userInfo.email}</Text>
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-      <Text style={styles.UseraccountbuttonText}>User account </Text>
-      <GenericButton buttonText='Edit Profile' onPress={handleEditProfile} icon='caret-forward-outline' top={-10} />
-      <GenericButton buttonText='Invite Doctor' onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} />
+        <View style={styles.profileCircle}>
+          <Text style={styles.initials}>{userInfo.firstName.charAt(0)}{userInfo.lastName.charAt(0)} </Text>
+          <TouchableOpacity>
+            <View style={[styles.cercleIcon, { borderRadius: 25 }]}>
+              <Ionicons style={styles.editIcon} name="pencil" size={20} color="white" />
+            </View>
+          </TouchableOpacity>
+        </View>
+        <View style={{ left: 30 }}>
+          <Text style={styles.userName}>{userInfo.firstName + " " + userInfo.lastName}</Text>
+          <Text style={styles.userEmail}>{userInfo.email}</Text>
+        </View>
 
-      <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
-      <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={-370} />
-      <GenericButton buttonText='Change Password' onPress={handleChangePassword} icon='caret-forward-outline' top={-355} />
-      <GenericButton buttonText='Emergency Call' onPress={handleButtonPress} icon='caret-forward-outline' top={-340} />
+        <Text style={styles.UseraccountbuttonText}>User account </Text>
+        <GenericButton buttonText='Edit Profile' onPress={handleEditProfile} icon='caret-forward-outline' top={-10} />
+        <GenericButton buttonText='Invite Doctor' onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} />
 
-      <LargeButton buttonText='Logout' onPress={log} icon='log-out-outline' top={-325} />
-      <Image source={require("../../../assets/logo...png")} style={[{ width: 300, height: 300, bottom: 380 }]} resizeMode="contain" />
+        <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
+        <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={-370} />
+        <GenericButton buttonText='Change Password' onPress={handleChangePassword} icon='caret-forward-outline' top={-355} />
+        <GenericButton buttonText='Emergency Call' onPress={handleButtonPress} icon='caret-forward-outline' top={-340} />
 
+        <LargeButton buttonText='Logout' onPress={log} icon='log-out-outline' top={-325} />
+        <Image source={require("../../../assets/logo...png")} style={[{ width: 300, height: 300, bottom: 380 }]} resizeMode="contain" />
 
+      </ScrollView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -127,7 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 23,
     marginRight: 150,
     marginBottom: 400,
-    top:10
+    top: 10
   },
   Editbutton: {
     backgroundColor: '#d4ceeb',
