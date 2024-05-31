@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Linking } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AuthContext } from '../../context/AuthContext';
 import ConstantBar from '../../components/BleutoothButton';
@@ -17,7 +17,10 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
 export default function SettingsScreen() {
   const { logout } = useContext(AuthContext)
   const { userInfo } = useContext(AuthContext)
+  const { userGuestInfo } = useContext(AuthContext);
+
   const { disconnectFromDevice } = BluetoothServices();
+  const [messengerText, setMessengerText] = useState('');
 
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
@@ -30,18 +33,42 @@ export default function SettingsScreen() {
     if (userInfo.role === 'patient') {
       navigation.setOptions({
         title: '',
-        headerRight: () => <ConstantBar marginRight={104} />,
+        headerRight: () => <ConstantBar />,
       });
+
+      if (userGuestInfo == null) {
+        setMessengerText('Invite Doctor')
+      } else {
+        setMessengerText('Message Doctor')
+      }
+
     } else if (userInfo.role === 'doctor') {
       navigation.setOptions({
         headerShown: false,
       });
+
+      if (userGuestInfo == null) {
+        setMessengerText('Invite Patient')
+      } else {
+        setMessengerText('Message Patient')
+      }
     }
   }, [userInfo.role, navigation]);
   const handleButtonPress = () => { }
+  const handleEmergencyCallPress = () => {  Linking.openURL('tel:911');}
+
   const handleEditProfile = () => { navigation.navigate('EditProfile') }
   const handleChangePassword = () => { navigation.navigate('ChangePassword') }
-  const handlePatient_DoctorPassword = () => { navigation.navigate('Patient_Doctor') }
+  const handlePatient_DoctorPassword = () => {
+    switch (userGuestInfo) {
+      case null:
+        navigation.navigate('Patient_Doctor')
+        break;
+     default:
+        navigation.navigate('ChatScreen')
+        break;
+    }
+  }
 
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
@@ -62,22 +89,30 @@ export default function SettingsScreen() {
 
         <Text style={styles.UseraccountbuttonText}>User account </Text>
         <GenericButton buttonText='Edit Profile' onPress={handleEditProfile} icon='caret-forward-outline' top={-10} />
-        <GenericButton buttonText='Invite Doctor' onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} />
+        <GenericButton buttonText={messengerText} onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} />
 
         <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
-        <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={-370} />
-        <GenericButton buttonText='Change Password' onPress={handleChangePassword} icon='caret-forward-outline' top={-355} />
-        <GenericButton buttonText='Emergency Call' onPress={handleButtonPress} icon='caret-forward-outline' top={-340} />
+        <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={12} />
+        <GenericButton buttonText='Change Password' onPress={handleChangePassword} icon='caret-forward-outline' top={25} />
+        <GenericButton buttonText='Emergency Call' onPress={handleEmergencyCallPress} icon='caret-forward-outline' top={40} />
 
-        <LargeButton buttonText='Logout' onPress={log} icon='log-out-outline' top={-325} />
-        <Image source={require("../../../assets/logo...png")} style={[{ width: 300, height: 300, bottom: 380 }]} resizeMode="contain" />
-
+        <LargeButton buttonText='Logout' onPress={log} icon='log-out-outline' top={60} />
+        <Image
+          source={require("../../../assets/logo...png")}
+          style={styles.logo}
+        />
       </ScrollView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  logo: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+    bottom: 20
+  },
   scrollContainer: {
     alignItems: 'center',
     paddingVertical: 20,
@@ -132,7 +167,6 @@ const styles = StyleSheet.create({
     color: '#7944cf',
     fontSize: 23,
     marginRight: 150,
-    marginBottom: 400,
     top: 10
   },
   Editbutton: {

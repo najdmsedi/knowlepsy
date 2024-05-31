@@ -5,6 +5,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PPGListAtom, PPGListTimeAtom, PPGValueAtom } from '../atoms';
+import { Image } from 'react-native-elements';
 
 const HeartRate = () => {
   const PPGValue = useRecoilValue(PPGValueAtom) as any;
@@ -12,33 +13,27 @@ const HeartRate = () => {
   const [PPGListTime, setPPGListTime] = useRecoilState(PPGListTimeAtom);
 
   useEffect(() => {
-    if(PPGValue?.heart_rate != undefined){
-    const updatedEDAList = [...PPGList, PPGValue?.heart_rate];
-    const updatedEDAListTime = [...PPGListTime, PPGValue?.time];
+    if (PPGValue?.heart_rate != undefined) {
+      const updatedPPGList = [...PPGList, PPGValue?.heart_rate];
+      const updatedPPGListTime = [...PPGListTime, PPGValue?.time];
 
-    console.log("updatedEDAListTime updatedEDAListTime= ", updatedEDAListTime);
-
-    if (updatedEDAList.length > 10) {
-      updatedEDAList.shift();
-    }
-    if (updatedEDAListTime.length > 10) {
-      updatedEDAListTime.shift();
-    }
-    setPPGListTime(updatedEDAListTime)
-    setPPGList(updatedEDAList);
-    console.log("EDAList= ", updatedEDAList);
+      if (updatedPPGList.length > 10) {
+        updatedPPGList.shift();
+      }
+      if (updatedPPGListTime.length > 10) {
+        updatedPPGListTime.shift();
+      }
+      setPPGListTime(updatedPPGListTime);
+      setPPGList(updatedPPGList);
     }
   }, [PPGValue]);
 
-  const heartSize1 = useRef(new Animated.Value(1)).current;
-  const heartSize2 = useRef(new Animated.Value(1)).current;
-  const heartSize3 = useRef(new Animated.Value(1)).current;
+  const heartSize = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const animateHeart = (heartSize: Animated.Value | Animated.ValueXY, delay: number) => {
+    const animateHeart = () => {
       return Animated.loop(
         Animated.sequence([
-          Animated.delay(delay),
           Animated.timing(heartSize, {
             toValue: 1.5,
             duration: 500,
@@ -55,17 +50,16 @@ const HeartRate = () => {
       ).start();
     };
 
-    animateHeart(heartSize1, 0);
-    animateHeart(heartSize2, 500);
-    animateHeart(heartSize3, 900);
-  }, [heartSize1, heartSize2, heartSize3]);
-
+    animateHeart();
+  }, [heartSize]);
   return (
     <LinearGradient colors={['#FEFEFE', '#A992FC']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={styles.header}>Heart Rate</Text>
+      {/* <Text style={styles.header}>Heart Rate</Text> */}
+      <Text style={styles.heartRateValue}>{PPGValue?.heart_rate} </Text><Text style={{ color: "#28032B", top: 50, left: 50 }}>BPM </Text>
+
       <LineChart
         data={{
-          labels:  PPGListTime ,
+          labels: PPGListTime,
           datasets: [{ data: PPGList }]
         }}
         width={Dimensions.get('window').width - 32} // Full width of the screen with some padding
@@ -94,16 +88,14 @@ const HeartRate = () => {
         bezier
         style={styles.chart}
       />
-      
       <View style={styles.heartRateContainer}>
-        <Text style={styles.label}>Your smart watch is recording </Text>
-        <View style={styles.heartIconContainer}>
-          <Animated.View style={{ transform: [{ scale: heartSize1 }] }}>
-            <Ionicons name={'heart'} size={100} color={'#D1837F'} />
+        <View style={styles.heartRateContainer}>
+          <Animated.View style={{ transform: [{ scale: heartSize }] }}>
+            <Image source={require('../../assets/hearRate3D.png')} style={styles.heartIcon} />
           </Animated.View>
-          <Text style={styles.heartRateValue}>{PPGValue?.heart_rate} </Text><Text style={{color:"#28032B"}}>BPM </Text>
         </View>
       </View>
+
     </LinearGradient>
   );
 }
@@ -111,10 +103,14 @@ const HeartRate = () => {
 export default HeartRate;
 
 const styles = StyleSheet.create({
+  heartIcon: {
+    width: 100,
+    height: 100,
+  },
   header: {
     color: '#402477',
     fontSize: 23,
-    top:50,
+    top: 50,
     fontWeight: 'bold',
   },
   chart: {
@@ -124,22 +120,23 @@ const styles = StyleSheet.create({
   },
   heartRateContainer: {
     alignItems: 'center',
-    bottom: 150,
+    bottom: 50,
   },
   label: {
     fontSize: 20,
     color: "black",
     bottom: 70,
-  },
+  }, 
   heartIconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   heartRateValue: {
-    fontSize: 30,
+    textAlign: 'center',
+    fontSize: 40,
     color: "black",
-    marginLeft: 80,
-    bottom: 10,
+    marginLeft: 0,
+    top: 70,
   },
 });

@@ -58,3 +58,8 @@ export const TempValueAtom = atom({
     key: 'TempValue',
     default: {},
 });
+
+export const EDAValueAtom = atom({
+    key: 'EDAValue',
+    default: {},
+});

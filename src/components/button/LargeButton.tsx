@@ -12,7 +12,7 @@ interface Props {
 
 const LargeButton: React.FC<Props> = ({ buttonText, icon, onPress, top }) => {
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.buttonContainer, { top: top }]}>
+        <TouchableOpacity onPress={onPress} style={[styles.buttonContainer, { marginTop: top }]}>
             <View style={styles.button}>
                 {icon && (
                     <View style={styles.iconContainer}>

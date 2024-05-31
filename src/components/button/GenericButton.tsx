@@ -8,11 +8,12 @@ interface Props {
     icon?: string; // Make icon optional
     onPress: () => void;
     top?: number;
+    bottom?: number;
 }
 
-const GenericButton: React.FC<Props> = ({ buttonText, icon, onPress, top }) => {
+const GenericButton: React.FC<Props> = ({ buttonText, icon, onPress, top,bottom }) => {
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.buttonContainer, { top: top }]}>
+        <TouchableOpacity onPress={onPress} style={[styles.buttonContainer, { top: top }, { bottom: bottom }]}>
             <View style={styles.button}>
                 <Text style={styles.buttonText}>{buttonText}</Text>
                 {icon && (

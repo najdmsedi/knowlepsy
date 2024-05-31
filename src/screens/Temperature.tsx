@@ -11,7 +11,6 @@ const Temperature = () => {
   const [TEMPList, setTEMPList] = useRecoilState(TempListAtom);
   const [TempListTime, setTempListTime] = useRecoilState(TempListTimeAtom);
   const [showThermometerOutline, setShowThermometerOutline] = useState(true);
-  console.log("eeeeeeeeeeeee",TEMPValue.wrist);
   
   useEffect(() => {
     if(TEMPValue?.wrist != undefined){

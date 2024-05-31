@@ -6,7 +6,7 @@ import UtilsDate from './UtilDate';
 import { Buffer } from 'buffer';
 import { AuthContext } from '../context/AuthContext';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom, TempValueAtom, PPGValueAtom } from '../atoms'
+import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom, TempValueAtom, PPGValueAtom, EDAValueAtom } from '../atoms'
 import { useNavigation } from '@react-navigation/native';
 import PushNotification from 'react-native-push-notification';
 
@@ -37,6 +37,7 @@ function BluetoothServices():BluetoothServicesType  {
 
   const setPPGValue = useSetRecoilState(PPGValueAtom);
   const setTempValue = useSetRecoilState(TempValueAtom);
+  const setEDAValue = useSetRecoilState(EDAValueAtom);
 
   const {userInfo} = useContext(AuthContext)
 
@@ -296,9 +297,7 @@ function BluetoothServices():BluetoothServicesType  {
     let extraData = {} as any
    
     try {
-      if(data['PPG']!= undefined){   
-        console.log("data.PPG",data.PPG);
-        
+      if(data['PPG']!= undefined){           
         setPPGValue(data.PPG);
       }
     } catch (error) {
@@ -337,8 +336,6 @@ function BluetoothServices():BluetoothServicesType  {
 
     try {
       if(data['TEMP']!= undefined){   
-        console.log("data.TEMP",data.TEMP);
-
         setTempValue(data.TEMP);        
       }
     } catch (error) {
@@ -359,6 +356,15 @@ function BluetoothServices():BluetoothServicesType  {
         throw new Error('Failed to add TEMP data');
       }
     }
+
+    try {
+          if(data['EDA']!= undefined){   
+            setEDAValue(data.EDA[0].EDA);        
+          }
+        } catch (error) {
+          console.log(error,"error from HR");
+          
+        }
 
     if (data['EDA']!= undefined){
       extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}

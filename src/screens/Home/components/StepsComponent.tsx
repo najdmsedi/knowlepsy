@@ -23,7 +23,6 @@ const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', ma
   
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
-      <TouchableOpacity onPress={onPress}>
         <Text style={styles.title}>{title}</Text>
         {connected &&
           <Text style={styles.Steps}>{Steps} <Text style={styles.StepsText}>Steps</Text></Text>
@@ -31,10 +30,9 @@ const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', ma
         {!connected &&
           <>
             <Text style={styles.Steps}>-- <Text style={styles.StepsText}>Steps</Text></Text>
-            <Text style={{ color: '#E84A46',left: 13 }}>offline </Text>
+            <Text style={{ color: '#E84A46' }}>offline </Text>
           </>
         }
-      </TouchableOpacity>
     </LinearGradient>
   );
 };
@@ -57,7 +55,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: -2,
     color: 'black',
-    left: 10
 
   },
   Steps: {

@@ -20,16 +20,16 @@ type ChatScreenProps = {
   otherUserAvatar: string;
 };
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ userId, otherUserId, userAvatar, otherUserAvatar }) => {
+const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
   const flatListRef = useRef<FlatList<Message>>(null);
   const isFocused = useIsFocused();
   const { userInfo } = useContext(AuthContext);
   const { userGuestInfo } = useContext(AuthContext);
-  const defaultAvatar = 'https://placeimg.com/140/140/any';
   let userGuestInfoID = "";
-
+  let userAvatar = "";
+  let otherUserAvatar = "";
   const fetchMessages = useCallback(async () => {
     try {
       const response = await fetch(`${BASE_URL}/messages/${userInfo._id}`);
@@ -114,17 +114,17 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ userId, otherUserId, userAvatar
 
   const renderItem: ListRenderItem<Message> = ({ item }) => (
     <View style={[styles.messageContainer, item.isUser ? styles.messageRight : styles.messageLeft]}>
-      {!item.isUser && 
-      // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
-              <Ionicons name="person-circle" size={20} color="black" />
+      {!item.isUser &&
+        // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
+        <Ionicons name="person-circle" size={20} color="black" />
 
       }
       <View style={[styles.messageBubble, item.isUser ? styles.bubbleRight : styles.bubbleLeft]}>
         <Text style={item.isUser ? styles.textRight : styles.textLeft}>{item.text} </Text>
       </View>
-      {item.isUser && 
-      // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
-      <Ionicons name="person-circle-outline" size={20} color="black" />
+      {item.isUser &&
+        // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
+        <Ionicons name="person-circle-outline" size={20} color="black" />
 
       }
     </View>
@@ -188,13 +188,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#e1e1e1',
   },
   bubbleRight: {
-    backgroundColor: '#0084ff',
+    backgroundColor: '#8356FF',
   },
   textLeft: {
     color: '#000',
   },
   textRight: {
     color: '#fff',
+    
   },
   inputContainer: {
     flexDirection: 'row',

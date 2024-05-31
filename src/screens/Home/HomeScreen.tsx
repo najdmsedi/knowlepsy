@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import WelcomeComponent from './components/WelcomeComponent';
 import ReportComponent from './components/ReportComponent';
@@ -9,7 +9,7 @@ import LastSleepTrackingComponent from './components/LastSleepTrackingComponent'
 import StressLevelComponent from './components/StressLevelComponent';
 import { AuthContext } from '../../context/AuthContext';
 import { useRecoilValue } from 'recoil';
-import { BPMAtom, StepsAtom, TempAtom } from './../../atoms';
+import { BPMAtom, EDAValueAtom, PPGValueAtom, StepsAtom, TempAtom } from './../../atoms';
 import ConstantBar from '../../components/BleutoothButton';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from "react-native-push-notification";
@@ -25,6 +25,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const Temp = useRecoilValue(TempAtom);
   const Steps = useRecoilValue(StepsAtom);
   const { userInfo } = useContext(AuthContext);
+  const { userGuestInfo } = useContext(AuthContext);
+
+  const PPGValue = useRecoilValue(PPGValueAtom) as any;
+  const EDAValue = useRecoilValue(EDAValueAtom) as any;
+
+  const [iconStress, setIconStress] = useState("happy");
+  const [colorStress, setColorStress] = useState("#3AA50E");
 
   useEffect(() => {
     if (userInfo.role === 'patient') {
@@ -34,65 +41,73 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       });
     } else if (userInfo.role === 'doctor') {
       navigation.setOptions({
-        headerShown: false, // This will completely remove the header
+        headerShown: false,
       });
     }
   }, [userInfo.role, navigation]);
 
   const chat = async () => {
-    console.log(userInfo);
-    if (userInfo.role === "patient") {
-      if (userInfo.doctorId == null) {
-        navigation.navigate('Patient_Doctor');
-      }
-      else {
+    switch (userGuestInfo) {
+      case null:
+        navigation.navigate('Patient_Doctor')
+        break;
+      default:
         navigation.navigate('ChatScreen')
-      }
+        break;
     }
-    else {
-      console.log("userInfo._id", userInfo._id);
-
-      try {
-        const res = await axios.get(`${BASE_URL}/patients/${userInfo._id}`);
-        console.log(res);
-        navigation.navigate('ChatScreen')
-        console.log("nhebech");
-      } catch (error) {
-        const axiosError = error as AxiosError;
-        if (axiosError.response) {
-          console.log('Error data:', axiosError.response.data);
-          console.log('Error status:', axiosError.response.status);
-          console.log('Error headers:', axiosError.response.headers);
-          navigation.navigate('Patient_Doctor');
-          console.log("nheb");
-        } else if (axiosError.request) {
-          console.log('Error request:', axiosError.request);
-        } else {
-          console.log('Error message:', axiosError.message);
-        }
-        console.log('Error config:', axiosError.config);
-      }
-
-    }
-    // PushNotification.localNotification({
-    //   channelId: "channel-id",
-    //   title: "test",
-    //   message: "knowlepsy",
-    // });
   };
+  // PushNotification.localNotification({
+  //   channelId: "channel-id",
+  //   title: "test",
+  //   message: "knowlepsy",
+  // });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log(EDAValue,PPGValue.heart_rate);
+        
+        const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
+          EDA: EDAValue,
+          HeartRate: PPGValue.heart_rate,
+        });
+        console.log('API Response:', response.data.stress_level);
+        switch (response.data.stress_level) {
+          case "low":
+            setIconStress("happy")
+            setColorStress("#3AA50E")
+            break;
+          case "medium":
+            setIconStress("happy")
+            setColorStress("#D1837F")
+            break;
+          case "high":
+            setIconStress("sad")
+            setColorStress("#B50F0F")
+            break;
+          default:
+            setIconStress("happy")
+            setColorStress("#3AA50E")
+            break;
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
+    fetchData();
+  }, [PPGValue, EDAValue]);
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <WelcomeComponent welcome='good morning' name={userInfo.firstName} color="#F5F3FF" marginTop={20} />
-        <StressLevelComponent title='Stress Level' color="#FAF9FE" marginTop={25} status='happy' statusColor='#3AA50E' />
+        <StressLevelComponent title='Stress Level' color="#FAF9FE" marginTop={25} status={iconStress} statusColor={colorStress} />
         <ReportComponent handleButtonPress={chat} color="#FCF2F5" marginTop={160} height={120} />
-        <Text style={styles.text}>Tap to see details </Text>
+        <Text style={{ ...styles.text, fontWeight: '900' }}>Tap to see details </Text>
         <TemperatureLevelComponent wirst={parseFloat(Temp)} title="Temperature" marginTop={330} />
         {/* <TemperatureComponent wrist={Temp} title="Temperature" marginTop={330} /> */}
         <HeartrateComponent BPM={BPM} title="Heart Rate" marginTop={330} height={118} />
         <StepsComponent Steps={Steps} title="Steps" marginTop={462} height={118} />
-        <Text style={styles.text1}>Sleep details </Text>
+        <Text style={{ ...styles.text1, fontWeight: '900' }} >Sleep quality </Text>
         <LastSleepTrackingComponent title="Last Sleep Tracking" marginTop={600} />
       </ScrollView>
     </LinearGradient>
@@ -122,7 +137,7 @@ const styles = StyleSheet.create({
     color: 'black',
     // marginVertical: 100,
     bottom: -550,
-    right: 135
+    right: 135,
   },
   textB: {
     fontSize: 13,

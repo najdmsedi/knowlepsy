@@ -2,13 +2,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/Home/HomeScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import SleepTrackScreen from '../screens/sleepTracking/SleepTrackScreen';
 import DeviceScreen from '../screens/Device/DeviceScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ScanScreen from '../components/ScanScreen';
 import { useContext, useEffect } from 'react';
 import BleManager from 'react-native-ble-manager';
-import PushNotification from 'react-native-push-notification';
 import { useSetRecoilState } from 'recoil';
 import { ConnectedAtom } from '../atoms';
 import Temperature from '../screens/Temperature';
@@ -24,7 +22,6 @@ import ChatScreen from '../components/messenger/ChatScreen';
 import Patient_Doctor from '../screens/Patient_Doctor';
 
 const Tab = createBottomTabNavigator();
-// const Stack = createNativeStackNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const homeName = "HomeScreen";
@@ -74,8 +71,18 @@ const HomeStack = ({ navigation }:any) => {
       <Stack.Screen name="Steps" component={Steps} options={{ headerLeft: () => <CustomBackButton />,title: ''}} />
       <Stack.Screen name="HeartRate" component={HeartRate} options={{ headerLeft: () => <CustomBackButton />,title: ''}}/>
       <Stack.Screen name="Stress" component={Stress} options={{ headerLeft: () => <CustomBackButton />,title: ''}}/>
-      <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: ''}}/>
-      <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: ''}}/>
+      <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: 'Edit profile', headerTitleStyle: {
+            color: '#5e2a89',
+            fontSize: 24, 
+            fontWeight: 'bold', 
+          },}}
+      />
+      <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: 'Change Password', headerTitleStyle: {
+            color: '#5e2a89',
+            fontSize: 24, 
+            fontWeight: 'bold', 
+          },}}
+      />
       <Stack.Screen name="Patient_Doctor" component={Patient_Doctor} options={{ headerLeft: () => <CustomBackButton destination='Settings'/>,title: ''}}/>
       <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerLeft: () => <CustomBackButton />,title: ''}}/>
     </Stack.Navigator>
@@ -84,8 +91,6 @@ const HomeStack = ({ navigation }:any) => {
 
 function TabNavigator() {
   const { userInfo } = useContext(AuthContext);
-console.log("useuse",userInfo);
-
   return (
     <Tab.Navigator
       initialRouteName="HomeScreen"
@@ -103,7 +108,7 @@ console.log("useuse",userInfo);
               iconName = focused ? 'settings' : 'settings-outline';
               break;
             default:
-              iconName = 'circle'; // Default icon
+              iconName = 'circle';
               break;
           }
           return <Ionicons name={iconName} size={focused ? 35 : 25} color="#8A57ED" />;
