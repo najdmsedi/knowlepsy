@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
@@ -26,7 +27,10 @@
     "@react-navigation/stack": "^6.3.29",
     "axios": "^1.6.8",
     "bcryptjs": "^2.4.3",
+    "deprecated-react-native-prop-types": "^2.3.0",
     "expo-font": "^12.0.5",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "react": "18.2.0",
     "react-icons": "^5.0.1",
     "react-native": "0.73.6",
@@ -39,6 +43,7 @@
     "react-native-gesture-handler": "^2.16.0",
     "react-native-gifted-charts": "^1.4.10",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-maps": "^0.28.0",
     "react-native-modal": "^13.0.1",
     "react-native-paper": "^5.12.3",
     "react-native-push-notification": "^8.1.1",

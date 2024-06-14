@@ -59,16 +59,9 @@ export default function SettingsScreen() {
 
   const handleEditProfile = () => { navigation.navigate('EditProfile') }
   const handleChangePassword = () => { navigation.navigate('ChangePassword') }
-  // const handlePatient_DoctorPassword = () => {
-  //   switch (userGuestInfo) {
-  //     case null:
-  //       navigation.navigate('Patient_Doctor')
-  //       break;
-  //    default:
-  //       navigation.navigate('ChatScreen')
-  //       break;
-  //   }
-  // }
+  const handleDoctorPress = () => {
+  
+  }
 
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
@@ -89,7 +82,7 @@ export default function SettingsScreen() {
 
         <Text style={styles.UseraccountbuttonText}>User account </Text>
         <GenericButton buttonText='Edit Profile' onPress={handleEditProfile} icon='caret-forward-outline' top={-10} />
-        {/* <GenericButton buttonText={messengerText} onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} /> */}
+        <GenericButton buttonText="Doctor" onPress={handleDoctorPress} icon='caret-forward-outline' top={3} />
 
         <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
         <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={12} />

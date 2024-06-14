@@ -123,7 +123,7 @@ const InvitationPage = () => {
     if (invitations.length === 0) {
         return (
             <View style={styles.container}>
-                <Text style={styles.noDataText}>No invitations found</Text>
+                <Text style={styles.noDataText}>No invitations found </Text>
             </View>
         );
     }
@@ -153,6 +153,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        justifyContent: 'center',
     },
     errorText: {
         color: 'red',
@@ -161,7 +162,11 @@ const styles = StyleSheet.create({
     noDataText: {
         color: 'black',
         fontSize: 16,
+        textAlign: 'center', 
+        justifyContent: 'center',
+        alignSelf: 'center',
     },
+    
     status: {
         fontSize: 12,
         color: 'gray',

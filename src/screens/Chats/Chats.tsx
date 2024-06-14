@@ -20,6 +20,8 @@ interface Connection {
   doctorId: string;
   doctorEmail: string;
   doctorName: string;
+  lastMessage: string;
+  lastMessageTime: Date;
 }
 
 const Chats = () => {
@@ -114,8 +116,16 @@ const Chats = () => {
       return () => {};
     }, [userInfo])
   );
-
+  const formatTime = (isoString: string | number | Date) => {
+    const date = new Date(isoString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+  
   const GoToChat = (item:any) =>{
+console.log(item.lastMessageTime)
+
     console.log("renderPatientItem",item);
     navigation.navigate('ChatScreen', { item });
   }
@@ -130,9 +140,9 @@ const Chats = () => {
         </View>
         <ListItem.Content>
           <ListItem.Title>{item.doctorName}</ListItem.Title>
-          <ListItem.Subtitle>hello</ListItem.Subtitle>
+          <ListItem.Subtitle>{item.lastMessage} </ListItem.Subtitle>
         </ListItem.Content>
-        <Text style={styles.time}>10:26 </Text>
+        <Text style={styles.time}>{item.lastMessageTime ? formatTime(item.lastMessageTime) : ''} </Text>
       </ListItem>
     </TouchableOpacity>
   );
@@ -147,9 +157,9 @@ const Chats = () => {
         </View>
         <ListItem.Content>
           <ListItem.Title>{item.patientName}</ListItem.Title>
-          <ListItem.Subtitle>hello</ListItem.Subtitle>
+          <ListItem.Subtitle>{item.lastMessage} </ListItem.Subtitle>
         </ListItem.Content>
-        <Text style={styles.time}>10:26 </Text>
+        <Text style={styles.time}>{item.lastMessageTime ? formatTime(item.lastMessageTime) : ''} </Text>
       </ListItem>
     </TouchableOpacity>
   );
@@ -159,7 +169,7 @@ const Chats = () => {
       <View style={styles.header}>
         <Pressable onPress={() => navigation.navigate('InvitationPage')}>
           <View style={styles.iconContainer}>
-            <Ionicons name="notifications-outline" size={35} color="#8A57ED" style={styles.icon} />
+            <Ionicons name="people-outline" size={35} color="#8A57ED" style={styles.icon} />
             {notificationCount > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{notificationCount}</Text>
@@ -204,7 +214,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   icon: {
-    transform: [{ rotate: '15deg' }],
+    // transform: [{ rotate: '15deg' }],
   },
   badge: {
     position: 'absolute',

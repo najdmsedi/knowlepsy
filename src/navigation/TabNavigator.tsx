@@ -21,6 +21,7 @@ import { AuthContext } from '../context/AuthContext';
 import ChatScreen from '../components/messenger/ChatScreen';
 import Chats from '../screens/Chats/Chats';
 import Map from '../screens/Map/Map';
+import Notification from '../screens/Notification/Notification';
 
 import InviteDoctor from '../screens/InviteDoctor';
 import PushNotificationConfig from './../../src/services/NotificationService';
@@ -54,6 +55,7 @@ export type RootStackParamList = {
   InviteDoctor: undefined;
   InvitationPage: undefined;
   Map: undefined;
+  Notification: undefined;
 };
 
 type RootTabParamList = {
@@ -215,6 +217,9 @@ function TabNavigator() {
             case "Map":
               iconName = focused ? 'map' : 'map-outline';
               break;
+            case "Notification":
+              iconName = focused ? 'notifications' : 'notifications-outline';
+              break;
             default:
               iconName = 'circle';
               break;
@@ -235,7 +240,7 @@ function TabNavigator() {
           <Tab.Screen name="HomeScreen" component={HomeStack} options={{ headerShown: false, tabBarLabel: '' }} />
           <Tab.Screen name="Map" component={Map} options={{ headerShown: false, tabBarLabel: '' }} />
           <Tab.Screen name="Chats" component={Chats} options={{ headerShown: false, tabBarLabel: '' }} />
-
+          <Tab.Screen name="Notification" component={Notification} options={{ headerShown: false, tabBarLabel: '' }} />
           <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: '' }} />
         </>
       )}

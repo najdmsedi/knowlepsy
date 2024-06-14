@@ -34,11 +34,15 @@
       android:value="false" />
     <meta-data android:name="com.dieam.reactnativepushnotification.notification_color"
       android:resource="@color/white" />
+    <meta-data
+      android:name="com.google.android.geo.API_KEY"
+      android:value="AIzaSyDP25w3g3i7gbCBCRC88TAHhHxodVnfVF8" />
     <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" />
     <receiver
       android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
     <receiver
-      android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver" android:exported="true">
+      android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver"
+      android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
         <action android:name="android.intent.action.QUICKBOOT_POWERON" />

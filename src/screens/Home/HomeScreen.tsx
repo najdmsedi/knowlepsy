@@ -48,6 +48,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         title: '',
         headerRight: () => <ConstantBar marginRight={104} />,
       });
+      
     } else if (userInfo.role === 'doctor') {
       navigation.setOptions({
         headerShown: false,
