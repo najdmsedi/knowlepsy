@@ -92,7 +92,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
       });
     } else {
       try {
-        const response = await axios.post(`${BASE_URL}/register`, userData, {
+        const response = await axios.post(`${BASE_URL}/auth/register`, userData, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -134,10 +134,10 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
         <View style={styles.container}>
           <Text style={styles.title}>Select Your Role</Text>
           <TouchableOpacity style={styles.roleButton} onPress={() => handleRoleSelection('doctor')}>
-            <Text style={styles.buttonText}>Doctor</Text>
+            <Text style={styles.buttonText}>Caregiver</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.roleButton} onPress={() => handleRoleSelection('patient')}>
-            <Text style={styles.buttonText}>Patient</Text>
+            <Text style={styles.buttonText}>  Patient  </Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>

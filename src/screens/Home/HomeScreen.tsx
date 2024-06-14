@@ -8,7 +8,7 @@ import StepsComponent from './components/StepsComponent';
 import LastSleepTrackingComponent from './components/LastSleepTrackingComponent';
 import StressLevelComponent from './components/StressLevelComponent';
 import { AuthContext } from '../../context/AuthContext';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { BPMAtom, EDAValueAtom, PPGValueAtom, StepsAtom, TempAtom } from './../../atoms';
 import ConstantBar from '../../components/BleutoothButton';
 import LinearGradient from 'react-native-linear-gradient';
@@ -24,6 +24,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const BPM = useRecoilValue(BPMAtom);
   const Temp = useRecoilValue(TempAtom);
   const Steps = useRecoilValue(StepsAtom);
+
+  const setBPM = useSetRecoilState(BPMAtom);
+  const setTemp = useSetRecoilState(TempAtom);
+  const setSteps = useSetRecoilState(StepsAtom);
+
+  const [TempDAte, setTempDAte] = useState("");
+  const [BPMDate, setBPMDate] = useState("");
+  const [StepsDate, setStepsDate] = useState("");
+
   const { userInfo } = useContext(AuthContext);
   const { userGuestInfo } = useContext(AuthContext);
 
@@ -43,18 +52,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       navigation.setOptions({
         headerShown: false,
       });
-    }
+    } 
   }, [userInfo.role, navigation]);
 
   const chat = async () => {
-    switch (userGuestInfo) {
-      case null:
-        navigation.navigate('Patient_Doctor')
-        break;
-      default:
-        navigation.navigate('ChatScreen')
-        break;
-    }
+    // switch (userGuestInfo) {
+    //   case null:
+    //     navigation.navigate('Patient_Doctor')
+    //     break;
+    //   default:
+    //     navigation.navigate('ChatScreen')
+    //     break;
+    // }
   };
   // PushNotification.localNotification({
   //   channelId: "channel-id",
@@ -62,6 +71,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   //   message: "knowlepsy",
   // });
   useEffect(() => {
+    if (userInfo.role === 'patient') {
+
     const fetchData = async () => {
       try {
         console.log(EDAValue,PPGValue.heart_rate);
@@ -95,18 +106,57 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     };
 
     fetchData();
+  }
   }, [PPGValue, EDAValue]);
+
+  // useEffect(() => {
+  //   if (userInfo.role === 'doctor') {
+  //     const fetchData = async () => {
+  //       try {
+  //         console.log('Fetching data...',userGuestInfo._id);
+  //         const urls = {
+  //           // temp: `http://172.187.93.156:3000/Temp/${userGuestInfo._id}`,
+  //           // hr: `http://172.187.93.156:3000/PPG/${userGuestInfo._id}`,
+  //           // steps: `http://172.187.93.156:3000/Steps/${userGuestInfo._id}`
+  //         };
+
+  //         // const tempResponse = await axios.get(urls.temp)
+  //         // const hrResponse = await axios.get(urls.hr)
+  //         // const stepsResponse = await axios.get(urls.steps)
+
+  //         // const Temp = tempResponse.data.data[0].TEMP.wrist;
+  //         // const HR = hrResponse.data.data[0].PPG.heart_rate;
+  //         // const Step = stepsResponse.data.data[0].Motion.steps;
+  //         // setSteps(Step)
+  //         // setBPM(HR) 
+  //         // setTemp(Temp)
+  //         // setStepsDate(stepsResponse.data.data[0].Motion.time)
+  //         // setBPMDate(hrResponse.data.data[0].PPG.time)
+  //         // setTempDAte(tempResponse.data.data[0].TEMP.time)
+
+  //         // console.log(Temp,"TempDAte",TempDAte)
+  //         // console.log(Step,"StepsDate",StepsDate)
+  //         // console.log(BPM,"BPMDate",BPMDate)
+
+  //       } catch (error) {
+  //         console.error('Failed to fetch data:', error);
+  //       }
+  //     };
+  //     fetchData();
+  //     const intervalId = setInterval(fetchData, 15000);
+  //     return () => clearInterval(intervalId);
+  //   }
+  // }, [userInfo.role, userInfo._id]);
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <WelcomeComponent welcome='good morning' name={userInfo.firstName} color="#F5F3FF" marginTop={20} />
         <StressLevelComponent title='Stress Level' color="#FAF9FE" marginTop={25} status={iconStress} statusColor={colorStress} />
-        <ReportComponent handleButtonPress={chat} color="#FCF2F5" marginTop={160} height={120} />
+        {/* <ReportComponent handleButtonPress={chat} color="#FCF2F5" marginTop={160} height={120} /> */}
         <Text style={{ ...styles.text, fontWeight: '900' }}>Tap to see details </Text>
-        <TemperatureLevelComponent wirst={parseFloat(Temp)} title="Temperature" marginTop={330} />
-        {/* <TemperatureComponent wrist={Temp} title="Temperature" marginTop={330} /> */}
-        <HeartrateComponent BPM={BPM} title="Heart Rate" marginTop={330} height={118} />
-        <StepsComponent Steps={Steps} title="Steps" marginTop={462} height={118} />
+        <TemperatureLevelComponent wirst={parseFloat(Temp)} time_forDoctor={TempDAte} title="Temperature" marginTop={210} />
+        <HeartrateComponent BPM={BPM} title="Heart Rate" marginTop={210} height={118} time_forDoctor={BPMDate} />
+        <StepsComponent Steps={Steps} title="Steps" marginTop={341} height={118}  time_forDoctor={StepsDate}/>
         <Text style={{ ...styles.text1, fontWeight: '900' }} >Sleep quality </Text>
         <LastSleepTrackingComponent title="Last Sleep Tracking" marginTop={600} />
       </ScrollView>
@@ -128,7 +178,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',  // Ensure text is centered
     color: 'black',
     // marginVertical: 100,
-    bottom: -270,
+    bottom: -155,
     right: 120
   },
   text1: {
@@ -136,7 +186,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',  // Ensure text is centered
     color: 'black',
     // marginVertical: 100,
-    bottom: -550,
+    bottom: -460,
     right: 135,
   },
   textB: {

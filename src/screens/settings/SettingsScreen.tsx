@@ -17,7 +17,7 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
 export default function SettingsScreen() {
   const { logout } = useContext(AuthContext)
   const { userInfo } = useContext(AuthContext)
-  const { userGuestInfo } = useContext(AuthContext);
+  // const { userGuestInfo } = useContext(AuthContext);
 
   const { disconnectFromDevice } = BluetoothServices();
   const [messengerText, setMessengerText] = useState('');
@@ -36,22 +36,22 @@ export default function SettingsScreen() {
         headerRight: () => <ConstantBar />,
       });
 
-      if (userGuestInfo == null) {
-        setMessengerText('Invite Doctor')
-      } else {
-        setMessengerText('Message Doctor')
-      }
+      // if (userGuestInfo == null) {
+      //   setMessengerText('Invite Doctor')
+      // } else {
+      //   setMessengerText('Message Doctor')
+      // }
 
     } else if (userInfo.role === 'doctor') {
       navigation.setOptions({
         headerShown: false,
       });
 
-      if (userGuestInfo == null) {
-        setMessengerText('Invite Patient')
-      } else {
-        setMessengerText('Message Patient')
-      }
+      // if (userGuestInfo == null) {
+      //   setMessengerText('Invite Patient')
+      // } else {
+      //   setMessengerText('Message Patient')
+      // }
     }
   }, [userInfo.role, navigation]);
   const handleButtonPress = () => { }
@@ -59,16 +59,16 @@ export default function SettingsScreen() {
 
   const handleEditProfile = () => { navigation.navigate('EditProfile') }
   const handleChangePassword = () => { navigation.navigate('ChangePassword') }
-  const handlePatient_DoctorPassword = () => {
-    switch (userGuestInfo) {
-      case null:
-        navigation.navigate('Patient_Doctor')
-        break;
-     default:
-        navigation.navigate('ChatScreen')
-        break;
-    }
-  }
+  // const handlePatient_DoctorPassword = () => {
+  //   switch (userGuestInfo) {
+  //     case null:
+  //       navigation.navigate('Patient_Doctor')
+  //       break;
+  //    default:
+  //       navigation.navigate('ChatScreen')
+  //       break;
+  //   }
+  // }
 
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
@@ -89,7 +89,7 @@ export default function SettingsScreen() {
 
         <Text style={styles.UseraccountbuttonText}>User account </Text>
         <GenericButton buttonText='Edit Profile' onPress={handleEditProfile} icon='caret-forward-outline' top={-10} />
-        <GenericButton buttonText={messengerText} onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} />
+        {/* <GenericButton buttonText={messengerText} onPress={handlePatient_DoctorPassword} icon='caret-forward-outline' top={3} /> */}
 
         <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
         <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={12} />

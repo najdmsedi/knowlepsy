@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ListRenderItem } from 'react-native';
-import { Avatar } from 'react-native-paper';
-import { useIsFocused } from '@react-navigation/native';
+import { RouteProp, useIsFocused, useRoute } from '@react-navigation/native';
 import { BASE_URL } from '../../config';
 import { AuthContext } from '../../context/AuthContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { io } from 'socket.io-client';
+import { RootStackParamList } from '../../navigation/TabNavigator';
 
 type Message = {
   id: string;
@@ -19,35 +20,76 @@ type ChatScreenProps = {
   userAvatar: string;
   otherUserAvatar: string;
 };
+type ChatScreenRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
+  const [userGuestInfoID, setuserGuestInfoID] = useState(" ");
+
   const flatListRef = useRef<FlatList<Message>>(null);
   const isFocused = useIsFocused();
   const { userInfo } = useContext(AuthContext);
-  const { userGuestInfo } = useContext(AuthContext);
-  let userGuestInfoID = "";
-  let userAvatar = "";
-  let otherUserAvatar = "";
+  const route = useRoute<ChatScreenRouteProp>();
+  const { item } = route.params;
+
+  const socket = useRef(io(BASE_URL)).current;
+
+  useEffect(() => {
+    const getuserGuestInfoID = async () => {      
+      try {
+        if(userInfo.role === "patient"){
+          setuserGuestInfoID(item.doctorId) 
+        }
+        else if (userInfo.role === "doctor"){
+          setuserGuestInfoID(item.patientId)
+        }
+      } catch (error) {
+        console.log("getConnection error",error);
+      }
+    } 
+    getuserGuestInfoID()
+  }, [item.doctorId, item.patientId, userInfo.role]);
+
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetch(`${BASE_URL}/messages/${userInfo._id}`);
+      console.log("Starting fetch from:", `${BASE_URL}/messages/${userInfo._id}/${item._id}`);
+      const response = await fetch(`${BASE_URL}/messages/${userInfo._id}/${item._id}`);
+      
       if (!response.ok) {
         throw new Error(`Failed to fetch messages: ${response.statusText}`);
       }
+  
+      console.log("Fetch response status:", response.status);
+  
       const data = await response.json();
-      const formattedMessages = data.map((msg: any) => ({
-        id: msg._id,
-        text: msg.text,
-        isUser: msg.senderId === userInfo._id,
-        avatar: msg.senderId === userInfo._id ? userAvatar : otherUserAvatar,
-      }));
+      console.log("Parsed data:", data);
+  
+      if (!Array.isArray(data)) {
+        throw new Error("Data is not an array");
+      }
+  
+      const formattedMessages = data.map((msg) => {
+        if (!msg._id || !msg.text || !msg.senderId) {
+          throw new Error("Message format is incorrect");
+        }
+  
+        return {
+          id: msg._id,
+          text: msg.text,
+          isUser: msg.senderId === userInfo._id,
+          avatar: msg.senderId === userInfo._id ? userInfo.avatar : item.avatar,
+        };
+      });
+  
+      console.log("Formatted messages:", formattedMessages);
       setMessages(formattedMessages);
-    } catch (error) {
-      console.error('Failed to fetch messages:', error);
+      console.log("Messages set in state successfully");
+      
+    } catch (error: any) {
+      console.error('Error fetching messages:', error);
     }
-  }, [userInfo._id, userAvatar, otherUserAvatar]);
+  }, [userInfo._id, item._id, userInfo.avatar, item.avatar]);
 
   useEffect(() => {
     if (isFocused) {
@@ -55,13 +97,13 @@ const ChatScreen = () => {
     }
   }, [isFocused, fetchMessages]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchMessages();
-    }, 5000);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     fetchMessages();
+  //   }, 5000);
 
-    return () => clearInterval(interval);
-  }, [fetchMessages]);
+  //   return () => clearInterval(interval);
+  // }, [fetchMessages]);
 
   useEffect(() => {
     if (flatListRef.current) {
@@ -69,21 +111,46 @@ const ChatScreen = () => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+      socket.emit('joinRoom', { roomId: item._id });
+    });
+
+    socket.on('receiveMessage', (message) => {
+      console.log('Received message:', message);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: message._id,
+          text: message.text,
+          isUser: message.senderId === userInfo._id,
+          avatar: message.senderId === userInfo._id ? userInfo.avatar : item.avatar,
+        },
+      ]);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from WebSocket server');
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [item._id, socket, userInfo._id, userInfo.avatar, item.avatar]);
+
   const sendMessage = async () => {
     if (!text.trim()) {
       return;
-    }
-    if (userInfo.role === "patient") {
-      userGuestInfoID = userGuestInfo.user._id;
-    } else if (userInfo.role === "doctor") {
-      userGuestInfoID = userGuestInfo._id;
     }
 
     const newMessage = {
       senderId: userInfo._id,
       receiverId: userGuestInfoID,
       text: text,
+      connectionId: item._id
     };
+    console.log("newMessage", newMessage);
 
     try {
       const response = await fetch(`${BASE_URL}/messages`, {
@@ -104,9 +171,13 @@ const ChatScreen = () => {
         id: savedMessage._id,
         text: savedMessage.text,
         isUser: true,
-        avatar: userAvatar,
+        avatar: userInfo.avatar,
       }]);
       setText('');
+
+      // Emit the message via WebSocket
+      socket.emit('sendMessage', newMessage);
+
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -114,19 +185,11 @@ const ChatScreen = () => {
 
   const renderItem: ListRenderItem<Message> = ({ item }) => (
     <View style={[styles.messageContainer, item.isUser ? styles.messageRight : styles.messageLeft]}>
-      {!item.isUser &&
-        // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
-        <Ionicons name="person-circle" size={20} color="black" />
-
-      }
+      {!item.isUser && <Ionicons name="person-circle" size={20} color="black" />}
       <View style={[styles.messageBubble, item.isUser ? styles.bubbleRight : styles.bubbleLeft]}>
         <Text style={item.isUser ? styles.textRight : styles.textLeft}>{item.text} </Text>
       </View>
-      {item.isUser &&
-        // <Avatar.Image size={36} source={{ uri: item.avatar || defaultAvatar }} />
-        <Ionicons name="person-circle-outline" size={20} color="black" />
-
-      }
+      {item.isUser && <Ionicons name="person-circle-outline" size={20} color="black" />}
     </View>
   );
 
@@ -195,7 +258,6 @@ const styles = StyleSheet.create({
   },
   textRight: {
     color: '#fff',
-    
   },
   inputContainer: {
     flexDirection: 'row',

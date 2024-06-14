@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRecoilValue } from 'recoil';
@@ -6,6 +6,7 @@ import { ConnectedAtom } from '../../../atoms';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/TabNavigator';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../../../context/AuthContext';
 
 interface RectangleProps {
   title: string;
@@ -13,26 +14,48 @@ interface RectangleProps {
   marginTop: number;
   height?: number;
   Steps?: any;
+  time_forDoctor?:string;
 }
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, Steps = 0 }) => {
+const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, Steps = 0, time_forDoctor=""}) => {
   const connected = useRecoilValue(ConnectedAtom);
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const onPress = () => {navigation.navigate('Steps')}
-  
+  const onPress = () => { navigation.navigate('Steps') }
+  const { userInfo } = useContext(AuthContext);
+
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
-        <Text style={styles.title}>{title}</Text>
-        {connected &&
-          <Text style={styles.Steps}>{Steps} <Text style={styles.StepsText}>Steps</Text></Text>
-        }
-        {!connected &&
+      <Text style={styles.title}>{title}</Text>
+{/* for patient */}
+
+      {connected && userInfo.role === "patient" &&
+        <Text style={styles.Steps}>{Steps} <Text style={styles.StepsText}>Steps</Text></Text>
+      }
+      {!connected && userInfo.role === "patient" &&
+        <>
+          <Text style={styles.Steps}>-- <Text style={styles.StepsText}>Steps</Text></Text>
+          <Text style={{ color: '#E84A46' }}>offline </Text>
+        </>
+      }
+
+
+{/* for doctor */}
+
+      {userInfo.role === "doctor" && !Steps &&
+        <>
+          <Text style={styles.Steps}>-- <Text style={styles.StepsText}>Steps</Text></Text>
+          <Text style={{ color: '#E84A46' }}>no fetch data </Text>
+        </>
+      }
+
+      {userInfo.role === "doctor" && time_forDoctor && Steps &&
           <>
-            <Text style={styles.Steps}>-- <Text style={styles.StepsText}>Steps</Text></Text>
-            <Text style={{ color: '#E84A46' }}>offline </Text>
+            <Text style={styles.Steps}>{Steps} <Text style={styles.StepsText}>Steps</Text></Text>
+
+            <Text style={{ color: 'gray' }}> {time_forDoctor} </Text>
           </>
-        }
+      }
     </LinearGradient>
   );
 };

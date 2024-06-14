@@ -5,7 +5,7 @@ import axios from 'axios';
 import { BASE_URL } from '../config';
 import CustomAlert from '../components/CustomAlert/CustomAlert';
 
-const Patient_Doctor = () => {
+const InviteDoctor = () => {
   const { userInfo } = useContext(AuthContext);
   const { login } = useContext(AuthContext)
   const [email, setEmail] = useState('');
@@ -36,7 +36,7 @@ const Patient_Doctor = () => {
   const handlePasswordCheck = async (password: string) => {
     try {
       const email = userInfo.email
-      const response = await axios.post(`${BASE_URL}/login`, { email, password })
+      const response = await axios.post(`${BASE_URL}/auth/login`, { email, password })
       if (response) {
         inviteDoctor(password);
       } else {
@@ -49,7 +49,7 @@ const Patient_Doctor = () => {
 
   const inviteDoctor = async (password: string) => {
     try {
-      const response = await axios.post(`${BASE_URL}/assign-doctor`, {
+      const response = await axios.post(`${BASE_URL}/connection/invitDoctor`, {
         patientId: userInfo._id,
         doctorEmail: email,
       });
@@ -85,9 +85,6 @@ const Patient_Doctor = () => {
           </TouchableOpacity>
         </>
       }
-      {userInfo.role === "doctor" &&
-        <Text style={styles.title}>You are not invited to a patient </Text>
-      }
       <CustomAlert
         isVisible={isAlertVisible}
         onClose={hideAlert}
@@ -100,7 +97,7 @@ const Patient_Doctor = () => {
   );
 }
 
-export default Patient_Doctor;
+export default InviteDoctor;
 
 const styles = StyleSheet.create({
   container: {
