@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import WelcomeComponent from './components/WelcomeComponent';
 import ReportComponent from './components/ReportComponent';
 import TemperatureLevelComponent from './components/TemperatureLevelComponent';
@@ -41,6 +41,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const [iconStress, setIconStress] = useState("happy");
   const [colorStress, setColorStress] = useState("#3AA50E");
+  console.log("rrrrrrrrrrrrrrrr",userInfo);
+  const { width, height } = Dimensions.get('window');
 
   useEffect(() => {
     if (userInfo.role === 'patient') {
@@ -74,80 +76,81 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   useEffect(() => {
     if (userInfo.role === 'patient') {
 
-    const fetchData = async () => {
-      try {
-        console.log(EDAValue,PPGValue.heart_rate);
+    // const fetchData = async () => {
+    //   try {
+    //     console.log(EDAValue,PPGValue.heart_rate);
         
-        const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
-          EDA: EDAValue,
-          HeartRate: PPGValue.heart_rate,
-        });
-        console.log('API Response:', response.data.stress_level);
-        switch (response.data.stress_level) {
-          case "low":
-            setIconStress("happy")
-            setColorStress("#3AA50E")
-            break;
-          case "medium":
-            setIconStress("happy")
-            setColorStress("#D1837F")
-            break;
-          case "high":
-            setIconStress("sad")
-            setColorStress("#B50F0F")
-            break;
-          default:
-            setIconStress("happy")
-            setColorStress("#3AA50E")
-            break;
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+    //     const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
+    //       EDA: EDAValue,
+    //       HeartRate: PPGValue.heart_rate,
+    //     });
+    //     console.log('API Response:', response.data.stress_level);
+    //     switch (response.data.stress_level) {
+    //       case "low":
+    //         setIconStress("happy")
+    //         setColorStress("#3AA50E")
+    //         break;
+    //       case "medium":
+    //         setIconStress("happy")
+    //         setColorStress("#D1837F")
+    //         break;
+    //       case "high":
+    //         setIconStress("sad")
+    //         setColorStress("#B50F0F")
+    //         break;
+    //       default:
+    //         setIconStress("happy")
+    //         setColorStress("#3AA50E")
+    //         break;
+    //     }
+    //   } catch (error) {
+    //     console.error('Error fetching data:', error);
+    //   }
+    // };
 
-    fetchData();
+    // fetchData();
   }
   }, [PPGValue, EDAValue]);
 
-  // useEffect(() => {
-  //   if (userInfo.role === 'doctor') {
-  //     const fetchData = async () => {
-  //       try {
-  //         console.log('Fetching data...',userGuestInfo._id);
-  //         const urls = {
-  //           // temp: `http://172.187.93.156:3000/Temp/${userGuestInfo._id}`,
-  //           // hr: `http://172.187.93.156:3000/PPG/${userGuestInfo._id}`,
-  //           // steps: `http://172.187.93.156:3000/Steps/${userGuestInfo._id}`
-  //         };
+  useEffect(() => {
+    if (userInfo.role === 'doctor') {
+      const fetchData = async () => {
+        try {
+          console.log('Fetching data...',userGuestInfo._id);
+          const urls = {
+            temp: `${BASE_URL}/data/getLatestTempData/${userGuestInfo._id}`,
+            hr: `${BASE_URL}/data/getLatestPPGData/${userGuestInfo._id}`,
+            steps: `${BASE_URL}/data/getLatestStepsData/${userGuestInfo._id}`
+          };
 
-  //         // const tempResponse = await axios.get(urls.temp)
-  //         // const hrResponse = await axios.get(urls.hr)
-  //         // const stepsResponse = await axios.get(urls.steps)
+          const tempResponse = await axios.get(urls.temp)
+          const hrResponse = await axios.get(urls.hr)
+          const stepsResponse = await axios.get(urls.steps)
 
-  //         // const Temp = tempResponse.data.data[0].TEMP.wrist;
-  //         // const HR = hrResponse.data.data[0].PPG.heart_rate;
-  //         // const Step = stepsResponse.data.data[0].Motion.steps;
-  //         // setSteps(Step)
-  //         // setBPM(HR) 
-  //         // setTemp(Temp)
-  //         // setStepsDate(stepsResponse.data.data[0].Motion.time)
-  //         // setBPMDate(hrResponse.data.data[0].PPG.time)
-  //         // setTempDAte(tempResponse.data.data[0].TEMP.time)
+          const Temp = tempResponse.data.latestTempData.TEMP.wrist;
+          const HR = hrResponse.data[0].PPG.heart_rate;
+          const Step = stepsResponse.data[0].Motion.steps;
 
-  //         // console.log(Temp,"TempDAte",TempDAte)
-  //         // console.log(Step,"StepsDate",StepsDate)
-  //         // console.log(BPM,"BPMDate",BPMDate)
+          setSteps(Step)
+          setBPM(HR) 
+          setTemp(Temp)
+          setStepsDate(stepsResponse.data[0].Motion.time)
+          setBPMDate(hrResponse.data[0].PPG.time)
+          setTempDAte(tempResponse.data.latestTempData.TEMP.time)
 
-  //       } catch (error) {
-  //         console.error('Failed to fetch data:', error);
-  //       }
-  //     };
-  //     fetchData();
-  //     const intervalId = setInterval(fetchData, 15000);
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [userInfo.role, userInfo._id]);
+          console.log(Temp,"TempDAte",TempDAte)
+          console.log(Step,"StepsDate",StepsDate)
+          console.log(BPM,"BPMDate",BPMDate)
+
+        } catch (error) {
+          console.error('Failed to fetch dataaa:', error);
+        }
+      };
+      fetchData();
+      const intervalId = setInterval(fetchData, 15000);
+      return () => clearInterval(intervalId);
+    }
+  }, [userInfo.role, userInfo._id]);
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>

@@ -32,6 +32,7 @@ import PushNotification from 'react-native-push-notification';
 import Toast from 'react-native-toast-message';
 import { BASE_URL } from '../config';
 import InvitationPage from '../components/messenger/InvitationPage';
+import LocationComponent from '../components/location/LocationComponent';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -250,6 +251,7 @@ function TabNavigator() {
           <Tab.Screen name="DeviceScreen" component={DeviceScreen} options={{ tabBarLabel: '' }} />
           <Tab.Screen name="Chats" component={Chats} options={{ tabBarLabel: '' }} />
           <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: '' }} />
+
         </>
       )}
     </Tab.Navigator>

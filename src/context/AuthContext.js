@@ -50,6 +50,13 @@ export const AuthProvider = ({ children }) => {
                 //     AsyncStorage.setItem('userGuestInfo', JSON.stringify(patientData));
                 // }
 
+                if(userDataResponse.data.data.role === "doctor"){
+                    doctorData = userDataResponse.data.data;
+                    const response = await axios.get(`${BASE_URL}/user/${userDataResponse.data.data.patientIds[0]}`);
+                    setUserGuestInfo(response.data);
+                    AsyncStorage.setItem('userGuestInfo', JSON.stringify(response.data));
+                }
+
                 setUserInfo(userDataResponse.data.data);
                 setUserToken(loginResponse.data.data);
                 AsyncStorage.setItem('userToken', loginResponse.data.data);

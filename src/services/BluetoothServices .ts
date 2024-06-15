@@ -9,6 +9,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom, TempValueAtom, PPGValueAtom, EDAValueAtom } from '../atoms'
 import { useNavigation } from '@react-navigation/native';
 import PushNotification from 'react-native-push-notification';
+import { BASE_URL } from '../config';
 
 type Device = {
   id: string;
@@ -308,7 +309,7 @@ function BluetoothServices():BluetoothServicesType  {
     if(data['PPG']!= undefined){      
       extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
 
-      const response = await fetch('http://172.187.93.156:3000/addPPGData', {
+      const response = await fetch(`${BASE_URL}/data/addPPGData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -322,7 +323,7 @@ function BluetoothServices():BluetoothServicesType  {
 
     if (data['Motion']!= undefined){
       extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
-      const response = await fetch('http://172.187.93.156:3000/addMotionData', {
+      const response = await fetch(`${BASE_URL}/data/addMotionData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -345,7 +346,7 @@ function BluetoothServices():BluetoothServicesType  {
 
     if (data['TEMP']!= undefined){
       extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
-      const response = await fetch('http://172.187.93.156:3000/addTempData', {
+      const response = await fetch(`${BASE_URL}/data/addTempData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -368,7 +369,7 @@ function BluetoothServices():BluetoothServicesType  {
 
     if (data['EDA']!= undefined){
       extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
-      const response = await fetch('http://172.187.93.156:3000/addEdaData', {
+      const response = await fetch(`${BASE_URL}/data/addEdaData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

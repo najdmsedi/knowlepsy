@@ -40,7 +40,7 @@ export const PPGListTimeAtom = atom({
 });
 export const PPGValueAtom = atom({
     key: 'PPGValue',
-    default: {},
+    default: 0,
 });
 
 
@@ -61,5 +61,10 @@ export const TempValueAtom = atom({
 
 export const EDAValueAtom = atom({
     key: 'EDAValue',
-    default: {},
+    default: 0,
+});
+
+export const locationAtom = atom({
+    key: 'location',
+    default: {latitude:0,longitude:0},
 });

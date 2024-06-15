@@ -115,7 +115,7 @@ function App() {
         <AuthProvider>
           <BluetoothModal showModal={showModal} setShowModal={setShowModal} />
           <AppNav />
-          <Toast config={toastConfig as any} />
+          <Toast config={toastConfig as any} />      
         </AuthProvider>
       </RecoilRoot>
     </GestureHandlerRootView>
