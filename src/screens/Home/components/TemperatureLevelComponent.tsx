@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/TabNavigator';
 import { AuthContext } from '../../../context/AuthContext';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 interface RectangleProps {
   title: string;
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 10,
     right: 220,
-    width: 'auto',
+    width: wp('44%'),
     borderRadius: 10,
     marginBottom: 20,
     elevation: 3,
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   title: {
-    fontSize: 18,
+    fontSize: wp('3.5%'),
     fontWeight: 'bold',
     marginBottom: 20,
     color: 'black'

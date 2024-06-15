@@ -15,6 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from "react-native-push-notification";
 import axios, { AxiosError } from 'axios';
 import { BASE_URL } from '../../config';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 type HomeScreenProps = {
   navigation: any;
@@ -155,7 +156,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <WelcomeComponent welcome='good morning' name={userInfo.firstName} color="#F5F3FF" marginTop={20} />
-        <StressLevelComponent title='Stress Level' color="#FAF9FE" marginTop={25} status={iconStress} statusColor={colorStress} />
+        <StressLevelComponent title='Stress Level' color="#FAF9FE" marginTop={3} status={iconStress} statusColor={colorStress} />
         {/* <ReportComponent handleButtonPress={chat} color="#FCF2F5" marginTop={160} height={120} /> */}
         <Text style={{ ...styles.text, fontWeight: '900' }}>Tap to see details </Text>
         <TemperatureLevelComponent wirst={parseFloat(Temp)} time_forDoctor={TempDAte} title="Temperature" marginTop={210} />
@@ -178,21 +179,22 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   text: {
-    fontSize: 16,
-    textAlign: 'center',  // Ensure text is centered
+    fontSize: wp('4%'),
+    textAlign: 'center',
     color: 'black',
-    // marginVertical: 100,
-    bottom: -155,
-    right: 120
+    marginTop: hp('5%'),
+    top: hp('12%'),
+    right: hp('13%')
   },
   text1: {
-    fontSize: 16,
+    fontSize: wp('4%'),
     textAlign: 'center',  // Ensure text is centered
     color: 'black',
-    // marginVertical: 100,
-    bottom: -460,
-    right: 135,
+    // marginTop: hp('5%'),
+    top: hp('44%'),
+    right: hp('15%')
   },
+
   textB: {
     fontSize: 13,
     fontWeight: 'bold',

@@ -5,6 +5,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../../navigation/TabNavigator';
 import { useNavigation } from '@react-navigation/native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 interface RectangleProps {
   title: string;
@@ -17,23 +18,15 @@ interface RectangleProps {
 }
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 120, status, statusColor,marginRight }) => {
+const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 120, status, statusColor, marginRight }) => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const onPress = () => {navigation.navigate('Stress')}
-  
+  const onPress = () => { navigation.navigate('Stress') }
+
   return (
-    <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height, }]}>
+    <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: hp(`${marginTop}%`), height: height, }]}>
       <TouchableOpacity onPress={onPress}>
-          <Text style={styles.title}>{title}</Text>
-
-          <Ionicons name={`${status}-outline`} size={60} color={statusColor} style={{ top: 10 }} />
-
-
-          {/* <Ionicons name={`${status}-outline`} size={60} color={'#3AA50E'} style={{ top: 10 }} />
-
-      <Ionicons name={'happy-outline'} size={60} color={'#D1837F'} style={{ top: 10 }} />
-
-      <Ionicons name={'sad-outline'} size={60} color={'#B50F0F'} style={{ top: 10 }} /> */}
+        <Text style={styles.title}>{title}</Text>
+        <Ionicons name={`${status}-outline`} size={60} color={statusColor} style={{ top: 10 }} />
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -42,9 +35,9 @@ const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightb
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 280,
+    left: 230,
     right: 20,
-    width: 'auto',
+    width: wp('35%'),
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
