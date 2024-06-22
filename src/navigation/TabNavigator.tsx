@@ -8,7 +8,7 @@ import ScanScreen from '../components/ScanScreen';
 import { useContext, useEffect, useState } from 'react';
 import BleManager from 'react-native-ble-manager';
 import { useSetRecoilState } from 'recoil';
-import { ConnectedAtom } from '../atoms';
+import { ConnectedAtom, DominantLevelAtom } from '../atoms';
 import Temperature from '../screens/Temperature';
 import { NavigatorScreenParams, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import Steps from '../screens/Steps';
@@ -33,6 +33,7 @@ import Toast from 'react-native-toast-message';
 import { BASE_URL } from '../config';
 import InvitationPage from '../components/messenger/InvitationPage';
 import LocationComponent from '../components/location/LocationComponent';
+import axios from 'axios';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -113,6 +114,15 @@ const HomeStack = ({ navigation }: any) => {
 function TabNavigator() {
   const { userInfo } = useContext(AuthContext);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
+  const [ppgData, setPpgData] = useState([]);
+  const [EDAData, setEDAData] = useState([]);
+  const [concatenatedData, setConcatenatedData] = useState<any>();
+  const [concatenatedresponse, setConcatenatedresponse] = useState<any>();
+  const [dominantStressLevel, setDominantStressLevel] = useState<string | null>(null);
+  const setDominantLevel = useSetRecoilState(DominantLevelAtom);
+
+  const { patientId } = useContext(AuthContext);
+  const { userGuestInfo } = useContext(AuthContext);
 
   useEffect(() => {
     PushNotificationConfig.configure();
@@ -138,39 +148,33 @@ function TabNavigator() {
         text1: notification?.title,
         text2: notification?.body,
         onPress() {
-          console.log("pressssssssssss", data);
+          handleNotificationClick(data);
         },
       });
     });
 
     const unsubscribeOnNotificationOpenedApp = messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log("unsubscribeOnNotificationOpenedApp");
-
       const { data } = remoteMessage;
       handleNotificationClick(data);
     });
 
     messaging().getInitialNotification().then(remoteMessage => {
-      console.log("messaging().getInitialNotification()");
 
       if (remoteMessage && remoteMessage.data) {
+        console.log("remoteMessage", remoteMessage);
+
         handleNotificationClick(remoteMessage.data);
       }
     });
 
     const getToken = async () => {
-      const token = await messaging().getToken() as any;
-      setFcmToken(token);
-      console.log("Tokens =", token.token);
+      const token = await messaging().getToken();
+      console.log("tokentoken", token);
+
+      return token;
     };
 
-    const checkAndUpdateToken = async (userId: string) => {
-      console.log("lezm netada hna");
-
-      const token = await messaging().getToken() as any;
-      setFcmToken(token.token);
-      console.log("en route f thniaaaa");
-
+    const updateTokenOnServer = async (userId: any, token: any) => {
       const response = await fetch(`${BASE_URL}/user/setFCMToken/${userId}`, {
         method: 'PUT',
         headers: {
@@ -186,15 +190,108 @@ function TabNavigator() {
         console.error('Failed to update FCM token:', result.message);
       }
     };
-    checkAndUpdateToken(userInfo._id)
+
+    const checkAndUpdateToken = async (userId: any) => {
+      const token = await getToken();
+      setFcmToken(token);
+      console.log("Updating token on the server");
+      await updateTokenOnServer(userId, token);
+    };
+
+    checkAndUpdateToken(userInfo._id);
+
+    // Handle token refresh
+    const unsubscribeOnTokenRefresh = messaging().onTokenRefresh(async (newToken) => {
+      setFcmToken(newToken);
+      await updateTokenOnServer(userInfo._id, newToken);
+    });
 
     return () => {
       unsubscribeOnMessage();
       unsubscribeOnNotificationOpenedApp();
-      getToken();
-      checkAndUpdateToken(userInfo._id)
+      unsubscribeOnTokenRefresh();
     };
   }, [userInfo]);
+
+  useEffect(() => {
+    const fetchPpgAndEDAData = async () => {
+      try {
+        const [responsePpg, responseEDA] = await Promise.all([
+          axios.get(`${BASE_URL}/risk-cron/getLatestPpgDataForFiveMinute/${patientId}`),
+          axios.get(`${BASE_URL}/risk-cron/getLatestEDADataForFiveMinute/${patientId}`)
+        ]);
+
+        const ppgData = responsePpg.data;
+        const EDAData = responseEDA.data;
+
+        const extractedDataPpg = ppgData.map((entry: { PPG: { heart_rate: any; }; }) => ({
+          heart_rate: entry.PPG.heart_rate,
+        }));
+
+        const extractedDataEDA = EDAData.map((entry: { EDA: { EDA: any; }[]; }) => ({
+          EDA: entry.EDA[0].EDA,
+        }));
+
+        const minLength = Math.min(extractedDataEDA.length, extractedDataPpg.length);
+        const data = [];
+        for (let i = 0; i < minLength; i++) {
+          data.push({
+            EDA: extractedDataEDA[i].EDA,
+            heart_rate: extractedDataPpg[i].heart_rate
+          });
+        }
+        setConcatenatedData(data);
+
+      } catch (error) {
+        console.error('Error fetching PPG or EDA data:', error);
+      }
+    };
+
+    const determineDominantStressLevel = (dataresponse: any[]) => {
+      const countMap = dataresponse.reduce((acc, level) => {
+        acc[level] = (acc[level] || 0) + 1;
+        return acc;
+      }, {});
+
+      let maxCount = 0;
+      let dominantLevel = null;
+
+      for (const level in countMap) {
+        if (countMap[level] > maxCount) {
+          maxCount = countMap[level];
+          dominantLevel = level;
+        }
+      }
+
+      setDominantStressLevel(dominantLevel);
+    };
+
+    const processDataAndDetermineStress = async () => {
+      await fetchPpgAndEDAData();
+      if (concatenatedData?.length > 0) {
+        const dataresponse = await Promise.all(
+          concatenatedData?.map(async (dataPoint: { EDA: any; heart_rate: any; }) => {
+            const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
+              EDA: dataPoint.EDA,
+              HeartRate: dataPoint.heart_rate,
+            });
+            return response.data.stress_level;
+          })
+        );
+
+        setConcatenatedresponse(dataresponse);
+        determineDominantStressLevel(dataresponse);
+        setDominantLevel(dominantStressLevel as any);
+        console.log("dominantStressLevel",dominantStressLevel);
+
+      }
+    };
+
+    processDataAndDetermineStress();
+    const intervalId = setInterval(processDataAndDetermineStress, 5 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, [patientId]);
 
   return (
     <Tab.Navigator

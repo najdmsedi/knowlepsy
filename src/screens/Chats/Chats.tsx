@@ -29,6 +29,7 @@ const Chats = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [notificationCount, setNotificationCount] = useState(0);
   const [Connection, setConnection] = useState<[]>([]);
+  const { userGuestInfo } = useContext(AuthContext);
 
   useEffect(() => {
     navigation.setOptions({
@@ -112,8 +113,8 @@ const Chats = () => {
 
       if (userInfo.role == "patient") { fetchPendingConnectionsForPatient(); fetchConnectionsForPatient() }
       if (userInfo.role == "doctor") { fetchPendingConnectionsForDoctor(); fetchConnectionsForDoctor() }
-      
-      return () => {};
+
+      return () => { };
     }, [userInfo])
   );
   const formatTime = (isoString: string | number | Date) => {
@@ -122,11 +123,11 @@ const Chats = () => {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   };
-  
-  const GoToChat = (item:any) =>{
-console.log(item.lastMessageTime)
 
-    console.log("renderPatientItem",item);
+  const GoToChat = (item: any) => {
+    console.log(item.lastMessageTime)
+
+    console.log("renderPatientItem", item);
     navigation.navigate('ChatScreen', { item });
   }
 
@@ -187,12 +188,16 @@ console.log(item.lastMessageTime)
         />
       }
 
-      {userInfo.role === "doctor" &&
+      {userInfo.role === "doctor" && userGuestInfo!=null &&
         <FlatList
           data={Connection}
           keyExtractor={(item) => item._id}
           renderItem={renderDoctorItem}
         />
+      }
+      {userInfo.role === "doctor" && userGuestInfo.length === 0 &&
+        <Text style={styles.title}>You have no patient to chat with.</Text>
+
       }
     </View>
   );
@@ -205,6 +210,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#563596',
+    marginBottom: 10,
+    textAlign: 'center',  // Center the text
+  },
+  
   header: {
     flexDirection: 'row',
     justifyContent: 'flex-end',

@@ -1,5 +1,5 @@
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal } from 'react-native';
+import React, { useState } from 'react';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import Fontisto from 'react-native-vector-icons/Fontisto';
@@ -8,6 +8,7 @@ import axios from 'axios';
 import { BASE_URL } from '../../../config';
 import { ImageBackground } from 'react-native';
 import Toast from 'react-native-toast-message';
+import DatePicker from 'react-native-date-picker';
 
 type SettingsScreenProps = {
   navigation: any;
@@ -33,38 +34,48 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
   const [passwordVerify, setPasswordVerify] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
 
+  const [birthday, setBirthday] = useState(new Date());
+  const [open, setOpen] = useState(false);
+
+  const [gender, setGender] = useState('');
+  const [isGenderModalVisible, setGenderModalVisible] = useState(false);
+
   function handleFirstName(e: any) {
     const text = e.nativeEvent.text;
-    setFirstName(text)
+    setFirstName(text);
     setFirstNameVerify(false);
     if (text.length > 1) {
       setFirstNameVerify(true);
     }
   }
+
   function handleLastname(e: any) {
     const text = e.nativeEvent.text;
-    setLastName(text)
+    setLastName(text);
     setLastNameVerify(false);
     if (text.length > 1) {
       setLastNameVerify(true);
     }
   }
+
   function handleEmail(e: any) {
     const text = e.nativeEvent.text;
-    setEmail(text)
+    setEmail(text);
     setEmailVerify(false);
     if (/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(text)) {
       setEmailVerify(true);
     }
   }
+
   function handleMobileNumber(e: any) {
     const text = e.nativeEvent.text;
-    setMobileNumber(text)
+    setMobileNumber(text);
     setMobileNumberVerify(false);
     if (/^\d{8}$/.test(text)) { // Match exactly 8 digits
       setMobileNumberVerify(true);
     }
   }
+
   function handlePassword(e: any) {
     const text = e.nativeEvent.text;
     setPassword(text);
@@ -75,6 +86,16 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
     }
   }
 
+  const handleBirthdayConfirm = (date: Date) => {
+    setOpen(false);
+    setBirthday(date);
+  };
+
+  const handleGender = (value: string) => {
+    setGender(value);
+    setGenderModalVisible(false);
+  };
+
   const Register = async () => {
     const userData = {
       firstName: firstname,
@@ -82,14 +103,17 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
       email,
       password,
       mobileNumber,
+      birthdayDate: birthday.toISOString().split('T')[0],
+      gender,
       role
     };
     console.log("userData", userData);
-    if (userData.firstName.length === 0 || userData.lastName.length === 0 || userData.email.length === 0 || userData.mobileNumber.length === 0 || userData.password.length === 0) {
+    if (userData.firstName.length === 0 || userData.lastName.length === 0 || userData.email.length === 0 || userData.mobileNumber.length === 0 || userData.password.length === 0 || userData.birthdayDate.length === 0 || userData.gender.length === 0) {
       Toast.show({
         type: 'customErrorToast',
         text1: 'All fields are required !!'
       });
+      console.log("userData", userData);
     } else {
       try {
         const response = await axios.post(`${BASE_URL}/auth/register`, userData, {
@@ -112,12 +136,11 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
         });
       }
     }
-
   };
 
   const handleLogin = () => {
-    navigation.navigate('LoginScreen')
-  }
+    navigation.navigate('LoginScreen');
+  };
 
   const handleRoleSelection = (selectedRole: string) => {
     setRole(selectedRole);
@@ -173,11 +196,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
               )}
             </View>
             {firstname.length < 1 ? null : firstNameVerify ? null : (
-              <Text
-                style={{
-                  marginLeft: 20,
-                  color: 'red',
-                }}>
+              <Text style={{ marginLeft: 20, color: 'red' }}>
                 Name should be more than 1 character.
               </Text>
             )}
@@ -201,11 +220,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
               )}
             </View>
             {lastname.length < 1 ? null : lastNameVerify ? null : (
-              <Text
-                style={{
-                  marginLeft: 20,
-                  color: 'red',
-                }}>
+              <Text style={{ marginLeft: 20, color: 'red' }}>
                 Name should be more than 1 character.
               </Text>
             )}
@@ -230,11 +245,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
               )}
             </View>
             {email.length < 1 ? null : emailVerify ? null : (
-              <Text
-                style={{
-                  marginLeft: 20,
-                  color: 'red',
-                }}>
+              <Text style={{ marginLeft: 20, color: 'red' }}>
                 Enter a proper email address
               </Text>
             )}
@@ -260,11 +271,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
               )}
             </View>
             {mobileNumber.length < 1 ? null : mobileNumberVerify ? null : (
-              <Text
-                style={{
-                  marginLeft: 20,
-                  color: 'red',
-                }}>
+              <Text style={{ marginLeft: 20, color: 'red' }}>
                 Phone number should be exactly 8 digits.
               </Text>
             )}
@@ -280,34 +287,64 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 {password.length < 1 ? null : showPassword ? (
-                  <Feather
-                    name="eye-off"
-                    style={{ marginRight: -10 }}
-                    color={passwordVerify ? 'green' : 'red'}
-                    size={23}
-                  />
+                  <Feather name="eye-off" style={{ marginRight: -10 }} color={passwordVerify ? 'green' : 'red'} size={23} />
                 ) : (
-                  <Feather
-                    name="eye"
-                    style={{ marginRight: -10 }}
-                    color={passwordVerify ? 'green' : 'red'}
-                    size={23}
-                  />
+                  <Feather name="eye" style={{ marginRight: -10 }} color={passwordVerify ? 'green' : 'red'} size={23} />
                 )}
               </TouchableOpacity>
             </View>
             {password.length < 1 ? null : passwordVerify ? null : (
-              <Text
-                style={{
-                  marginLeft: 20,
-                  color: 'red',
-                }}>
+              <Text style={{ marginLeft: 20, color: 'red' }}>
                 Password must contain uppercase, lowercase, number and be at least 6 characters long.
               </Text>
             )}
 
+            <View style={styles.action}>
+              <FontAwesome name="calendar" color="#5e2a89" style={styles.smallIcon} />
+              <TouchableOpacity onPress={() => setOpen(true)} style={styles.textInput}>
+                <Text style={{ color: birthday ? 'white' : '#e0e0e0' }}>
+                  {birthday ? birthday.toISOString().split('T')[0] : 'Select Birthday'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <DatePicker
+              modal
+              open={open}
+              date={birthday}
+              mode="date"
+              onConfirm={handleBirthdayConfirm}
+              onCancel={() => setOpen(false)}
+            />
+
+            <View style={styles.action}>
+              <FontAwesome name="transgender" color="#5e2a89" style={styles.smallIcon} />
+              <TouchableOpacity onPress={() => setGenderModalVisible(true)} style={styles.textInput}>
+                <Text style={{ color: gender ? 'white' : '#e0e0e0' }}>
+                  {gender ? gender : 'Select Gender'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Modal visible={isGenderModalVisible} transparent={true}>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <TouchableOpacity onPress={() => handleGender('Male')} style={styles.modalButton}>
+                    <Text style={styles.modalButtonText}>Male</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleGender('Female')} style={styles.modalButton}>
+                    <Text style={styles.modalButtonText}>Female</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleGender('Other')} style={styles.modalButton}>
+                    <Text style={styles.modalButtonText}>Other</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setGenderModalVisible(false)} style={styles.modalCancelButton}>
+                    <Text style={styles.modalCancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
           </View>
-          <View >
+          <View>
             <TouchableOpacity style={styles.button} onPress={Register}>
               <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
@@ -326,7 +363,6 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
 
 export default RegisterScreen;
 
-
 const styles = StyleSheet.create({
   scrollViewContent: {
     flexGrow: 1,
@@ -335,7 +371,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 90
+    marginBottom: 100
   },
   button: {
     backgroundColor: '#4A189B',
@@ -378,7 +414,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    marginBottom: 50,
+    marginBottom: 10,
   },
   text_footer: {
     color: '#05375a',
@@ -403,7 +439,6 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   inputContainer: {
-    marginVertical: 10,
     width: '80%',
   },
   header: {
@@ -439,7 +474,6 @@ const styles = StyleSheet.create({
   },
   smallIcon2: {
     fontSize: 40,
-    // marginRight: 10,
   },
   bottomText: {
     color: 'black',
@@ -499,10 +533,44 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
     backgroundColor: '#8356FF',
-    // paddingVertical: 10,
     borderRadius: 10,
-    // flexDirection: 'row',
-    // alignItems: 'center',
     padding: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalButton: {
+    padding: 10,
+    marginVertical: 5,
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#4A189B',
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  modalCancelButton: {
+    padding: 10,
+    marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: 'red',
+    borderRadius: 5,
+  },
+  modalCancelButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });

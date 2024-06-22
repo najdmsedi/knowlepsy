@@ -20,8 +20,8 @@ const Map = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-     console.log("userGuestInfo userGuestInfo",userGuestInfo);
-     
+      console.log("userGuestInfo userGuestInfo", userGuestInfo);
+
     };
 
     fetchUser();
@@ -55,26 +55,50 @@ const Map = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Track Patient Location</Text>
-      <View style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: 35.7398,
-            longitude: 10.7600,
-            latitudeDelta: 1,
-            longitudeDelta: 1,
-          }}
-          showsUserLocation={true}
-          zoomEnabled={true}
-        >
-          <Marker
-            coordinate={{ latitude: location? Number(location?.latitude):0, longitude: location? Number(location?.longitude):40 }}
-            title={userGuestInfo.firstName +" "+ userGuestInfo.lastName}
-            description={userGuestInfo.email}
-          />
-        </MapView>
-      </View>
+      {userGuestInfo!=null &&
+        <>
+          <Text style={styles.title}>Track Patient Location</Text>
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: 35.7398,
+                longitude: 10.7600,
+                latitudeDelta: 1,
+                longitudeDelta: 1,
+              }}
+              showsUserLocation={true}
+              zoomEnabled={true}
+            >
+              <Marker
+                coordinate={{ latitude: location ? Number(location?.latitude) : 0, longitude: location ? Number(location?.longitude) : 40 }}
+                title={userGuestInfo.firstName + " " + userGuestInfo.lastName}
+                description={userGuestInfo.email}
+              />
+            </MapView>
+          </View>
+        </>
+      }
+
+      {userGuestInfo.length === 0 &&
+        <>
+          <Text style={styles.title}>You have no patient to care for.</Text>
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: 35.7398,
+                longitude: 10.7600,
+                latitudeDelta: 1,
+                longitudeDelta: 1,
+              }}
+              showsUserLocation={true}
+              zoomEnabled={true}
+            >
+            </MapView>
+          </View>
+        </>
+      }
     </View>
   );
 };

@@ -9,7 +9,7 @@ import LastSleepTrackingComponent from './components/LastSleepTrackingComponent'
 import StressLevelComponent from './components/StressLevelComponent';
 import { AuthContext } from '../../context/AuthContext';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { BPMAtom, EDAValueAtom, PPGValueAtom, StepsAtom, TempAtom } from './../../atoms';
+import { BPMAtom, DominantLevelAtom, EDAValueAtom, PPGValueAtom, StepsAtom, TempAtom } from './../../atoms';
 import ConstantBar from '../../components/BleutoothButton';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from "react-native-push-notification";
@@ -40,9 +40,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const PPGValue = useRecoilValue(PPGValueAtom) as any;
   const EDAValue = useRecoilValue(EDAValueAtom) as any;
 
+  const DominantLevel = useRecoilValue(DominantLevelAtom) as any;
+
   const [iconStress, setIconStress] = useState("happy");
   const [colorStress, setColorStress] = useState("#3AA50E");
-  console.log("rrrrrrrrrrrrrrrr",userInfo);
+  // console.log("rrrrrrrrrrrrrrrr", userInfo);
   const { width, height } = Dimensions.get('window');
 
   useEffect(() => {
@@ -51,12 +53,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         title: '',
         headerRight: () => <ConstantBar marginRight={104} />,
       });
-      
+
     } else if (userInfo.role === 'doctor') {
       navigation.setOptions({
         headerShown: false,
       });
-    } 
+    }
   }, [userInfo.role, navigation]);
 
   const chat = async () => {
@@ -77,91 +79,97 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   useEffect(() => {
     if (userInfo.role === 'patient') {
 
-    // const fetchData = async () => {
-    //   try {
-    //     console.log(EDAValue,PPGValue.heart_rate);
-        
-    //     const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
-    //       EDA: EDAValue,
-    //       HeartRate: PPGValue.heart_rate,
-    //     });
-    //     console.log('API Response:', response.data.stress_level);
-    //     switch (response.data.stress_level) {
-    //       case "low":
-    //         setIconStress("happy")
-    //         setColorStress("#3AA50E")
-    //         break;
-    //       case "medium":
-    //         setIconStress("happy")
-    //         setColorStress("#D1837F")
-    //         break;
-    //       case "high":
-    //         setIconStress("sad")
-    //         setColorStress("#B50F0F")
-    //         break;
-    //       default:
-    //         setIconStress("happy")
-    //         setColorStress("#3AA50E")
-    //         break;
-    //     }
-    //   } catch (error) {
-    //     console.error('Error fetching data:', error);
-    //   }
-    // };
+      const fetchData = async () => {
+        try {
+          // console.log(EDAValue,PPGValue.heart_rate);
 
-    // fetchData();
-  }
+          // const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
+          //   EDA: EDAValue,
+          //   HeartRate: PPGValue.heart_rate,
+          // });
+          // console.log('API Response:', response.data.stress_level);
+          switch (DominantLevel) {
+            case "low":
+              setIconStress("happy")
+              setColorStress("#3AA50E")
+              break;
+            case "medium":
+              setIconStress("happy")
+              setColorStress("#D1837F")
+              break;
+            case "high":
+              setIconStress("sad")
+              setColorStress("#B50F0F")
+              break;
+            default:
+              setIconStress("happy")
+              setColorStress("#3AA50E")
+              break;
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+
+      fetchData();
+    }
   }, [PPGValue, EDAValue]);
 
   useEffect(() => {
-    if (userInfo.role === 'doctor') {
+    console.log("userGuestInfo",userGuestInfo);
+    
+    if (userInfo.role === 'doctor' && userGuestInfo && userGuestInfo.length > 0) {
       const fetchData = async () => {
         try {
-          console.log('Fetching data...',userGuestInfo._id);
+          console.log('Fetching data...', userGuestInfo._id);
           const urls = {
             temp: `${BASE_URL}/data/getLatestTempData/${userGuestInfo._id}`,
             hr: `${BASE_URL}/data/getLatestPPGData/${userGuestInfo._id}`,
             steps: `${BASE_URL}/data/getLatestStepsData/${userGuestInfo._id}`
           };
-
-          const tempResponse = await axios.get(urls.temp)
-          const hrResponse = await axios.get(urls.hr)
-          const stepsResponse = await axios.get(urls.steps)
-
-          const Temp = tempResponse.data.latestTempData.TEMP.wrist;
-          const HR = hrResponse.data[0].PPG.heart_rate;
-          const Step = stepsResponse.data[0].Motion.steps;
-
-          setSteps(Step)
-          setBPM(HR) 
-          setTemp(Temp)
-          setStepsDate(stepsResponse.data[0].Motion.time)
-          setBPMDate(hrResponse.data[0].PPG.time)
-          setTempDAte(tempResponse.data.latestTempData.TEMP.time)
-
-          console.log(Temp,"TempDAte",TempDAte)
-          console.log(Step,"StepsDate",StepsDate)
-          console.log(BPM,"BPMDate",BPMDate)
-
+  
+          const [tempResponse, hrResponse, stepsResponse] = await Promise.all([
+            axios.get(urls.temp),
+            axios.get(urls.hr),
+            axios.get(urls.steps)
+          ]);
+  
+          const Temp = tempResponse.data.latestTempData?.TEMP?.wrist;
+          const HR = hrResponse.data[0]?.PPG?.heart_rate;
+          const Step = stepsResponse.data[0]?.Motion?.steps;
+  
+          setSteps(Step);
+          setBPM(HR);
+          setTemp(Temp);
+          setStepsDate(stepsResponse.data[0]?.Motion?.time);
+          setBPMDate(hrResponse.data[0]?.PPG?.time);
+          setTempDAte(tempResponse.data.latestTempData?.TEMP?.time);
+  
+          console.log(Temp, "TempDate", tempResponse.data.latestTempData?.TEMP?.time);
+          console.log(Step, "StepsDate", stepsResponse.data[0]?.Motion?.time);
+          console.log(HR, "BPMDate", hrResponse.data[0]?.PPG?.time);
         } catch (error) {
-          console.error('Failed to fetch dataaa:', error);
+          console.error('Failed to fetch data:', error);
         }
       };
+  
       fetchData();
       const intervalId = setInterval(fetchData, 15000);
       return () => clearInterval(intervalId);
     }
-  }, [userInfo.role, userInfo._id]);
+  }, [userInfo.role, userGuestInfo]);
+  
+   
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <WelcomeComponent welcome='good morning' name={userInfo.firstName} color="#F5F3FF" marginTop={20} />
-        <StressLevelComponent title='Stress Level' color="#FAF9FE" marginTop={3} status={iconStress} statusColor={colorStress} />
+        <StressLevelComponent title={'Stress Level'} color="#FAF9FE" marginTop={3} status={iconStress} statusColor={colorStress} />
         {/* <ReportComponent handleButtonPress={chat} color="#FCF2F5" marginTop={160} height={120} /> */}
-        <Text style={{ ...styles.text, fontWeight: '900' }}>Tap to see details </Text>
+        <Text style={{ ...styles.text, fontWeight: '900' }}>Tap to see details  </Text>
         <TemperatureLevelComponent wirst={parseFloat(Temp)} time_forDoctor={TempDAte} title="Temperature" marginTop={210} />
         <HeartrateComponent BPM={BPM} title="Heart Rate" marginTop={210} height={118} time_forDoctor={BPMDate} />
-        <StepsComponent Steps={Steps} title="Steps" marginTop={341} height={118}  time_forDoctor={StepsDate}/>
+        <StepsComponent Steps={Steps} title="Steps" marginTop={341} height={118} time_forDoctor={StepsDate} />
         <Text style={{ ...styles.text1, fontWeight: '900' }} >Sleep quality </Text>
         <LastSleepTrackingComponent title="Last Sleep Tracking" marginTop={600} />
       </ScrollView>

@@ -68,3 +68,8 @@ export const locationAtom = atom({
     key: 'location',
     default: {latitude:0,longitude:0},
 });
+
+export const DominantLevelAtom = atom({
+    key: 'DominantLevel',
+    default: false,
+});

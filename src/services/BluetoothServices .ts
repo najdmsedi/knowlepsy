@@ -368,7 +368,11 @@ function BluetoothServices():BluetoothServicesType  {
         }
 
     if (data['EDA']!= undefined){
-      extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...data}
+      const currentDate = new Date();
+      const formattedDate = currentDate.toISOString().split('T')[0];
+      const formattedTime = currentDate.toTimeString().split(' ')[0];
+
+      extraData = {...{userId:userInfo._id},...{firstName:userInfo.firstName},...{lastName:userInfo.lastName},...{email:userInfo.email},...{date:formattedDate},...{time:formattedTime},...data}
       const response = await fetch(`${BASE_URL}/data/addEdaData`, {
         method: 'POST',
         headers: {

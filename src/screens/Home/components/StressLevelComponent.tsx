@@ -35,9 +35,9 @@ const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightb
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 230,
+    left: 270,
     right: 20,
-    width: wp('35%'),
+    width: wp('30px'),
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',

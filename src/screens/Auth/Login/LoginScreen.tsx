@@ -46,21 +46,34 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
-    console.log("email",email);
-    console.log("password",password);
 
     if (email.length === 0 || password.length === 0) {
       Toast.show({
         type: 'customErrorToast',
-        text1: 'please fill the fields!'
+        text1: 'Please fill the fields!',
       });
     } else {
-      Toast.show({
-        type: 'customSuccessToast',
-        text1: 'Login Success'
-      });
-
-      login(email, password)
+      try {
+        const loginSuccess = await login(email, password);
+        console.log("loginSuccess",loginSuccess);
+        
+        if (loginSuccess) {
+          Toast.show({
+            type: 'customSuccessToast',
+            text1: 'Login Success',
+          });
+        } else {
+          Toast.show({
+            type: 'customErrorToast',
+            text1: 'E-mail or password are wrong!',
+          });
+        }
+      } catch (error) {
+        Toast.show({
+          type: 'customErrorToast',
+          text1: 'An error occurred during login!',
+        });
+      }
     }
   };
 
