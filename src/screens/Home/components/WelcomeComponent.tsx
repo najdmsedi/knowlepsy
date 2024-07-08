@@ -15,7 +15,7 @@ const WelcomeComponent: React.FC<RectangleProps> = ({ name, welcome, color = '#A
   const Patient = useRecoilValue<any>(PatientAtom);
   const { userInfo } = useContext(AuthContext);
 
-  console.log("Patient Patient",Patient);
+  // console.log("Patient Patient",Patient);
   
   return (
     <View style={[styles.container, { backgroundColor: color }, { top: marginTop }]}>

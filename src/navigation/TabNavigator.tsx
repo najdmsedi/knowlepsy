@@ -117,16 +117,7 @@ const HomeStack = ({ navigation }: any) => {
 function TabNavigator() {
   const { userInfo } = useContext(AuthContext);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
-  const [ppgData, setPpgData] = useState([]);
-  const [EDAData, setEDAData] = useState([]);
-  const [concatenatedData, setConcatenatedData] = useState<any>();
-  const [concatenatedresponse, setConcatenatedresponse] = useState<any>();
-  const [dominantStressLevel, setDominantStressLevel] = useState<string | null>(null);
-  const setDominantLevel = useSetRecoilState(DominantLevelAtom);
-  const setTimeLevel = useSetRecoilState(TimeLevelAtom);
-  const isConnected = useRecoilValue(ConnectedAtom)
-
-  const { patientId } = useContext(AuthContext);
+ 
   const { userGuestInfo } = useContext(AuthContext);
 
   useEffect(() => {
@@ -218,90 +209,6 @@ function TabNavigator() {
     };
   }, [userInfo]);
 
-  useEffect(() => {
-    if (isConnected) {
-      const fetchPpgAndEDAData = async () => {
-        try {
-          const [responsePpg, responseEDA] = await Promise.all([
-            axios.get(`${BASE_URL}/risk-cron/getLatestPpgDataForFiveMinute/${patientId}`),
-            axios.get(`${BASE_URL}/risk-cron/getLatestEDADataForFiveMinute/${patientId}`)
-          ]);
-
-          const ppgData = responsePpg.data;
-          const EDAData = responseEDA.data;
-
-          const extractedDataPpg = ppgData.map((entry: { PPG: { heart_rate: any; }; }) => ({
-            heart_rate: entry.PPG.heart_rate,
-          }));
-
-          const extractedDataEDA = EDAData.map((entry: { EDA: { EDA: any; }[]; }) => ({
-            EDA: entry.EDA[0].EDA,
-          }));
-          // console.log("EDAData",EDAData[0].time);
-          setTimeLevel(EDAData[0].time)
-          const minLength = Math.min(extractedDataEDA.length, extractedDataPpg.length);
-          const data = [];
-          for (let i = 0; i < minLength; i++) {
-            data.push({
-              EDA: extractedDataEDA[i].EDA,
-              heart_rate: extractedDataPpg[i].heart_rate
-            });
-          }
-          setConcatenatedData(data);
-
-        } catch (error) {
-          console.error('Error fetching PPG or EDA data:', error);
-        }
-      };
-
-      const determineDominantStressLevel = (dataresponse: any[]) => {
-        const countMap = dataresponse.reduce((acc, level) => {
-          acc[level] = (acc[level] || 0) + 1;
-          return acc;
-        }, {});
-
-        let maxCount = 0;
-        let dominantLevel = null;
-
-        for (const level in countMap) {
-          if (countMap[level] > maxCount) {
-            maxCount = countMap[level];
-            dominantLevel = level;
-          }
-        }
-
-        setDominantStressLevel(dominantLevel);
-      };
-
-      const processDataAndDetermineStress = async () => {
-        await fetchPpgAndEDAData();
-        console.log("concatenatedData", concatenatedData);
-
-        if (concatenatedData?.length > 0) {
-          const dataresponse = await Promise.all(
-            concatenatedData?.map(async (dataPoint: { EDA: any; heart_rate: any; }) => {
-              const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
-                EDA: dataPoint.EDA,
-                HeartRate: dataPoint.heart_rate,
-              });
-              return response.data.stress_level;
-            })
-          );
-
-          setConcatenatedresponse(dataresponse);
-          determineDominantStressLevel(dataresponse);
-          setDominantLevel(dominantStressLevel as any);
-          console.log("dominantStressLevel", dominantStressLevel);
-
-        }
-      };
-
-      processDataAndDetermineStress();
-      const intervalId = setInterval(processDataAndDetermineStress, 5 * 60 * 1000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [patientId]);
 
   return (
     <Tab.Navigator

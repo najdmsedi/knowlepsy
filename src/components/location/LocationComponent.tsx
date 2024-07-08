@@ -39,7 +39,7 @@ const LocationComponent: React.FC = () => {
             longitude
         })
             .then(response => {
-                console.log('Location sent successfully', response.data);
+                // console.log('Location sent successfully', response.data);
             })
             .catch(error => {
                 console.error('Error sending location', error);

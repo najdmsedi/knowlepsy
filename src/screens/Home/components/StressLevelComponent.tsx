@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -21,12 +21,15 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
 const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 120, status, statusColor, marginLeft = 0 }) => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const onPress = () => { navigation.navigate('Stress') }
-
+  useEffect(() => {
+    console.log('StressLevelComponent props updated:', { status, statusColor });
+  }, [status, statusColor]);
+  
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: hp(`${marginTop}%`), height: height, marginLeft: marginLeft }]}>
       <TouchableOpacity onPress={onPress}>
         <Text style={styles.title}>{title}</Text>
-        <Ionicons name={`${status}-outline`} size={60} color={"#3AA50E"} style={{ top: 20 }} />
+        <Ionicons name={`${status}-outline`} size={60} color={statusColor} style={{ top: 20 }} />
         <Ionicons name={`alert-circle-outline`} size={25} color={"black"} style={{ top: 10, left: 60 }} />
       </TouchableOpacity>
     </LinearGradient>

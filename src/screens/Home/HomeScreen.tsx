@@ -9,7 +9,7 @@ import LastSleepTrackingComponent from './components/LastSleepTrackingComponent'
 import StressLevelComponent from './components/StressLevelComponent';
 import { AuthContext } from '../../context/AuthContext';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { BPMAtom, DominantLevelAtom, EDAValueAtom, PPGValueAtom, PatientAtom, PatientsAtom, StepsAtom, TempAtom, TimeLevelAtom } from './../../atoms';
+import { BPMAtom, ConnectedAtom, DominantLevelAtom, EDAValueAtom, PPGValueAtom, PatientAtom, PatientsAtom, StepsAtom, TempAtom, TimeLevelAtom } from './../../atoms';
 import ConstantBar from '../../components/BleutoothButton';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from "react-native-push-notification";
@@ -43,32 +43,29 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [BPM, setBPM] = useRecoilState(BPMAtom);
   const [Temp, setTemp] = useRecoilState(TempAtom);
   const [Steps, setSteps] = useRecoilState(StepsAtom);
-
-  // const [BPM, setBPM] = useState("--");
-  // const [Temp, setTemp] = useState("--");
-  // const [Steps, setSteps] = useState("--");
-
   const [TempDAte, setTempDate] = useState("");
   const [BPMDate, setBPMDate] = useState("");
   const [StepsDate, setStepsDate] = useState("");
-
   const { userInfo } = useContext(AuthContext);
   // const { userGuestInfo } = useContext(AuthContext);
-
   const PPGValue = useRecoilValue(PPGValueAtom) as any;
   const EDAValue = useRecoilValue(EDAValueAtom) as any;
-
-  const DominantLevel = useRecoilValue(DominantLevelAtom) as any;
   const TimeLevel = useRecoilValue(TimeLevelAtom)
-
   const [iconStress, setIconStress] = useState("happy");
   const [colorStress, setColorStress] = useState("gray");
   const Patient = useRecoilValue<any>(PatientAtom);
   const setPatient = useSetRecoilState(PatientAtom);
-
   const Patients = useRecoilValue<Patient[]>(PatientsAtom);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedValue, setSelectedValue] = useState(null);
+  const [ppgData, setPpgData] = useState([]);
+  const [EDAData, setEDAData] = useState([]);
+  const [concatenatedData, setConcatenatedData] = useState<any>();
+  const [concatenatedresponse, setConcatenatedresponse] = useState<any>();
+  const [dominantStressLevel, setDominantStressLevel] = useState<string | null>(null);
+  const setTimeLevel = useSetRecoilState(TimeLevelAtom);
   const { width, height } = Dimensions.get('window');
+  const connected = useRecoilValue(ConnectedAtom);
 
   useEffect(() => {
     if (userInfo.role === 'patient') {
@@ -83,15 +80,124 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, [userInfo.role, navigation]);
 
-  const chat = async () => {
-    // chat logic here
-  };
+
+  const isConnected = useRecoilValue(ConnectedAtom)
+  const { patientId } = useContext(AuthContext);
+  const [dominantLevel, setDominantLevel] = useRecoilState(DominantLevelAtom);
 
   useEffect(() => {
-    if (userInfo.role === 'patient') {
-      const fetchData = async () => {
+    console.log("ياتكانوك",isConnected);
+    
+    if(!isConnected){setDominantStressLevel(null)}
+    else if (isConnected) {
+      console.log("azertycaca",isConnected);
+
+      const fetchStessData = async () => {
         try {
-          switch (DominantLevel) {
+          const [responsePpg, responseEDA] = await Promise.all([
+            axios.get(`${BASE_URL}/risk-cron/getLatestPpgDataForFiveMinute/${patientId}`),
+            axios.get(`${BASE_URL}/risk-cron/getLatestEDADataForFiveMinute/${patientId}`)
+          ]);
+   
+          const ppgData = responsePpg.data;
+          const EDAData = responseEDA.data; 
+  
+          const extractedDataPpg = ppgData.map((entry: { PPG: { heart_rate: any; }; }) => ({
+            heart_rate: entry.PPG.heart_rate,
+          }));
+  
+          const extractedDataEDA = EDAData.map((entry: { EDA: { EDA: any; }[]; }) => ({
+            EDA: entry.EDA[0].EDA,
+          }));
+  
+          setTimeLevel(EDAData[0].time)
+          const minLength = Math.min(extractedDataEDA.length, extractedDataPpg.length);
+          const data = [];
+          for (let i = 0; i < minLength; i++) {
+            data.push({
+              EDA: extractedDataEDA[i].EDA,
+              heart_rate: extractedDataPpg[i].heart_rate
+            });
+          }
+          setConcatenatedData(data);
+  
+        } catch (error) {
+          console.error('Error fetching PPG or EDA data:', error);
+        }
+      };
+  
+      const determineDominantStressLevel = (dataresponse: any[]) => {
+        console.log("determineDominantStressLevel ",dataresponse);
+        
+        const countMap = dataresponse.reduce((acc, level) => {
+          console.log("countMap ",dataresponse);
+
+          acc[level] = (acc[level] || 0) + 1;
+          return acc;
+        }, {});
+  
+        let maxCount = 0;
+        let dominantLevel = null;
+  
+        for (const level in countMap) {
+          console.log("level ",level);
+
+          if (countMap[level] > maxCount) {
+            maxCount = countMap[level];
+            dominantLevel = level;
+          }
+        }
+        console.log("determineDominantStressLevel ",dominantLevel);
+
+        setDominantStressLevel(dominantLevel);
+      }; 
+  
+      const processDataAndDetermineStress = async () => {
+        await fetchStessData();
+        console.log("concatenatedData", concatenatedData);
+  
+        if (concatenatedData?.length > 0) {
+          const dataresponse = await Promise.all(
+            concatenatedData?.map(async (dataPoint: { EDA: any; heart_rate: any; }) => {
+              const response = await axios.post('http://172.187.93.156:5000/Young_predict', {
+                EDA: dataPoint.EDA,
+                HeartRate: dataPoint.heart_rate,
+              });
+              return response.data.stress_level;
+            })
+          );
+  
+          setConcatenatedresponse(dataresponse);
+          determineDominantStressLevel(dataresponse);
+          setDominantLevel(dominantStressLevel as any);
+          console.log("dominantStressLevel", dominantStressLevel);
+        }
+      };
+  
+      processDataAndDetermineStress();
+      const intervalId = setInterval(processDataAndDetermineStress, 60 * 1000); // Run every minute
+  
+      return () => clearInterval(intervalId);
+    }
+   
+  }, [patientId, isConnected]);
+  
+  useEffect(() => {
+    if (userInfo.role === 'patient') {
+      console.log("DominantLevel", dominantLevel);
+
+      if (connected) {
+        setIconStress("happy");
+        setColorStress("#3AA50E");
+    } else { 
+        setIconStress("sad");
+        setColorStress("#bcbcbc"); 
+    }
+ 
+
+      const fetchData = async (dominantLevel: any) => {
+        try {
+          switch (dominantLevel) {
             case "low":
               setIconStress("happy");
               setColorStress("#3AA50E");
@@ -99,14 +205,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             case "medium":
               setIconStress("happy");
               setColorStress("#D1837F");
-              break;
+              break; 
             case "high":
               setIconStress("sad");
               setColorStress("#B50F0F");
               break;
             default:
               setIconStress("happy");
-              setColorStress("#bcbcbc");
+              setColorStress("#3AA50E");
               break;
           }
         } catch (error) {
@@ -114,9 +220,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         }
       };
 
-      fetchData();
+      fetchData(dominantLevel);
     }
-  }, [PPGValue, EDAValue]);
+  }, [PPGValue, EDAValue,dominantLevel]);
 
   const fetchPatientData = (patient: any) => {
     if (userInfo.role === 'caireGiver' && patient) {
@@ -146,7 +252,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           setBPMDate(hrResponse.data[0]?.PPG?.time || '');
           setTempDate(tempResponse.data.latestTempData?.TEMP?.time || '');
         } catch (error) {
-          // console.error('Failed to fetch data:', error);
           setSteps('--');
           setBPM('--');
           setTemp('--');
@@ -161,16 +266,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       return () => clearInterval(intervalId);
     }
   }
-  useEffect(() => {
-    console.log("userGuestInfo_", Patient._id);
 
+  useEffect(() => {
     if (userInfo.role === "caireGiver") {
       fetchPatientData(Patient)
     }
   }, [Patient]);
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(null);
 
 
   const changePatient = (option: {}) => {
@@ -181,16 +282,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     setStepsDate("");
     setBPMDate("");
     setTempDate("");
-
-    // Use a timeout to ensure state updates before fetching new data
     setTimeout(() => {
       setPatient(option);
     }, 0);
-
-    console.log(".length", Patients);
-    console.log("-----------------------------------------------------------------------");
-  
-    console.log("-----------------------------------------------------------------------");
   };
 
   const getStylesForRole = (role: string) => {
@@ -199,13 +293,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     } else if (role === "caireGiver") {
       return styles.text2;
     }
-    return styles.container; // Default style if role is neither patient nor caregiver
+    return styles.container;
   };
-  const get = () => {
-    console.log("BPM", BPM);
-    console.log("Temp", Temp);
-    console.log("Steps", Steps);
-  }
+
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>

@@ -5,8 +5,8 @@ import BleManager from 'react-native-ble-manager';
 import UtilsDate from './UtilDate';
 import { Buffer } from 'buffer';
 import { AuthContext } from '../context/AuthContext';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom, TempValueAtom, PPGValueAtom, EDAValueAtom } from '../atoms'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { BPMAtom, TempAtom, StepsAtom, ConnectedAtom, DeviceNameAtom, TempValueAtom, PPGValueAtom, EDAValueAtom, DominantLevelAtom } from '../atoms'
 import { useNavigation } from '@react-navigation/native';
 import PushNotification from 'react-native-push-notification';
 import { BASE_URL } from '../config';
@@ -52,6 +52,7 @@ function BluetoothServices():BluetoothServicesType  {
   const [dataSubscriptionListener, setDataSubscriptionListener] = useState(null);
   const [connectedDevice, setConnectedDevice] = useState<any | null>(null);
   const navigation = useNavigation();
+  const [dominantLevel, setDominantLevel] = useRecoilState(DominantLevelAtom as any);
 
   const { BleManagerModule } = NativeModules;
   const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -145,6 +146,7 @@ function BluetoothServices():BluetoothServicesType  {
       setIsConnected(true)
       //recoil
       setConnected(true)
+      setDominantLevel("low")
       setDevice((prevBPM) => device.advertising.localName || prevBPM);
       PushNotification.localNotification({
         channelId: "channel-id",
@@ -162,6 +164,8 @@ function BluetoothServices():BluetoothServicesType  {
     setSteps('--');
     setTemp('--');
     setConnected(false)
+    setDominantLevel(null)
+
     //FIX_ME
     const connectedPeripherals = await BleManager.getConnectedPeripherals([]);
     if (connectedPeripherals.length > 0) {

@@ -42,10 +42,10 @@ const Map = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      console.log("userGuestInfo userGuestInfo", Patients);
+      // console.log("userGuestInfo userGuestInfo", Patients);
 
     };
-    console.log("location location", locations);
+    // console.log("location location", locations);
 
     fetchUser();
   }, []);
@@ -78,7 +78,7 @@ const Map = () => {
 
       // Loop through each patient ID and fetch the location
       for (const patient of Patients as any) {
-        console.log("patient patient patient patient", patient);
+        // console.log("patient patient patient patient", patient);
 
         const response = await axios.get(`${BASE_URL}/GPS/GPS/${patient._id}`);
         allLocations.push({
@@ -86,7 +86,7 @@ const Map = () => {
           location: response.data
         }); // Store each patient's location with their ID
       }
-      console.log("allLocations allLocations", allLocations);
+      // console.log("allLocations allLocations", allLocations);
 
       // Update the state with all fetched locations
       setLocations(allLocations);
