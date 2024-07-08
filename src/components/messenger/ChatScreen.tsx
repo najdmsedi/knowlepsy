@@ -39,9 +39,9 @@ const ChatScreen = () => {
     const getuserGuestInfoID = async () => {      
       try {
         if(userInfo.role === "patient"){
-          setuserGuestInfoID(item.doctorId) 
+          setuserGuestInfoID(item.caireGiverId) 
         }
-        else if (userInfo.role === "doctor"){
+        else if (userInfo.role === "caireGiver"){
           setuserGuestInfoID(item.patientId)
         }
       } catch (error) {
@@ -49,7 +49,7 @@ const ChatScreen = () => {
       }
     } 
     getuserGuestInfoID()
-  }, [item.doctorId, item.patientId, userInfo.role]);
+  }, [item.caireGiverId, item.patientId, userInfo.role]);
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -96,14 +96,6 @@ const ChatScreen = () => {
       fetchMessages();
     }
   }, [isFocused, fetchMessages]);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     fetchMessages();
-  //   }, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, [fetchMessages]);
 
   useEffect(() => {
     if (flatListRef.current) {
@@ -195,6 +187,14 @@ const ChatScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        {userInfo.role === "patient" &&
+        <Text style={styles.headerText}>{item.caireGiverName}</Text>
+      }
+      {userInfo.role === "caireGiver" &&
+        <Text style={styles.headerText}>{item.patientName}</Text>
+      }
+      </View>
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -225,6 +225,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  header: {
+    padding: 10,
+    backgroundColor: '#8356FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   messagesList: {
     flex: 1,

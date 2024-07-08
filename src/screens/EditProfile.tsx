@@ -1,5 +1,5 @@
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useContext, useState } from 'react'
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
 import { BASE_URL } from '../config';
@@ -8,80 +8,98 @@ import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import { AuthContext } from '../context/AuthContext';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/TabNavigator';
+import { useNavigation } from '@react-navigation/native';
+import DatePicker from 'react-native-date-picker';
 
 type SettingsScreenProps = {
   navigation: any;
 };
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-function EditProfile({ navigation }: SettingsScreenProps) {
-  const [role, setRole] = useState('');
-  const { userInfo } = useContext(AuthContext);
+function EditProfile({}: SettingsScreenProps) {
+  const { userInfo, login, password } = useContext(AuthContext);
 
-  const [firstname, setFirstName] = useState('');
-  const [firstNameVerify, setFirstNameVerify] = useState(false);
+  const [firstname, setFirstName] = useState(userInfo.firstName);
+  const [firstNameVerify, setFirstNameVerify] = useState(true);
 
-  const [lastname, setLastName] = useState('');
-  const [lastNameVerify, setLastNameVerify] = useState(false);
+  const [lastname, setLastName] = useState(userInfo.lastName);
+  const [lastNameVerify, setLastNameVerify] = useState(true);
 
-  const [email, setEmail] = useState('');
-  const [emailVerify, setEmailVerify] = useState(false);
+  const [email, setEmail] = useState(userInfo.email);
+  const [emailVerify, setEmailVerify] = useState(true);
 
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [mobileNumberVerify, setMobileNumberVerify] = useState(false);
+  const [mobileNumber, setMobileNumber] = useState(userInfo.mobileNumber);
+  const [mobileNumberVerify, setMobileNumberVerify] = useState(true);
 
-  const [password, setPassword] = useState('');
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+
+  const [birthday, setBirthday] = useState(new Date(userInfo.birthdayDate));
+  const [open, setOpen] = useState(false);
+
+
+  const reLogin = async (password: string) => {
+    try {
+      console.log("userInfo.email",userInfo.email);
+      
+      await login(userInfo.email, password);
+    } catch (error) {
+      console.log('Error re-logging in:', error);
+    }
+  };
+
+  useEffect(() => {
+    setFirstName(userInfo.firstName);
+    setLastName(userInfo.lastName);
+    setEmail(userInfo.email);
+    setMobileNumber(userInfo.mobileNumber);
+  }, [userInfo]);
 
   function handleFirstName(e: any) {
     const text = e.nativeEvent.text;
-    setFirstName(text)
-    setFirstNameVerify(false);
-    if (text.length > 1) {
-      setFirstNameVerify(true);
-    }
-  }
-  function handleLastname(e: any) {
-    const text = e.nativeEvent.text;
-    setLastName(text)
-    setLastNameVerify(false);
-    if (text.length > 1) {
-      setLastNameVerify(true);
-    }
-  }
-  function handleEmail(e: any) {
-    const text = e.nativeEvent.text;
-    setEmail(text)
-    setEmailVerify(false);
-    if (/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(text)) {
-      setEmailVerify(true);
-    }
-  }
-  function handleMobileNumber(e: any) {
-    const text = e.nativeEvent.text;
-    setMobileNumber(text)
-    setMobileNumberVerify(false);
-    if (/^\d{8}$/.test(text)) {
-      setMobileNumberVerify(true);
-    }
+    setFirstName(text);
+    setFirstNameVerify(text.length > 1);
   }
 
-  const Register = async () => {
+  function handleLastname(e: any) {
+    const text = e.nativeEvent.text;
+    setLastName(text);
+    setLastNameVerify(text.length > 1);
+  }
+
+  function handleEmail(e: any) {
+    const text = e.nativeEvent.text;
+    setEmail(text);
+    setEmailVerify(/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(text));
+  }
+
+  function handleMobileNumber(e: any) {
+    const text = e.nativeEvent.text;
+    setMobileNumber(text);
+    setMobileNumberVerify(/^\d{8}$/.test(text));
+  }
+  function handleBirthdayConfirm(date: Date) {
+    setOpen(false);
+    setBirthday(date);
+  }
+  const updateUser = async () => {
     const userData = {
       firstName: firstname,
       lastName: lastname,
       email,
-      password,
       mobileNumber,
-      role
+      birthdayDate: birthday
     };
-    console.log("userData", userData);
-    if (userData.firstName.length === 0 || userData.lastName.length === 0 || userData.email.length === 0 || userData.mobileNumber.length === 0 || userData.password.length === 0) {
+
+    if (userData.firstName.length === 0 || userData.lastName.length === 0 || userData.email.length === 0 || userData.mobileNumber.length === 0) {
       Toast.show({
         type: 'customErrorToast',
         text1: 'All fields are required !!'
       });
     } else {
       try {
-        const response = await axios.post(`${BASE_URL}/reghister`, userData, {
+        const response = await axios.put(`${BASE_URL}/user/updateUser/${userInfo._id}`, userData, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -90,148 +108,130 @@ function EditProfile({ navigation }: SettingsScreenProps) {
         console.log("Response:", response.data);
         Toast.show({
           type: 'customSuccessToast',
-          text1: 'Register Success'
+          text1: 'Profile Updated Successfully'
         });
-        navigation.navigate('LoginScreen');
+        console.log("password",password);
+        
+        reLogin(password);
+        navigation.navigate('Home');
       } catch (error) {
-        console.log('Error adding data:', error);
+        console.log('Error updating data:', error);
         Toast.show({
           type: 'customErrorToast',
-          text1: 'Failed to add data. Please try again later.'
+          text1: 'Failed to update data. Please try again later.'
         });
       }
     }
-
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContent}>
       <View style={styles.container}>
         <Image source={require("../../assets/logo...png")} style={[{ width: 300, height: 150 }]} resizeMode="contain" />
-        <View style={styles.inputContainer} >
-
+        <View style={styles.inputContainer}>
           <View style={styles.action}>
-            <FontAwesome
-              name="user-o"
-              color="#5e2a89"
-              style={styles.smallIcon}
-            />
+            <FontAwesome name="user-o" color="#5e2a89" style={styles.smallIcon} />
             <TextInput
               placeholder="First Name"
               placeholderTextColor="gray"
               style={styles.textInput}
-              value={userInfo.firstName}
-              onChange={e => handleFirstName(e)}
+              value={firstname}
+              onChange={handleFirstName}
             />
-            {firstname.length < 1 ? null : firstNameVerify ? (
+            {firstNameVerify ? (
               <Feather name="check-circle" color="green" size={20} />
             ) : (
               <Ionicons name="alert-circle" color="red" size={20} />
             )}
           </View>
-          {firstname.length < 1 ? null : firstNameVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
+          {!firstNameVerify && (
+            <Text style={{ marginLeft: 20, color: 'red' }}>
               Name should be more than 1 character.
             </Text>
           )}
 
           <View style={styles.action}>
-            <FontAwesome
-              name="user-o"
-              color="#5e2a89"
-              style={styles.smallIcon}
-            />
+            <FontAwesome name="user-o" color="#5e2a89" style={styles.smallIcon} />
             <TextInput
               placeholder="Last Name"
               placeholderTextColor="gray"
               style={styles.textInput}
-              value={userInfo.lastName}
-              onChange={e => handleLastname(e)}
+              value={lastname}
+              onChange={handleLastname}
             />
-            {lastname.length < 1 ? null : lastNameVerify ? (
+            {lastNameVerify ? (
               <Feather name="check-circle" color="green" size={20} />
             ) : (
               <Ionicons name="alert-circle" color="red" size={20} />
             )}
           </View>
-          {lastname.length < 1 ? null : lastNameVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
+          {!lastNameVerify && (
+            <Text style={{ marginLeft: 20, color: 'red' }}>
               Name should be more than 1 character.
             </Text>
           )}
 
           <View style={styles.action}>
-            <Fontisto
-              name="email"
-              color="#5e2a89"
-              size={24}
-              style={{ marginLeft: 0, paddingRight: 5 }}
-            />
+            <Fontisto name="email" color="#5e2a89" size={24} style={{ marginLeft: 0, paddingRight: 5 }} />
             <TextInput
               placeholder="E-mail"
               placeholderTextColor="gray"
               style={styles.textInput}
-              value={userInfo.email}
-              onChange={e => handleEmail(e)}
+              value={email}
+              onChange={handleEmail}
             />
-            {email.length < 1 ? null : emailVerify ? (
+            {emailVerify ? (
               <Feather name="check-circle" color="green" size={20} />
             ) : (
               <Ionicons name="alert-circle" color="red" size={20} />
             )}
           </View>
-          {email.length < 1 ? null : emailVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
+          {!emailVerify && (
+            <Text style={{ marginLeft: 20, color: 'red' }}>
               Enter a proper email address
             </Text>
           )}
 
           <View style={styles.action}>
-            <FontAwesome
-              name="mobile"
-              color="#5e2a89"
-              size={35}
-              style={{ paddingRight: 10, marginTop: -7, marginLeft: 5 }}
-            />
+            <FontAwesome name="mobile" color="#5e2a89" size={35} style={{ paddingRight: 10, marginTop: -7, marginLeft: 5 }} />
             <TextInput
               placeholder="Mobile Number"
               placeholderTextColor="gray"
               style={styles.textInput}
-              value={userInfo.mobileNumber}
-              onChange={e => handleMobileNumber(e)}
+              value={mobileNumber}
+              onChange={handleMobileNumber}
               maxLength={8}
             />
-            {mobileNumber.length < 1 ? null : mobileNumberVerify ? (
+            {mobileNumberVerify ? (
               <Feather name="check-circle" color="green" size={20} />
             ) : (
               <Ionicons name="alert-circle" color="red" size={20} />
             )}
           </View>
-          {mobileNumber.length < 1 ? null : mobileNumberVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
+          {!mobileNumberVerify && (
+            <Text style={{ marginLeft: 20, color: 'red' }}>
               Phone number should be exactly 8 digits.
             </Text>
           )}
-
+            <View style={styles.action}>
+            <FontAwesome name="calendar" color="#5e2a89" style={styles.smallIcon} />
+            <TouchableOpacity onPress={() => setOpen(true)} style={styles.textInput}>
+              <Text style={{ color: birthday ? 'black' : '#e0e0e0' }}>
+                {birthday ? birthday.toISOString().split('T')[0] : 'Select Birthday'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <DatePicker
+            modal
+            open={open}
+            date={birthday}
+            mode="date"
+            onConfirm={handleBirthdayConfirm}
+            onCancel={() => setOpen(false)}
+          />
         </View>
         <View>
-          <TouchableOpacity style={styles.button} onPress={Register}>
+          <TouchableOpacity style={styles.button} onPress={updateUser}>
             <Text style={styles.buttonText}>Update</Text>
           </TouchableOpacity>
         </View>
@@ -240,7 +240,7 @@ function EditProfile({ navigation }: SettingsScreenProps) {
   );
 }
 
-export default EditProfile
+export default EditProfile;
 
 const styles = StyleSheet.create({
   scrollViewContent: {
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 130
+    marginBottom: 130,
   },
   button: {
     backgroundColor: '#4A189B',
@@ -304,9 +304,7 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 3,
     marginTop: 15,
-
     paddingHorizontal: 15,
-
     borderWidth: 1,
     borderColor: '#ece1f2',
     borderRadius: 50,
@@ -314,7 +312,6 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     marginTop: -12,
-
     color: 'black',
   },
   inputContainer: {
@@ -329,7 +326,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 30,
   },
-
   inBut: {
     width: '70%',
     backgroundColor: '#420475',
@@ -353,7 +349,6 @@ const styles = StyleSheet.create({
   },
   smallIcon2: {
     fontSize: 40,
-    // marginRight: 10,
   },
   bottomText: {
     color: 'black',
@@ -388,12 +383,12 @@ const styles = StyleSheet.create({
   registerText: {
     color: '#ece1f2',
     fontSize: 16,
-    marginLeft: 15
+    marginLeft: 15,
   },
   registerLink: {
     color: '#4A189B',
     fontSize: 16,
-    marginLeft: 10
+    marginLeft: 10,
   },
   backgroundImage: {
     flex: 1,
@@ -413,10 +408,7 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
     backgroundColor: '#8356FF',
-    // paddingVertical: 10,
     borderRadius: 10,
-    // flexDirection: 'row',
-    // alignItems: 'center',
     padding: 10,
   },
 });

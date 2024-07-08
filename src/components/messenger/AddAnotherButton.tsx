@@ -9,11 +9,11 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
 
 const AddAnotherButton = () => {
     const navigation = useNavigation<HomeScreenNavigationProp>();
-    const handlePress = () => {navigation.navigate('InviteDoctor')};
+    const handlePress = () => {navigation.navigate('InvitecaireGiver')};
     return (
         <TouchableOpacity style={styles.button} onPress={handlePress}>
             <Icon name="add-circle-outline" type="ionicon" color="#8A57ED" />
-            <Text style={styles.buttonText}>Add Another</Text>
+            <Text style={styles.buttonText}>Add Caregiver</Text>
         </TouchableOpacity>
     );
 };

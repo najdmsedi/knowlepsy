@@ -5,7 +5,7 @@ import axios from 'axios';
 import { BASE_URL } from '../config';
 import CustomAlert from '../components/CustomAlert/CustomAlert';
 
-const InviteDoctor = () => {
+const InvitecaireGiver = () => {
   const { userInfo } = useContext(AuthContext);
   const { login } = useContext(AuthContext)
   const [email, setEmail] = useState('');
@@ -38,7 +38,7 @@ const InviteDoctor = () => {
       const email = userInfo.email
       const response = await axios.post(`${BASE_URL}/auth/login`, { email, password })
       if (response) {
-        inviteDoctor(password);
+        invitecaireGiver(password);
       } else {
         showAlert('Error', 'Incorrect password', () => { });
       }
@@ -47,19 +47,19 @@ const InviteDoctor = () => {
     }
   };
 
-  const inviteDoctor = async (password: string) => {
+  const invitecaireGiver = async (password: string) => {
     try {
-      const response = await axios.post(`${BASE_URL}/connection/invitDoctor`, {
+      const response = await axios.post(`${BASE_URL}/connection/invitcaireGiver`, {
         patientId: userInfo._id,
-        doctorEmail: email,
+        caireGiverEmail: email,
       });
       if (response.status === 200) {
-        showAlert('Success', 'Doctor invited successfully', () => { reLogin(password) }, false);
+        showAlert('Success', 'caregiver invited successfully', () => { reLogin(password) }, false);
       } else {
-        showAlert('Error', 'Failed to invite doctor', () => { }, false);
+        showAlert('Error', 'Failed to invite caregiver', () => { }, false);
       }
     } catch (error) {
-      showAlert('Error', 'An error occurred while inviting the doctor', () => { });
+      showAlert('Error', 'An error occurred while inviting the caregiver', () => { });
     }
   };
 
@@ -71,17 +71,17 @@ const InviteDoctor = () => {
     <View style={styles.container}>
       {userInfo.role === "patient" &&
         <>
-          <Text style={styles.title}>Invite Doctor </Text>
+          <Text style={styles.title}>Invite Caregiver </Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter doctor's email"
+            placeholder="e-mail"
             placeholderTextColor="#aaa"
             keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
           />
           <TouchableOpacity style={styles.button} onPress={startInviteProcess}>
-            <Text style={styles.buttonText}>Invite</Text>
+            <Text style={styles.buttonText}>Invite </Text>
           </TouchableOpacity>
         </>
       }
@@ -97,7 +97,7 @@ const InviteDoctor = () => {
   );
 }
 
-export default InviteDoctor;
+export default InvitecaireGiver;
 
 const styles = StyleSheet.create({
   container: {

@@ -156,7 +156,7 @@ function RegisterScreen({ navigation }: SettingsScreenProps) {
       <ImageBackground source={require("../../../../assets/HeroImageOne.png")} style={[styles.backgroundImage, { opacity: 0.8 }]}>
         <View style={styles.container}>
           <Text style={styles.title}>Select Your Role</Text>
-          <TouchableOpacity style={styles.roleButton} onPress={() => handleRoleSelection('doctor')}>
+          <TouchableOpacity style={styles.roleButton} onPress={() => handleRoleSelection('caireGiver')}>
             <Text style={styles.buttonText}>Caregiver</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.roleButton} onPress={() => handleRoleSelection('patient')}>

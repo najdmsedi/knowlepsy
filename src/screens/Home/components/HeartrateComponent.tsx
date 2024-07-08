@@ -15,16 +15,15 @@ interface RectangleProps {
   marginTop: number;
   height?: number;
   BPM?: any;
-  time_forDoctor?: string;
+  time_forcaireGiver?: string;
 }
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, BPM = '--', time_forDoctor = "" }) => {
+const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, BPM = '--', time_forcaireGiver = "" }) => {
   const connected = useRecoilValue(ConnectedAtom);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const onPress = () => { navigation.navigate('HeartRate') }
   const { userInfo } = useContext(AuthContext);
-  console.log("from here ", userInfo.role)
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: marginTop, height: height }]}>
       <TouchableOpacity onPress={onPress}>
@@ -42,19 +41,19 @@ const HeartrateComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD'
         }
 
 
-        {/* for doctor */}
-        {userInfo.role === "doctor" && !BPM &&
+        {/* for caireGiver */}
+        {userInfo.role === "caireGiver" && BPM==="--" &&
           <>
             <Text style={styles.BPM}>-- <Text style={styles.BPMText}>BPM</Text></Text>
             <Text style={{ color: '#E84A46' }}>no fetch data </Text>
           </>
         }
 
-        {userInfo.role === "doctor" && time_forDoctor && BPM &&
+        {userInfo.role === "caireGiver" && time_forcaireGiver && BPM &&
           <>
             <Text style={styles.BPM}>{BPM} <Text style={styles.BPMText}>BPM</Text></Text>
 
-            <Text style={{ color: 'gray' }}> {time_forDoctor} </Text>
+            <Text style={{ color: 'gray' }}> {time_forcaireGiver} </Text>
           </>
         }
       </TouchableOpacity>

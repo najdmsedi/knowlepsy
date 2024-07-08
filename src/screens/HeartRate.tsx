@@ -1,23 +1,33 @@
-import { Dimensions, StyleSheet, Text, View, Animated, Easing, TouchableOpacity } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, StyleSheet, Text, View, Animated, Easing, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { PPGListAtom, PPGListTimeAtom, PPGValueAtom } from '../atoms';
+import { LoadPPGListAtom, LoadPPGListTimeAtom, PPGListAtom, PPGListTimeAtom, PPGValueAtom } from '../atoms';
 import { Image } from 'react-native-elements';
 import DatePicker from 'react-native-date-picker';
+import axios from 'axios';
+import { BASE_URL } from '../config';
+import { AuthContext } from '../context/AuthContext';
 
 const HeartRate = () => {
   const PPGValue = useRecoilValue(PPGValueAtom) as any;
+  const [LoadPPGList, setLoadPPGList] = useRecoilState(LoadPPGListAtom);
+  const [LoadPPGListTime, setLoadPPGListTime] = useRecoilState(LoadPPGListTimeAtom);
+
   const [PPGList, setPPGList] = useRecoilState(PPGListAtom);
   const [PPGListTime, setPPGListTime] = useRecoilState(PPGListTimeAtom);
+
+
+  const { userInfo } = useContext(AuthContext);
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
-  
+  const [error, setError] = useState('');
+
   useEffect(() => {
     if (PPGValue?.heart_rate != undefined) {
       const updatedPPGList = [...PPGList, PPGValue?.heart_rate];
@@ -59,32 +69,40 @@ const HeartRate = () => {
     animateHeart();
   }, [heartSize]);
 
-  const filterDataByDate = () => {
-    if (startDate && endDate) {
-      console.log("startDate", startDate);
-      console.log("endDate", endDate);
+  const fetchPpgData = async (start: string, end: string) => {
+    console.log(start, " ", end);
 
-      const filteredTEMPList = PPGList.filter((_, index) => {
-        const tempTime = new Date(PPGListTime[index]);
-        return tempTime >= startDate && tempTime <= endDate;
-      });
+    try {
+      console.log(start, " ", end);
+      console.log(`${BASE_URL}/data/ppg-data/${userInfo._id}/${start}/${end}`);
 
-      const filteredTempListTime = PPGListTime.filter((time) => {
-        const tempTime = new Date(time);
-        return tempTime >= startDate && tempTime <= endDate;
-      });
+      const response = await axios.get(`${BASE_URL}/data/ppg-data/${userInfo._id}/${start}/${end}`);
 
-      return { filteredTEMPList, filteredTempListTime };
+      const data = response.data;
+      // const ppgValues = data.map((entry: { PPG: { heart_rate: string; }; }) => parseFloat(entry.PPG.heart_rate)); // Assuming heart_rate is stored as string
+      // const ppgTimes = data.map((entry: { PPG: { time: any; }; }) => entry.PPG.time);
+      // const ppgDates = data.map((entry: { PPG: { date: any; }; }) => entry.PPG.date);
+
+      const ppgValues = data.map((entry: { PPG: { heart_rate: string; }; }) => parseFloat(entry.PPG.heart_rate)); // Assuming heart_rate is stored as string
+      const ppgTimes = data.map((entry: { PPG: { date: any; time: any; }; }) => `${entry.PPG.time}`); // Combine date and time for better labeling
+
+      console.log("ppgValues ", ppgValues);
+      console.log("ppgTimes ", ppgTimes);
+      // console.log("ppgDates ",ppgDates);
+
+      // const ppgValues = data.map((entry: { PPG: { value: any; }; }) => entry.PPG.value); // Assuming PPG data has a 'value' field
+      // const ppgTimes = data.map((entry: { PPG: { date: any; }; }) => entry.PPG.date); // Assuming PPG data has a 'date' field
+      setLoadPPGList(ppgValues);
+      setLoadPPGListTime(ppgTimes);
+      // setError('');
+    } catch (err) {
+      console.log('err', err);
+
+      setError('Failed to fetch PPG data');
+      setLoadPPGList([]);
+      setLoadPPGListTime([]);
     }
-    return { filteredTEMPList: PPGList, filteredTempListTime: PPGListTime };
   };
-
-  const { filteredTEMPList, filteredTempListTime } = filterDataByDate();
-
-  useEffect(() => {
-    console.log("Filtered TEMP List:", filteredTEMPList);
-    console.log("Filtered Temp List Time:", filteredTempListTime);
-  }, [filteredTEMPList, filteredTempListTime]);
 
   const showStartDatePicker = () => {
     setStartDatePickerVisibility(true);
@@ -94,25 +112,35 @@ const HeartRate = () => {
     setEndDatePickerVisibility(true);
   };
 
-  const handleStartConfirm = (date: Date) => {
+  const handleStartConfirm = (date: any) => {
     setStartDate(date);
     setStartDatePickerVisibility(false);
     if (endDate) {
-      console.log("Both dates selected: Start Date -", date, "End Date -", endDate);
-    } else {
-      console.log("Start date selected:", date);
+      fetchPpgData(date.toISOString().split('T')[0], endDate.toISOString().split('T')[0]); // Fetch data if both dates are selected
     }
   };
 
-  const handleEndConfirm = (date: Date) => {
+  const handleEndConfirm = (date: any) => {
     setEndDate(date);
     setEndDatePickerVisibility(false);
     if (startDate) {
-      console.log("Both dates selected: Start Date -", startDate, "End Date -", date);
-    } else {
-      console.log("End date selected:", date);
+      fetchPpgData(startDate.toISOString().split('T')[0], date.toISOString().split('T')[0]); // Fetch data if both dates are selected
     }
   };
+  const [showSecondLabel, setShowSecondLabel] = useState(false);
+
+  const handleScroll = (event: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    setShowSecondLabel(scrollPosition > 0);
+  };
+
+  const chartWidth = Math.max(LoadPPGListTime.length * 40, Dimensions.get('window').width - 32);
+
+  const minTemp = Math.min(...LoadPPGList);
+  const maxTemp = Math.max(...LoadPPGList);
+  const interval = (maxTemp - minTemp) / 4;
+  const customLabels = Array.from({ length: 5 }, (_, i) => (minTemp + i * interval).toFixed(1));
+
   return (
     <LinearGradient colors={['#FEFEFE', '#A992FC']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text style={styles.header}>Heart Rate</Text>
@@ -123,45 +151,79 @@ const HeartRate = () => {
             {startDate ? startDate.toDateString() : 'Select Start Date '}
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity onPress={showEndDatePicker} style={styles.dateButton}>
           <Text style={styles.dateButtonText}>
             {endDate ? endDate.toDateString() : 'Select End Date '}
           </Text>
         </TouchableOpacity>
       </View>
-      <LineChart
-        data={{
-          labels: PPGListTime,
-          datasets: [{ data: PPGList }]
-        }}
-        width={Dimensions.get('window').width - 32} // Full width of the screen with some padding
-        height={350}
-        yAxisInterval={1} // optional, defaults to 1
-        verticalLabelRotation={60}
-        chartConfig={{
-          backgroundColor: "#1e2923",
-          backgroundGradientFrom: "#7B60EA",
-          backgroundGradientTo: "#9B88EA",
-          decimalPlaces: 0, // Show no decimal places
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
-            borderRadius: 16,
-          },
-          propsForDots: {
-            r: "4",
-            strokeWidth: "2",
-            stroke: "#ffa726"
-          },
-          propsForBackgroundLines: {
-            strokeDasharray: ""
-          },
-        }}
-        bezier
-        style={styles.chart}
-      />
 
+      <DatePicker
+        modal
+        open={isStartDatePickerVisible}
+        date={startDate || new Date()}
+        onConfirm={handleStartConfirm}
+        onCancel={() => setStartDatePickerVisibility(false)}
+        mode="date"
+        maximumDate={new Date()}
+      />
+      <DatePicker
+        modal
+        open={isEndDatePickerVisible}
+        date={endDate || new Date()}
+        onConfirm={handleEndConfirm}
+        onCancel={() => setEndDatePickerVisibility(false)}
+        mode="date"
+        maximumDate={new Date()}
+      />
+      <View style={styles.chartContainer}>
+        <ScrollView horizontal onScroll={handleScroll} scrollEventThrottle={16}>
+          <View>
+            <LineChart
+              data={{
+                labels: LoadPPGListTime,
+                datasets: [{ data: LoadPPGList }]
+              }}
+              width={chartWidth} // Full width of the screen with some padding
+              height={350}
+              yAxisInterval={1} // optional, defaults to 1
+              verticalLabelRotation={60}
+              chartConfig={{
+                backgroundColor: "#1e2923",
+                backgroundGradientFrom: "#7B60EA",
+                backgroundGradientTo: "#9B88EA",
+                decimalPlaces: 0, // Show no decimal places
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "2",
+                  stroke: "#ffa726"
+                },
+                propsForBackgroundLines: {
+                  strokeDasharray: ""
+                },
+              }}
+              bezier
+              style={styles.chart}
+            />
+          </View>
+
+        </ScrollView>
+        {
+          showSecondLabel && (
+            <View style={styles.overlay}>
+              {customLabels.reverse().map((value, index) => (
+                <Text key={index} style={styles.yAxisLabel}>{value} C°</Text>
+              ))}
+            </View>
+          )
+        }
+      </View >
       {/* <View style={styles.heartRateContainer}>
         <View style={styles.heartRateContainer}>
           <Animated.View style={{ transform: [{ scale: heartSize }] }}>
@@ -169,7 +231,7 @@ const HeartRate = () => {
           </Animated.View>
         </View>
       </View> */}
-  <View style={styles.heartRateContainer}>
+      < View style={styles.heartRateContainer} >
         <Text style={styles.label}>Real Time </Text>
         {/* <View style={styles.temperatureIconContainer}>
           {showThermometerOutline ? (
@@ -183,8 +245,8 @@ const HeartRate = () => {
         </View> */}
         <LineChart
           data={{
-            labels: filteredTempListTime,
-            datasets: [{ data: filteredTEMPList }],
+            labels: PPGListTime,
+            datasets: [{ data: PPGList }]
           }}
           width={Dimensions.get('window').width - 32}
           height={200}
@@ -213,18 +275,14 @@ const HeartRate = () => {
           bezier
           style={styles.chart2}
         />
-      </View>
-    </LinearGradient>
+      </View >
+    </LinearGradient >
   );
 }
 
 export default HeartRate;
 
 const styles = StyleSheet.create({
-  heartIcon: {
-    width: 100,
-    height: 100,
-  },
   header: {
     color: '#402477',
     fontSize: 23,
@@ -233,41 +291,34 @@ const styles = StyleSheet.create({
   },
   chart: {
     borderRadius: 16,
-    paddingVertical: 190,
-    top: 80,
+    marginTop: 20,
   },
   chart2: {
     borderRadius: 16,
     paddingVertical: 80,
-    top:0
+    top: 0
+  },
+  noDataText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+    marginVertical: 20,
   },
   heartRateContainer: {
     alignItems: 'center',
-    bottom: 150,
+    bottom: 0,
   },
   label: {
     fontSize: 20,
     color: "black",
     top: 50,
-  }, 
-  heartIconContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heartRateValue: {
-    textAlign: 'center',
-    fontSize: 40,
-    color: "black",
-    marginLeft: 0,
-    top: 70,
   },
   dateButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '90%',
-    marginBottom: 10,
-    top: 260,
+    marginBottom: 0,
+    top: 10,
   },
   dateButton: {
     backgroundColor: '#A992FC',
@@ -280,5 +331,26 @@ const styles = StyleSheet.create({
   dateButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
+  },
+  chartContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    left: 15
+  },
+  overlay: {
+    position: 'absolute',
+    left: 0,
+    height: 350,
+    justifyContent: 'space-between',
+    zIndex: 1,
+    paddingVertical: 40,
+  },
+  yAxisLabel: {
+    color: '#fff',
+    marginLeft: 8,
+    fontSize: 10,
+  },
+  scrollView: {
+    marginLeft: 40, // Space for y-axis labels
   },
 });

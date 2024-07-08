@@ -30,6 +30,14 @@ export const DeviceCharacteristiqueAtom = atom({
     default: null,
 });
 
+export const LoadPPGListAtom = atom({
+    key: 'LoadPPGList',
+    default: [0,0,0,0,0,0,0,0,0,0,0],
+});
+export const LoadPPGListTimeAtom = atom({
+    key: 'LoadPPGListTime',
+    default: ["0","0","0","0","0","0","0","0","0","0","0"],
+});
 export const PPGListAtom = atom({
     key: 'PPGList',
     default: [0,0,0,0,0,0,0,0,0,0,0],
@@ -43,7 +51,14 @@ export const PPGValueAtom = atom({
     default: 0,
 });
 
-
+export const LoadTempListAtom = atom({
+    key: 'LoadTempList',
+    default: [0,0,0,0,0,0,0,0,0,0,0],
+});
+export const LoadTempListTimeAtom = atom({
+    key: 'LoadTempListTime',
+    default: ["0","0","0","0","0","0","0","0","0","0","0"],
+});
 
 
 export const TempListAtom = atom({
@@ -71,5 +86,20 @@ export const locationAtom = atom({
 
 export const DominantLevelAtom = atom({
     key: 'DominantLevel',
-    default: false,
+    default: '',
+});
+
+export const TimeLevelAtom = atom({
+    key: 'TimeLevel',
+    default: '',
+});
+
+
+export const PatientAtom = atom({
+    key: 'Patient',
+    default: {},
+});
+export const PatientsAtom = atom({
+    key: 'Patients',
+    default: [],
 });

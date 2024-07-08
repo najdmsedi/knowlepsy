@@ -15,11 +15,11 @@ interface RectangleProps {
   marginTop: number;
   height?: number;
   Steps?: any;
-  time_forDoctor?:string;
+  time_forcaireGiver?:string;
 }
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, Steps = 0, time_forDoctor=""}) => {
+const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', marginTop, height = 80, Steps = 0, time_forcaireGiver=""}) => {
   const connected = useRecoilValue(ConnectedAtom);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const onPress = () => { navigation.navigate('Steps') }
@@ -41,20 +41,20 @@ const StepsComponent: React.FC<RectangleProps> = ({ title, color = '#F5F3FD', ma
       }
 
 
-{/* for doctor */}
+{/* for caireGiver */}
 
-      {userInfo.role === "doctor" && !Steps &&
+      {userInfo.role === "caireGiver" && Steps==="--" &&
         <>
           <Text style={styles.Steps}>-- <Text style={styles.StepsText}>Steps</Text></Text>
           <Text style={{ color: '#E84A46' }}>no fetch data </Text>
         </>
       }
 
-      {userInfo.role === "doctor" && time_forDoctor && Steps &&
+      {userInfo.role === "caireGiver" && time_forcaireGiver && Steps &&
           <>
             <Text style={styles.Steps}>{Steps} <Text style={styles.StepsText}>Steps</Text></Text>
 
-            <Text style={{ color: 'gray' }}> {time_forDoctor} </Text>
+            <Text style={{ color: 'gray' }}> {time_forcaireGiver} </Text>
           </>
       }
     </LinearGradient>

@@ -47,7 +47,7 @@ const LocationComponent: React.FC = () => {
     };
 
     useEffect(() => {
-        console.log("user from non ",userInfo);
+        // console.log("user from non ",userInfo);
         
         if (userInfo.role === "patient") {
             getLocation();

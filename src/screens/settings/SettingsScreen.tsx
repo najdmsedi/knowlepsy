@@ -60,7 +60,7 @@ export default function SettingsScreen() {
   const handleEditProfile = () => { navigation.navigate('EditProfile') }
   const handleChangePassword = () => { navigation.navigate('ChangePassword') }
   const handleDoctorPress = () => {
-  
+    navigation.navigate('AddDoctor')
   }
 
   return (
@@ -82,7 +82,7 @@ export default function SettingsScreen() {
 
         <Text style={styles.UseraccountbuttonText}>User account </Text>
         <GenericButton buttonText='Edit Profile' onPress={handleEditProfile} icon='caret-forward-outline' top={-10} />
-        <GenericButton buttonText="Doctor" onPress={handleDoctorPress} icon='caret-forward-outline' top={3} />
+        <GenericButton buttonText="Add Doctor" onPress={handleDoctorPress} icon='caret-forward-outline' top={3} />
 
         <Text style={styles.ApplicationSettingsbuttonText}>Application Settings </Text>
         <GenericButton buttonText='Information' onPress={handleButtonPress} icon='caret-forward-outline' top={12} />

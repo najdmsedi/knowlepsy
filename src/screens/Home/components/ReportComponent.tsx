@@ -45,9 +45,9 @@ const ReportComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue',
       </View>
       <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
         {userInfo.role === "patient" &&
-          <Text style={styles.buttonText}>Messaging Doctor</Text>
+          <Text style={styles.buttonText}>Messaging caireGiver</Text>
         }
-        {userInfo.role === "doctor" &&
+        {userInfo.role === "caireGiver" &&
           <Text style={styles.buttonText}>Messaging Patient</Text>
         }
         <Ionicons name="chatbox-ellipses-outline" size={20} color="white" style={styles.buttonIcon} />

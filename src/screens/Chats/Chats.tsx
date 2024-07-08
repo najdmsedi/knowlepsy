@@ -9,6 +9,8 @@ import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../config';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/TabNavigator';
+import { PatientAtom, PatientsAtom } from '../../atoms';
+import { useRecoilValue } from 'recoil';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -17,9 +19,9 @@ interface Connection {
   patientId: string;
   patientEmail: string;
   patientName: string;
-  doctorId: string;
-  doctorEmail: string;
-  doctorName: string;
+  caireGiverId: string;
+  caireGiverEmail: string;
+  caireGiverName: string;
   lastMessage: string;
   lastMessageTime: Date;
 }
@@ -30,6 +32,7 @@ const Chats = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [Connection, setConnection] = useState<[]>([]);
   const { userGuestInfo } = useContext(AuthContext);
+  const Patients = useRecoilValue(PatientsAtom);
 
   useEffect(() => {
     navigation.setOptions({
@@ -60,9 +63,9 @@ const Chats = () => {
         }
       };
 
-      const fetchPendingConnectionsForDoctor = async () => {
+      const fetchPendingConnectionsForcaireGiver = async () => {
         try {
-          const response = await fetch(`${BASE_URL}/connection/getPendingDoctorConnection/?doctorId=${userInfo._id}`);
+          const response = await fetch(`${BASE_URL}/connection/getPendingcaireGiverConnection/?caireGiverId=${userInfo._id}`);
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
@@ -94,9 +97,9 @@ const Chats = () => {
         }
       };
 
-      const fetchConnectionsForDoctor = async () => {
+      const fetchConnectionsForcaireGiver = async () => {
         try {
-          const response = await fetch(`${BASE_URL}/connection/getDoctorConnection/?doctorId=${userInfo._id}`);
+          const response = await fetch(`${BASE_URL}/connection/getcaireGiverConnection/?caireGiverId=${userInfo._id}`);
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
@@ -112,7 +115,7 @@ const Chats = () => {
       };
 
       if (userInfo.role == "patient") { fetchPendingConnectionsForPatient(); fetchConnectionsForPatient() }
-      if (userInfo.role == "doctor") { fetchPendingConnectionsForDoctor(); fetchConnectionsForDoctor() }
+      if (userInfo.role == "caireGiver") { fetchPendingConnectionsForcaireGiver(); fetchConnectionsForcaireGiver() }
 
       return () => { };
     }, [userInfo])
@@ -136,11 +139,11 @@ const Chats = () => {
       <ListItem bottomDivider>
         <View style={styles.circle}>
           <Text style={styles.initials}>
-            {item.doctorName.charAt(0).toUpperCase()}{item.doctorName.charAt(1).toUpperCase()}
+            {item.caireGiverName.charAt(0).toUpperCase()}{item.caireGiverName.charAt(1).toUpperCase()}
           </Text>
         </View>
         <ListItem.Content>
-          <ListItem.Title>{item.doctorName}</ListItem.Title>
+          <ListItem.Title>{item.caireGiverName}</ListItem.Title>
           <ListItem.Subtitle>{item.lastMessage} </ListItem.Subtitle>
         </ListItem.Content>
         <Text style={styles.time}>{item.lastMessageTime ? formatTime(item.lastMessageTime) : ''} </Text>
@@ -148,7 +151,7 @@ const Chats = () => {
     </TouchableOpacity>
   );
 
-  const renderDoctorItem = ({ item }: { item: Connection }) => (
+  const rendercaireGiverItem = ({ item }: { item: Connection }) => (
     <TouchableOpacity onPress={() => GoToChat(item)}>
       <ListItem bottomDivider>
         <View style={styles.circle}>
@@ -179,7 +182,7 @@ const Chats = () => {
           </View>
         </Pressable>
       </View>
-      {userInfo.role === "patient" && userInfo.doctorIds.length < 5 &&
+      {userInfo.role === "patient" && userInfo.caireGiverIds.length < 5 &&
         <FlatList
           data={Connection}
           keyExtractor={(item) => item._id}
@@ -188,14 +191,14 @@ const Chats = () => {
         />
       }
 
-      {userInfo.role === "doctor" && userGuestInfo!=null &&
+      {userInfo.role === "caireGiver" && Patients.length > 0 &&
         <FlatList
           data={Connection}
           keyExtractor={(item) => item._id}
-          renderItem={renderDoctorItem}
+          renderItem={rendercaireGiverItem}
         />
       }
-      {userInfo.role === "doctor" && userGuestInfo.length === 0 &&
+      {userInfo.role === "caireGiver" && Patients.length === 0 &&
         <Text style={styles.title}>You have no patient to chat with.</Text>
 
       }
