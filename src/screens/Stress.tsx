@@ -3,6 +3,7 @@ import React from 'react'
 import LinearGradient from 'react-native-linear-gradient'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import StressLevelComponent from './Home/components/StressLevelComponent'
+import SimpleStressLevelComponent from './SimpleStressLevelComponent'
 
 const Stress = () => {
     return (
@@ -14,27 +15,27 @@ const Stress = () => {
             </View>
             <View style={styles.stressBox}>
                 <View style={styles.row}>
-                    <StressLevelComponent marginTop={-3.7} title='Stress Level' color="#bcbcbc" status='happy' statusColor='#bcbcbc' marginLeft={-30} />
+                    <SimpleStressLevelComponent marginTop={-3.7} title='Stress Level' color="#bcbcbc" status='happy' statusColor='#bcbcbc' marginLeft={-30} />
                     <Text style={styles.description}>This indicates that you are not connected</Text>
                 </View>
             </View>
             <View style={styles.stressBox}>
                 <View style={styles.row}>
-                    <StressLevelComponent marginTop={-3.7} title='Stress Level' color="#FAF9FE" status='happy' statusColor='#3AA50E' marginLeft={-30} />
+                    <SimpleStressLevelComponent marginTop={-3.7} title='Stress Level' color="#FAF9FE" status='happy' statusColor='#3AA50E' marginLeft={-30} />
                     <Text style={styles.description}>This indicates that you have no stress</Text>
                 </View>
             </View>
 
             <View style={styles.stressBox}>
                 <View style={styles.row}>
-                    <StressLevelComponent marginTop={-3.7} title='Stress Level' color="#FAF9FE" status='happy' statusColor='#D1837F' marginLeft={-30} />
+                    <SimpleStressLevelComponent marginTop={-3.7} title='Stress Level' color="#FAF9FE" status='happy' statusColor='#D1837F' marginLeft={-30} />
                     <Text style={styles.description}>This indicates that your stress level is medium</Text>
                 </View>
             </View>
 
             <View style={styles.stressBox}>
                 <View style={styles.row}>
-                    <StressLevelComponent marginTop={-3.7} title='Stress Level' color="#FAF9FE" status='sad' statusColor='#B50F0F' marginLeft={-30} />
+                    <SimpleStressLevelComponent marginTop={-3.7} title='Stress Level' color="#FAF9FE" status='sad' statusColor='#B50F0F' marginLeft={-30} />
                     <Text style={styles.description}>This indicates that your stress level is high</Text>
                 </View>
             </View>

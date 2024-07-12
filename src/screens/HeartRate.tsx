@@ -143,57 +143,108 @@ const HeartRate = () => {
 
   return (
     <LinearGradient colors={['#FEFEFE', '#A992FC']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={styles.header}>Heart Rate</Text>
-      {/* <Text style={styles.heartRateValue}>{PPGValue?.heart_rate} </Text><Text style={{ color: "#28032B", top: 50, left: 50 }}>BPM </Text> */}
-      <View style={styles.dateButtonContainer}>
-        <TouchableOpacity onPress={showStartDatePicker} style={styles.dateButton}>
-          <Text style={styles.dateButtonText}>
-            {startDate ? startDate.toDateString() : 'Select Start Date '}
-          </Text>
-        </TouchableOpacity>
+      {userInfo.role === "patient" &&
+        <>
+          <Text style={styles.header}>Heart Rate</Text>
 
-        <TouchableOpacity onPress={showEndDatePicker} style={styles.dateButton}>
-          <Text style={styles.dateButtonText}>
-            {endDate ? endDate.toDateString() : 'Select End Date '}
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.dateButtonContainer}>
+            <TouchableOpacity onPress={showStartDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {startDate ? startDate.toDateString() : 'Select Start Date '}
+              </Text>
+            </TouchableOpacity>
 
-      <DatePicker
-        modal
-        open={isStartDatePickerVisible}
-        date={startDate || new Date()}
-        onConfirm={handleStartConfirm}
-        onCancel={() => setStartDatePickerVisibility(false)}
-        mode="date"
-        maximumDate={new Date()}
-      />
-      <DatePicker
-        modal
-        open={isEndDatePickerVisible}
-        date={endDate || new Date()}
-        onConfirm={handleEndConfirm}
-        onCancel={() => setEndDatePickerVisibility(false)}
-        mode="date"
-        maximumDate={new Date()}
-      />
-      <View style={styles.chartContainer}>
-        <ScrollView horizontal onScroll={handleScroll} scrollEventThrottle={16}>
-          <View>
+            <TouchableOpacity onPress={showEndDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {endDate ? endDate.toDateString() : 'Select End Date '}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <DatePicker
+            modal
+            open={isStartDatePickerVisible}
+            date={startDate || new Date()}
+            onConfirm={handleStartConfirm}
+            onCancel={() => setStartDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
+          <DatePicker
+            modal
+            open={isEndDatePickerVisible}
+            date={endDate || new Date()}
+            onConfirm={handleEndConfirm}
+            onCancel={() => setEndDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
+          <View style={styles.chartContainer}>
+            <ScrollView horizontal onScroll={handleScroll} scrollEventThrottle={16}>
+              <View>
+                <LineChart
+                  data={{
+                    labels: LoadPPGListTime,
+                    datasets: [{ data: LoadPPGList }]
+                  }}
+                  width={chartWidth} // Full width of the screen with some padding
+                  height={350}
+                  yAxisInterval={1} // optional, defaults to 1
+                  verticalLabelRotation={60}
+                  chartConfig={{
+                    backgroundColor: "#1e2923",
+                    backgroundGradientFrom: "#7B60EA",
+                    backgroundGradientTo: "#9B88EA",
+                    decimalPlaces: 0, // Show no decimal places
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    style: {
+                      borderRadius: 16,
+                    },
+                    propsForDots: {
+                      r: "4",
+                      strokeWidth: "2",
+                      stroke: "#ffa726"
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: ""
+                    },
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+              </View>
+
+            </ScrollView>
+            {
+              showSecondLabel && (
+                <View style={styles.overlay}>
+                  {customLabels.reverse().map((value, index) => (
+                    <Text key={index} style={styles.yAxisLabel}>{value} C°</Text>
+                  ))}
+                </View>
+              )
+            }
+          </View>
+
+
+          < View style={styles.heartRateContainer} >
+            <Text style={styles.label}>Real Time </Text>
             <LineChart
               data={{
-                labels: LoadPPGListTime,
-                datasets: [{ data: LoadPPGList }]
+                labels: PPGListTime,
+                datasets: [{ data: PPGList }]
               }}
-              width={chartWidth} // Full width of the screen with some padding
-              height={350}
-              yAxisInterval={1} // optional, defaults to 1
+              width={Dimensions.get('window').width - 32}
+              height={200}
+              yAxisInterval={1}
               verticalLabelRotation={60}
+              yAxisSuffix=" C°"
               chartConfig={{
                 backgroundColor: "#1e2923",
                 backgroundGradientFrom: "#7B60EA",
                 backgroundGradientTo: "#9B88EA",
-                decimalPlaces: 0, // Show no decimal places
+                decimalPlaces: 2,
                 color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: {
@@ -206,76 +257,102 @@ const HeartRate = () => {
                 },
                 propsForBackgroundLines: {
                   strokeDasharray: ""
-                },
+                }
               }}
               bezier
-              style={styles.chart}
+              style={styles.chart2}
             />
+          </View >
+        </>
+      }
+      
+      {userInfo.role === "caireGiver" &&
+        <>
+          <Text style={styles.header1}>Heart Rate</Text>
+
+          <View style={styles.dateButtonContainer}>
+            <TouchableOpacity onPress={showStartDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {startDate ? startDate.toDateString() : 'Select Start Date '}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={showEndDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {endDate ? endDate.toDateString() : 'Select End Date '}
+              </Text>
+            </TouchableOpacity>
           </View>
 
-        </ScrollView>
-        {
-          showSecondLabel && (
-            <View style={styles.overlay}>
-              {customLabels.reverse().map((value, index) => (
-                <Text key={index} style={styles.yAxisLabel}>{value} C°</Text>
-              ))}
-            </View>
-          )
-        }
-      </View >
-      {/* <View style={styles.heartRateContainer}>
-        <View style={styles.heartRateContainer}>
-          <Animated.View style={{ transform: [{ scale: heartSize }] }}>
-            <Image source={require('../../assets/hearRate3D.png')} style={styles.heartIcon} />
-          </Animated.View>
-        </View>
-      </View> */}
-      < View style={styles.heartRateContainer} >
-        <Text style={styles.label}>Real Time </Text>
-        {/* <View style={styles.temperatureIconContainer}>
-          {showThermometerOutline ? (
-            <Ionicons name={'thermometer-outline'} size={100} color={'#D1837F'} />
-          ) : (
-            <Ionicons name={'thermometer'} size={100} color={'#D1837F'} />
-          )}
-          <Text style={{ color: "#28032B", marginLeft: 80 }}>
-            <Text style={styles.temperatureValue}>{TEMPValue.wrist} </Text> C°
-          </Text>
-        </View> */}
-        <LineChart
-          data={{
-            labels: PPGListTime,
-            datasets: [{ data: PPGList }]
-          }}
-          width={Dimensions.get('window').width - 32}
-          height={200}
-          yAxisInterval={1}
-          verticalLabelRotation={60}
-          yAxisSuffix=" C°"
-          chartConfig={{
-            backgroundColor: "#1e2923",
-            backgroundGradientFrom: "#7B60EA",
-            backgroundGradientTo: "#9B88EA",
-            decimalPlaces: 2,
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16,
-            },
-            propsForDots: {
-              r: "4",
-              strokeWidth: "2",
-              stroke: "#ffa726"
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: ""
+          <DatePicker
+            modal
+            open={isStartDatePickerVisible}
+            date={startDate || new Date()}
+            onConfirm={handleStartConfirm}
+            onCancel={() => setStartDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
+          <DatePicker
+            modal
+            open={isEndDatePickerVisible}
+            date={endDate || new Date()}
+            onConfirm={handleEndConfirm}
+            onCancel={() => setEndDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
+          <View style={styles.chartContainer}>
+            <ScrollView horizontal onScroll={handleScroll} scrollEventThrottle={16}>
+              <View>
+                <LineChart
+                  data={{
+                    labels: LoadPPGListTime,
+                    datasets: [{ data: LoadPPGList }]
+                  }}
+                  width={chartWidth} // Full width of the screen with some padding
+                  height={350}
+                  yAxisInterval={1} // optional, defaults to 1
+                  verticalLabelRotation={60}
+                  chartConfig={{
+                    backgroundColor: "#1e2923",
+                    backgroundGradientFrom: "#7B60EA",
+                    backgroundGradientTo: "#9B88EA",
+                    decimalPlaces: 0, // Show no decimal places
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    style: {
+                      borderRadius: 16,
+                    },
+                    propsForDots: {
+                      r: "4",
+                      strokeWidth: "2",
+                      stroke: "#ffa726"
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: ""
+                    },
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+              </View>
+
+            </ScrollView>
+            {
+              showSecondLabel && (
+                <View style={styles.overlay}>
+                  {customLabels.reverse().map((value, index) => (
+                    <Text key={index} style={styles.yAxisLabel}>{value} C°</Text>
+                  ))}
+                </View>
+              )
             }
-          }}
-          bezier
-          style={styles.chart2}
-        />
-      </View >
+          </View>
+
+        </>
+      }
+
     </LinearGradient >
   );
 }
@@ -287,6 +364,12 @@ const styles = StyleSheet.create({
     color: '#402477',
     fontSize: 23,
     top: 220,
+    fontWeight: 'bold',
+  },
+  header1: {
+    color: '#402477',
+    fontSize: 23,
+    top: -50,
     fontWeight: 'bold',
   },
   chart: {

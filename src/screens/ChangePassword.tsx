@@ -1,69 +1,101 @@
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useContext, useState } from 'react'
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import React, { useContext, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
 import { BASE_URL } from '../config';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Fontisto from 'react-native-vector-icons/Fontisto';
 import { AuthContext } from '../context/AuthContext';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/TabNavigator';
+import { useNavigation } from '@react-navigation/native';
 
 type SettingsScreenProps = {
   navigation: any;
 };
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-function ChangePassword({ navigation }: SettingsScreenProps) {
-  const [role, setRole] = useState('');
-  const { userInfo } = useContext(AuthContext);
-  const [password, setPassword] = useState('');
+function ChangePassword({}: SettingsScreenProps) {
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordVerify, setPasswordVerify] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
+  const { userInfo, login, password } = useContext(AuthContext);
 
-  function handlePassword(e: any) {
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+
+  const reLogin = async (password: string) => {
+    try {
+      console.log("userInfo.email",userInfo.email);
+      
+      await login(userInfo.email, password);
+    } catch (error) {
+      console.log('Error re-logging in:', error);
+    }
+  };
+
+  function handlePassword(e: any, field: string) {
     const text = e.nativeEvent.text;
-    setPassword(text);
-    setPasswordVerify(false);
-    if (/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(text)) {
-      setPassword(text);
-      setPasswordVerify(true);
+    if (field === 'old') {
+      setOldPassword(text);
+    } else if (field === 'new') {
+      setNewPassword(text);
+      setPasswordVerify(false);
+      if (/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(text)) {
+        setPasswordVerify(true);
+      }
+    } else {
+      setConfirmPassword(text);
     }
   }
 
-  const Register = async () => {
+  const changePassword = async () => {
+    console.log(newPassword, confirmPassword);
+    
+    if (newPassword !== confirmPassword) {      
+      Toast.show({
+        type: 'customErrorToast',
+        text1: 'Passwords do not match!'
+      });
+      return;
+    }
+
     const userData = {
-      password,
-      role
+      email:userInfo.email,
+      currentPassword: oldPassword,
+      newPassword
     };
-    console.log("userData", userData);
-    // if (userData.firstName.length === 0 || userData.lastName.length === 0 || userData.email.length === 0 || userData.mobileNumber.length === 0 || userData.password.length === 0) {
-    //   Toast.show({
-    //     type: 'customErrorToast',
-    //     text1: 'All fields are required !!'
-    //   });
-    // } else {
-    //   try {
-    //     const response = await axios.post(`${BASE_URL}/reghister`, userData, {
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //     });
 
-    //     console.log("Response:", response.data);
-    //     Toast.show({
-    //       type: 'customSuccessToast',
-    //       text1: 'Register Success'
-    //     });
-    //     navigation.navigate('LoginScreen');
-    //   } catch (error) {
-    //     console.log('Error adding data:', error);
-    //     Toast.show({
-    //       type: 'customErrorToast',
-    //       text1: 'Failed to add data. Please try again later.'
-    //     });
-    //   }
-    // }
+    try {
+      const response = await axios.put(`${BASE_URL}/user/changePassword/${userInfo._id}`, userData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
+      console.log("Response:", response.data);
+      Toast.show({
+        type: 'customSuccessToast',
+        text1: 'Password changed successfully'
+      });
+      reLogin(password);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.log('Error changing password:', error);
+      Toast.show({
+        type: 'customErrorToast',
+        text1: 'Failed to change password. Please try again later.'
+      });
+    }
   };
 
   return (
@@ -78,36 +110,27 @@ function ChangePassword({ navigation }: SettingsScreenProps) {
               placeholder="Old Password"
               placeholderTextColor="gray"
               style={styles.textInput}
-              onChange={e => handlePassword(e)}
+              onChange={e => handlePassword(e, 'old')}
               secureTextEntry={showPassword}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              {password.length < 1 ? null : showPassword ? (
+              {oldPassword.length < 1 ? null : showPassword ? (
                 <Feather
                   name="eye-off"
                   style={{ marginRight: -10 }}
-                  color={passwordVerify ? 'green' : 'red'}
+                  color='gray'
                   size={23}
                 />
               ) : (
                 <Feather
                   name="eye"
                   style={{ marginRight: -10 }}
-                  color={passwordVerify ? 'green' : 'red'}
+                  color='gray'
                   size={23}
                 />
               )}
             </TouchableOpacity>
           </View>
-          {password.length < 1 ? null : passwordVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
-              Password must contain uppercase, lowercase, number and be at least 6 characters long.
-            </Text>
-          )}
 
           <View style={styles.action}>
             <FontAwesome name="lock" color="#5e2a89" style={styles.smallIcon} />
@@ -115,11 +138,11 @@ function ChangePassword({ navigation }: SettingsScreenProps) {
               placeholder="New Password"
               placeholderTextColor="gray"
               style={styles.textInput}
-              onChange={e => handlePassword(e)}
+              onChange={e => handlePassword(e, 'new')}
               secureTextEntry={showPassword}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              {password.length < 1 ? null : showPassword ? (
+              {newPassword.length < 1 ? null : showPassword ? (
                 <Feather
                   name="eye-off"
                   style={{ marginRight: -10 }}
@@ -136,7 +159,7 @@ function ChangePassword({ navigation }: SettingsScreenProps) {
               )}
             </TouchableOpacity>
           </View>
-          {password.length < 1 ? null : passwordVerify ? null : (
+          {newPassword.length < 1 ? null : passwordVerify ? null : (
             <Text
               style={{
                 marginLeft: 20,
@@ -152,39 +175,31 @@ function ChangePassword({ navigation }: SettingsScreenProps) {
               placeholder="Confirm Password"
               placeholderTextColor="gray"
               style={styles.textInput}
-              onChange={e => handlePassword(e)}
+              onChange={e => handlePassword(e, 'confirm')}
               secureTextEntry={showPassword}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              {password.length < 1 ? null : showPassword ? (
+              {confirmPassword.length < 1 ? null : showPassword ? (
                 <Feather
                   name="eye-off"
                   style={{ marginRight: -10 }}
-                  color={passwordVerify ? 'green' : 'red'}
+                  color='gray'
                   size={23}
                 />
               ) : (
                 <Feather
                   name="eye"
                   style={{ marginRight: -10 }}
-                  color={passwordVerify ? 'green' : 'red'}
+                  color='gray'
                   size={23}
                 />
               )}
             </TouchableOpacity>
           </View>
-          {password.length < 1 ? null : passwordVerify ? null : (
-            <Text
-              style={{
-                marginLeft: 20,
-                color: 'red',
-              }}>
-              Password must contain uppercase, lowercase, number and be at least 6 characters long.
-            </Text>
-          )}
+
         </View>
         <View>
-          <TouchableOpacity style={styles.button} onPress={Register}>
+          <TouchableOpacity style={styles.button} onPress={changePassword}>
             <Text style={styles.buttonText}>Update</Text>
           </TouchableOpacity>
         </View>
@@ -193,7 +208,7 @@ function ChangePassword({ navigation }: SettingsScreenProps) {
   );
 }
 
-export default ChangePassword
+export default ChangePassword;
 
 const styles = StyleSheet.create({
   scrollViewContent: {

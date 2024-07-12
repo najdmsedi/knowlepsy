@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import WelcomeComponent from './components/WelcomeComponent';
 import ConstantBar from '../../components/BleutoothButton';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRecoilValue } from 'recoil';
 import { BPMAtom, ConnectedAtom, DeviceNameAtom, StepsAtom, TempAtom } from '../../atoms';
 import BluetoothServices from '../../services/BluetoothServices ';
@@ -15,7 +15,7 @@ import ComponentTemperature from './components/ComponentTemperature';
 type DeviceScreenProps = {
   navigation: any;
 };
- 
+
 export default function DeviceScreen({ navigation }: DeviceScreenProps) {
   const connected = useRecoilValue(ConnectedAtom);
   const DeviceName = useRecoilValue(DeviceNameAtom);
@@ -39,18 +39,21 @@ export default function DeviceScreen({ navigation }: DeviceScreenProps) {
   }
   const handleButtonPresss = () => {
   }
+
+
+
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       {connected ? (
         <>
           <WelcomeComponent color="#CCBEFE" marginTop={20} />
-          
+
           <Text style={styles.text}>Device Settings</Text>
           <ComponentSteps marginTop={160} title='Steps' color='#DCFFE3' width={120} left={275} value={Steps}> </ComponentSteps>
           <ComponentTemperature marginTop={160} title='Temperature' color='#D7D2F9' width={120} left={145} value={Temp}> </ComponentTemperature>
           <ComponentHR marginTop={160} title='Heart rate' color='#FDE9E7' width={120} left={15} value={BPM}> </ComponentHR>
 
-          
+
           <TouchableOpacity onPress={disconnect} style={styles.custombutton}>
             <Ionicons name="remove-circle-outline" size={20} color="white" style={styles.buttonIcon} />
             <Text style={styles.buttonText}>  Remove Device</Text>
@@ -59,15 +62,17 @@ export default function DeviceScreen({ navigation }: DeviceScreenProps) {
             <Ionicons name="refresh-circle-outline" size={20} color="white" style={styles.buttonIcon} />
             <Text style={styles.buttonText}>  Reset Device    </Text>
           </TouchableOpacity>
-                 
-        </>
+
+        </> 
       ) : (
         <>
-          <WelcomeComponent  color="#F5F3FF" marginTop={20} />
+          <WelcomeComponent color="#F5F3FF" marginTop={20} />
           <TouchableOpacity onPress={handleButtonPress} style={styles.button}>
             <Ionicons name="watch-outline" size={20} color="white" style={styles.buttonIcon} />
             <Text style={styles.buttonText}>  Scan Device</Text>
           </TouchableOpacity>
+
+        
         </>
       )}
 

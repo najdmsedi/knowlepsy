@@ -22,7 +22,7 @@ const WelcomeComponent: React.FC<RectangleProps> = ({ name, welcome, color = '#A
       <View style={styles.leftContent}>
         <Text style={styles.welcome}>{welcome}</Text>
         <Text style={styles.name}>{name}</Text>
-        {userInfo.role === "caireGiver" && Patient===null &&
+        {userInfo.role === "caireGiver" && Patient!==null &&
           <Text style={styles.Patient}>Patient: {Patient.firstName} {Patient.lastName}</Text>
         }
 

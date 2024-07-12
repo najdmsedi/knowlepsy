@@ -80,7 +80,7 @@ const Temperature = () => {
   const handleStartConfirm = (date: any) => {
     setStartDate(date);
     setStartDatePickerVisibility(false);
-    if (endDate) {      
+    if (endDate) {
       fetchTempData(date.toISOString().split('T')[0], endDate.toISOString().split('T')[0]);
     }
   };
@@ -109,52 +109,99 @@ const Temperature = () => {
 
   return (
     <LinearGradient colors={['#FEFEFE', '#A992FC']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={styles.header}>Temperature</Text>
+      {userInfo.role === "patient" &&
+        <>
+          <Text style={styles.header}>Temperature</Text>
 
-      <View style={styles.dateButtonContainer}>
-        <TouchableOpacity onPress={showStartDatePicker} style={styles.dateButton}>
-          <Text style={styles.dateButtonText}>
-            {startDate ? startDate.toDateString() : 'Select Start Date'}
-          </Text>
-        </TouchableOpacity>
+          <View style={styles.dateButtonContainer}>
+            <TouchableOpacity onPress={showStartDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {startDate ? startDate.toDateString() : 'Select Start Date'}
+              </Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={showEndDatePicker} style={styles.dateButton}>
-          <Text style={styles.dateButtonText}>
-            {endDate ? endDate.toDateString() : 'Select End Date'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity onPress={showEndDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {endDate ? endDate.toDateString() : 'Select End Date'}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-      <DatePicker
-        modal
-        open={isStartDatePickerVisible}
-        date={startDate || new Date()}
-        onConfirm={handleStartConfirm}
-        onCancel={() => setStartDatePickerVisibility(false)}
-        mode="date"
-        maximumDate={new Date()}
-      />
+          <DatePicker
+            modal
+            open={isStartDatePickerVisible}
+            date={startDate || new Date()}
+            onConfirm={handleStartConfirm}
+            onCancel={() => setStartDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
 
-      <DatePicker
-        modal
-        open={isEndDatePickerVisible}
-        date={endDate || new Date()}
-        onConfirm={handleEndConfirm}
-        onCancel={() => setEndDatePickerVisibility(false)}
-        mode="date"
-        maximumDate={new Date()}
-      />
+          <DatePicker
+            modal
+            open={isEndDatePickerVisible}
+            date={endDate || new Date()}
+            onConfirm={handleEndConfirm}
+            onCancel={() => setEndDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
 
-      <View style={styles.chartContainer}>
-        <ScrollView horizontal onScroll={handleScroll} scrollEventThrottle={16}>
-          <View>
+          <View style={styles.chartContainer}>
+            <ScrollView horizontal onScroll={handleScroll} scrollEventThrottle={16}>
+              <View>
+                <LineChart
+                  data={{
+                    labels: LoadTempListTime,
+                    datasets: [{ data: LoadTempList }],
+                  }}
+                  width={chartWidth} // Adjust width
+                  height={350}
+                  yAxisInterval={1}
+                  verticalLabelRotation={60}
+                  yAxisSuffix=" C°"
+                  chartConfig={{
+                    backgroundColor: "#1e2923",
+                    backgroundGradientFrom: "#7B60EA",
+                    backgroundGradientTo: "#9B88EA",
+                    decimalPlaces: 1,
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    style: {
+                      borderRadius: 16,
+                    },
+                    propsForDots: {
+                      r: "4",
+                      strokeWidth: "2",
+                      stroke: "#ffa726",
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: "",
+                    },
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+              </View>
+            </ScrollView>
+            {showSecondLabel && (
+              <View style={styles.overlay}>
+                {customLabels.reverse().map((value, index) => (
+                  <Text key={index} style={styles.yAxisLabel}>{value} C°</Text>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.temperatureContainer}>
+            <Text style={styles.label}>Real Time </Text>
             <LineChart
               data={{
-                labels: LoadTempListTime,
-                datasets: [{ data: LoadTempList }],
+                labels: TempListTime,
+                datasets: [{ data: TEMPList }],
               }}
-              width={chartWidth} // Adjust width
-              height={350}
+              width={Dimensions.get('window').width - 32}
+              height={200}
               yAxisInterval={1}
               verticalLabelRotation={60}
               yAxisSuffix=" C°"
@@ -162,7 +209,7 @@ const Temperature = () => {
                 backgroundColor: "#1e2923",
                 backgroundGradientFrom: "#7B60EA",
                 backgroundGradientTo: "#9B88EA",
-                decimalPlaces: 1,
+                decimalPlaces: 2,
                 color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: {
@@ -171,61 +218,103 @@ const Temperature = () => {
                 propsForDots: {
                   r: "4",
                   strokeWidth: "2",
-                  stroke: "#ffa726",
+                  stroke: "#ffa726"
                 },
                 propsForBackgroundLines: {
-                  strokeDasharray: "",
-                },
+                  strokeDasharray: ""
+                }
               }}
               bezier
-              style={styles.chart}
+              style={styles.chart2}
             />
           </View>
-        </ScrollView>
-        {showSecondLabel && (
-          <View style={styles.overlay}>
-            {customLabels.reverse().map((value, index) => (
-              <Text key={index} style={styles.yAxisLabel}>{value} C°</Text>
-            ))}
-          </View>
-        )}
-      </View>
 
-      <View style={styles.temperatureContainer}>
-        <Text style={styles.label}>Real Time </Text>
-        <LineChart
-          data={{
-            labels: TempListTime,
-            datasets: [{ data: TEMPList }],
-          }}
-          width={Dimensions.get('window').width - 32}
-          height={200}
-          yAxisInterval={1}
-          verticalLabelRotation={60}
-          yAxisSuffix=" C°"
-          chartConfig={{
-            backgroundColor: "#1e2923",
-            backgroundGradientFrom: "#7B60EA",
-            backgroundGradientTo: "#9B88EA",
-            decimalPlaces: 2,
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16,
-            },
-            propsForDots: {
-              r: "4",
-              strokeWidth: "2",
-              stroke: "#ffa726"
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: ""
-            }
-          }}
-          bezier
-          style={styles.chart2}
-        />
-      </View>
+        </>}
+
+        {userInfo.role === "caireGiver" &&
+        <>
+          <Text style={styles.header1}>Temperature</Text>
+
+          <View style={styles.dateButtonContainer}>
+            <TouchableOpacity onPress={showStartDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {startDate ? startDate.toDateString() : 'Select Start Date'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={showEndDatePicker} style={styles.dateButton}>
+              <Text style={styles.dateButtonText}>
+                {endDate ? endDate.toDateString() : 'Select End Date'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <DatePicker
+            modal
+            open={isStartDatePickerVisible}
+            date={startDate || new Date()}
+            onConfirm={handleStartConfirm}
+            onCancel={() => setStartDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
+
+          <DatePicker
+            modal
+            open={isEndDatePickerVisible}
+            date={endDate || new Date()}
+            onConfirm={handleEndConfirm}
+            onCancel={() => setEndDatePickerVisibility(false)}
+            mode="date"
+            maximumDate={new Date()}
+          />
+
+          <View style={styles.chartContainer}>
+            <ScrollView horizontal onScroll={handleScroll} scrollEventThrottle={16}>
+              <View>
+                <LineChart
+                  data={{
+                    labels: LoadTempListTime,
+                    datasets: [{ data: LoadTempList }],
+                  }}
+                  width={chartWidth} // Adjust width
+                  height={350}
+                  yAxisInterval={1}
+                  verticalLabelRotation={60}
+                  yAxisSuffix=" C°"
+                  chartConfig={{
+                    backgroundColor: "#1e2923",
+                    backgroundGradientFrom: "#7B60EA",
+                    backgroundGradientTo: "#9B88EA",
+                    decimalPlaces: 1,
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    style: {
+                      borderRadius: 16,
+                    },
+                    propsForDots: {
+                      r: "4",
+                      strokeWidth: "2",
+                      stroke: "#ffa726",
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: "",
+                    },
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+              </View>
+            </ScrollView>
+            {showSecondLabel && (
+              <View style={styles.overlay}>
+                {customLabels.reverse().map((value, index) => (
+                  <Text key={index} style={styles.yAxisLabel}>{value} C°</Text>
+                ))}
+              </View>
+            )}
+          </View>
+        </>}
     </LinearGradient>
   );
 }
@@ -237,6 +326,12 @@ const styles = StyleSheet.create({
     color: '#402477',
     fontSize: 23,
     top: 220,
+    fontWeight: 'bold',
+  },
+  header1: {
+    color: '#402477',
+    fontSize: 23,
+    top: -50,
     fontWeight: 'bold',
   },
   chart: {

@@ -14,14 +14,15 @@ import ConstantBar from '../../components/BleutoothButton';
 import LinearGradient from 'react-native-linear-gradient';
 import PushNotification from "react-native-push-notification";
 import axios, { AxiosError } from 'axios';
-import { BASE_URL } from '../../config';
+import { API_KEY, BASE_URL, URL_GEMINI } from '../../config';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { calculateStatistics, generateText, getCurrentDate, getFirstAndLastTime } from '../../api';
 
 type HomeScreenProps = {
   navigation: any;
 };
-// types.ts
+// types.ts 
 export interface Patient {
   _id: string;
   firstName: string;
@@ -86,11 +87,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [dominantLevel, setDominantLevel] = useRecoilState(DominantLevelAtom);
 
   useEffect(() => {
-    console.log("ياتكانوك",isConnected);
-    
-    if(!isConnected){setDominantStressLevel(null)}
+
+    if (!isConnected) { setDominantStressLevel(null) }
     else if (isConnected) {
-      console.log("azertycaca",isConnected);
+      console.log("azertycaca", isConnected);
 
       const fetchStessData = async () => {
         try {
@@ -98,18 +98,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             axios.get(`${BASE_URL}/risk-cron/getLatestPpgDataForFiveMinute/${patientId}`),
             axios.get(`${BASE_URL}/risk-cron/getLatestEDADataForFiveMinute/${patientId}`)
           ]);
-   
+
           const ppgData = responsePpg.data;
-          const EDAData = responseEDA.data; 
-  
+          const EDAData = responseEDA.data;
+
           const extractedDataPpg = ppgData.map((entry: { PPG: { heart_rate: any; }; }) => ({
             heart_rate: entry.PPG.heart_rate,
           }));
-  
+
           const extractedDataEDA = EDAData.map((entry: { EDA: { EDA: any; }[]; }) => ({
             EDA: entry.EDA[0].EDA,
           }));
-  
+
           setTimeLevel(EDAData[0].time)
           const minLength = Math.min(extractedDataEDA.length, extractedDataPpg.length);
           const data = [];
@@ -120,42 +120,42 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             });
           }
           setConcatenatedData(data);
-  
+
         } catch (error) {
           console.error('Error fetching PPG or EDA data:', error);
         }
       };
-  
+
       const determineDominantStressLevel = (dataresponse: any[]) => {
-        console.log("determineDominantStressLevel ",dataresponse);
-        
+        console.log("determineDominantStressLevel ", dataresponse);
+
         const countMap = dataresponse.reduce((acc, level) => {
-          console.log("countMap ",dataresponse);
+          console.log("countMap ", dataresponse);
 
           acc[level] = (acc[level] || 0) + 1;
           return acc;
         }, {});
-  
+
         let maxCount = 0;
         let dominantLevel = null;
-  
+
         for (const level in countMap) {
-          console.log("level ",level);
+          console.log("level ", level);
 
           if (countMap[level] > maxCount) {
             maxCount = countMap[level];
             dominantLevel = level;
           }
         }
-        console.log("determineDominantStressLevel ",dominantLevel);
+        console.log("determineDominantStressLevel ", dominantLevel);
 
         setDominantStressLevel(dominantLevel);
-      }; 
-  
+      };
+
       const processDataAndDetermineStress = async () => {
         await fetchStessData();
         console.log("concatenatedData", concatenatedData);
-  
+
         if (concatenatedData?.length > 0) {
           const dataresponse = await Promise.all(
             concatenatedData?.map(async (dataPoint: { EDA: any; heart_rate: any; }) => {
@@ -166,34 +166,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               return response.data.stress_level;
             })
           );
-  
+
           setConcatenatedresponse(dataresponse);
           determineDominantStressLevel(dataresponse);
           setDominantLevel(dominantStressLevel as any);
           console.log("dominantStressLevel", dominantStressLevel);
         }
       };
-  
+
       processDataAndDetermineStress();
       const intervalId = setInterval(processDataAndDetermineStress, 60 * 1000); // Run every minute
-  
+
       return () => clearInterval(intervalId);
     }
-   
+
   }, [patientId, isConnected]);
-  
+
   useEffect(() => {
     if (userInfo.role === 'patient') {
       console.log("DominantLevel", dominantLevel);
-
-      if (connected) {
-        setIconStress("happy");
-        setColorStress("#3AA50E");
-    } else { 
-        setIconStress("sad");
-        setColorStress("#bcbcbc"); 
-    }
- 
 
       const fetchData = async (dominantLevel: any) => {
         try {
@@ -205,7 +196,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             case "medium":
               setIconStress("happy");
               setColorStress("#D1837F");
-              break; 
+              break;
             case "high":
               setIconStress("sad");
               setColorStress("#B50F0F");
@@ -222,7 +213,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       fetchData(dominantLevel);
     }
-  }, [PPGValue, EDAValue,dominantLevel]);
+  }, [PPGValue, EDAValue, dominantLevel]);
+
+
 
   const fetchPatientData = (patient: any) => {
     if (userInfo.role === 'caireGiver' && patient) {
@@ -248,6 +241,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           setSteps(Step);
           setBPM(HR);
           setTemp(Temp);
+
+
           setStepsDate(stepsResponse.data[0]?.Motion?.time || '');
           setBPMDate(hrResponse.data[0]?.PPG?.time || '');
           setTempDate(tempResponse.data.latestTempData?.TEMP?.time || '');
@@ -260,6 +255,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           setTempDate('');
         }
       };
+      console.log("Temp", Temp);
 
       fetchData();
       const intervalId = setInterval(fetchData, 15000);
@@ -295,6 +291,120 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
     return styles.container;
   };
+
+  useEffect(() => {
+    const fetchPpgData = async () => {
+      try {
+        // Initialize objects to store results
+        const heartRateResults: any = {
+          statistics: {},
+          times: {}
+        };
+
+        const temperatureResults: any = {
+          statistics: {},
+          times: {}
+        };
+        // get data of today of ppg
+        const date = getCurrentDate();
+        const responsePPG = await axios.get(`${BASE_URL}/data/ppg-data/${userInfo._id}/${date}/${date}`);
+        const dataPPG = responsePPG.data;
+        const ppgValues = dataPPG.map((entry: { PPG: { heart_rate: string; }; }) => parseFloat(entry.PPG.heart_rate));
+        const ppgTimes = dataPPG.map((entry: { PPG: { time: any; }; }) => `${entry.PPG.time}`);
+        heartRateResults.statistics = calculateStatistics(ppgValues.join(','));
+        heartRateResults.times = getFirstAndLastTime(ppgTimes);
+
+        // get data of today of Temp
+        const responseTemp = await axios.get(`${BASE_URL}/data/Temp-data/${userInfo._id}/${date}/${date}`);
+        const dataTemp = responseTemp.data;
+        const TempValues = dataTemp.map((entry: any) => parseFloat(entry.TEMP.wrist));
+        const TempTimes = dataTemp.map((entry: any) => `${entry.TEMP.time}`);
+        temperatureResults.statistics = calculateStatistics(TempValues.join(','));
+        temperatureResults.times = getFirstAndLastTime(TempTimes);
+        // Log or save results as needed
+        console.log('PPG Results:', heartRateResults);
+        console.log('Temp Results:', temperatureResults);
+        console.log('userInfo:', userInfo);
+        const reportPrompttext1 = `
+        please just generate me a paragraph of 30 words only that take this data and write a small Analysis of it 
+        Heart Rate Results:
+        - Statistics: 
+          - Max: ${heartRateResults.statistics.max}
+          - Min: ${heartRateResults.statistics.min}
+          - Average: ${heartRateResults.statistics.avg}
+        - Time Information: 
+          - First Time: ${heartRateResults.times.firstTime}
+          - Last Time: ${heartRateResults.times.lastTime}
+    
+        Temperature Results:
+        - Statistics: 
+          - Max: ${temperatureResults.statistics.max}
+          - Min: ${temperatureResults.statistics.min}
+          - Average: ${temperatureResults.statistics.avg}
+        - Time Information: 
+          - First Time: ${temperatureResults.times.firstTime}
+          - Last Time: ${temperatureResults.times.lastTime}
+      `;
+
+        const reportPrompttext2 = `
+      please just generate me a paragraph of 30 words only that take this data and write a small Recommendations for doctor of it 
+      Heart Rate Results:
+      - Statistics: 
+        - Max: ${heartRateResults.statistics.max}
+        - Min: ${heartRateResults.statistics.min}
+        - Average: ${heartRateResults.statistics.avg}
+      - Time Information: 
+        - First Time: ${heartRateResults.times.firstTime}
+        - Last Time: ${heartRateResults.times.lastTime}
+  
+      Temperature Results:
+      - Statistics: 
+        - Max: ${temperatureResults.statistics.max}
+        - Min: ${temperatureResults.statistics.min}
+        - Average: ${temperatureResults.statistics.avg}
+      - Time Information: 
+        - First Time: ${temperatureResults.times.firstTime}
+        - Last Time: ${temperatureResults.times.lastTime}
+      `;
+        // Call the generateText function with the reportPrompt
+        const AnalysisreportText = await generateText(reportPrompttext1);
+
+        const RecommendationsreportText = await generateText(reportPrompttext2);
+        console.log("AnalysisreportText", AnalysisreportText);
+        console.log("RecommendationsreportText", RecommendationsreportText);
+
+        let data = {
+          ...userInfo, date,
+          max_heartRateResults: heartRateResults.statistics.max,
+          min_heartRateResults: heartRateResults.statistics.min,
+          avg_heartRateResults: heartRateResults.statistics.avg,
+          firstTime_heartRateResults: heartRateResults.times.firstTime,
+          lastTime_heartRateResults: heartRateResults.times.lastTime,
+          max_temperatureResults: temperatureResults.statistics.max,
+          min_temperatureResults: temperatureResults.statistics.min,
+          avg_temperatureResults: temperatureResults.statistics.avg,
+          firstTime_temperatureResults: temperatureResults.times.firstTime,
+          lastTime_temperatureResults: temperatureResults.times.lastTime,
+        }
+        console.log("eaeaeaeae", data);
+        // Send the generated report via email
+        const emailPayload = {
+          to: 'najdmsedi22@gmail.com',
+          subject: 'Daily Health Report',
+          AnalysisreportText,
+          RecommendationsreportText,
+          data,
+        };
+
+        await axios.post('http://172.187.93.156:3000/mailer/sendMail', emailPayload);
+      } catch (err) {
+        console.log('err', err);
+      }
+    };
+
+    fetchPpgData();
+  }, [userInfo]);
+
 
   return (
     <LinearGradient colors={['#FEFEFE', '#EDEBF7']} style={styles.container}>

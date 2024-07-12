@@ -159,6 +159,11 @@ export default function LoginScreen() {
               <Text style={styles.registerLink}>Register </Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.registerContainer}>
+            <TouchableOpacity onPress={handleRegister}>
+            <Text style={styles.passText}>Forget password?  </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </ImageBackground>
@@ -228,6 +233,10 @@ const styles = StyleSheet.create({
   registerText: {
     color: 'white',
     fontSize: 16,
+  },
+  passText: {
+    color: 'white',
+    fontSize: 12,
   },
   registerLink: {
     color: '#4A189B',

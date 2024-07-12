@@ -3,13 +3,12 @@ import React, { useContext, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { RootStackParamList } from '../../../navigation/TabNavigator';
+import { RootStackParamList } from '../navigation/TabNavigator';
 import { useNavigation } from '@react-navigation/native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useRecoilValue } from 'recoil';
-import { ConnectedAtom } from '../../../atoms';
-import { AuthContext } from '../../../context/AuthContext';
-import Lottie from 'lottie-react-native';
+import { ConnectedAtom } from '../atoms';
+import { AuthContext } from '../context/AuthContext';
 
 interface RectangleProps {
   title: string;
@@ -22,7 +21,7 @@ interface RectangleProps {
 }
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 120, status, statusColor, marginLeft = 0 }) => {
+const SimpleStressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightblue', marginTop, height = 120, status, statusColor, marginLeft = 0 }) => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const connected = useRecoilValue(ConnectedAtom);
   const { userInfo } = useContext(AuthContext);
@@ -41,34 +40,18 @@ const StressLevelComponent: React.FC<RectangleProps> = ({ title, color = 'lightb
   useEffect(() => {
     console.log('StressLevelComponent props updated:', { status, statusColor });
   }, [status, statusColor]);
-
+  
   return (
     <LinearGradient colors={['#FEFEFE', '#E3DFF7']} style={[styles.container, { backgroundColor: color, top: hp(`${marginTop}%`), height: height, marginLeft: marginLeft }]}>
 
-      {connected && userInfo.role === "patient" &&
+   
         <TouchableOpacity onPress={onPress}>
-          <Text style={styles.title1}>{title}</Text>
-          <Ionicons name={`${status}-outline`} size={60} color={statusColor} style={{ top: 30, left: 10 }} />
+          <Text style={styles.title}>{title}</Text>
+          <Ionicons name={`${status}-outline`} size={60} color={statusColor} style={{ top: 10 }} />
           {/* <Ionicons name={`alert-circle-outline`} size={25} color={"black"} style={{ top: 10, left: 60 }} /> */}
-          <Lottie style={{ top: 15, left: 4, width: 80, height: 60, alignItems: 'center' }} source={require("../../../../assets/faces.json")} autoPlay loop />
         </TouchableOpacity>
-      }
+      
 
-      {!connected && userInfo.role === "patient" &&
-        <TouchableOpacity onPress={onPress}>
-          <Text style={styles.title}>{title}</Text>
-          <Ionicons name={`${status}-outline`} size={60} color={"gray"} style={{ top: 20 }} />
-          <Ionicons name={`alert-circle-outline`} size={25} color={"black"} style={{ top: 10, left: 60 }} />
-        </TouchableOpacity>
-      }
-
-      {userInfo.role === "caireGiver" &&
-        <TouchableOpacity onPress={onPress}>
-          <Text style={styles.title}>{title}</Text>
-          <Ionicons name={`${status}-outline`} size={60} color={statusColor} style={{ top: 20, left: 3 }} />
-          <Ionicons name={`alert-circle-outline`} size={25} color={"black"} style={{ top: 10, left: 60 }} />
-        </TouchableOpacity>
-      }
     </LinearGradient>
   );
 };
@@ -99,9 +82,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     position: 'absolute',
     left: -15,
-    top: -5,
+    top: -15,
     color: 'black'
   },
 });
 
-export default StressLevelComponent;
+export default SimpleStressLevelComponent;
